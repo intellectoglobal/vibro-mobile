@@ -7,7 +7,7 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { 
+import {
   CheckCircleIcon,
   PaperAirplaneIcon,
   BookmarkIcon,
@@ -15,15 +15,19 @@ import {
   CogIcon,
   MagnifyingGlassIcon,
   PlusIcon,
-  BellIcon
+  BellIcon,
 } from 'react-native-heroicons/outline';
+import { DrawerContentComponentProps } from '@react-navigation/drawer';
 
-const Sidebar = () => {
+const Sidebar = (props: DrawerContentComponentProps) => {
+  const { navigation } = props;
+
   const menuItems = [
     {
       id: 1,
       title: 'Completed Tasks',
       icon: CheckCircleIcon,
+      onPress: () => console.log('Completed Tasks'), // replace with navigation.navigate()
     },
     {
       id: 2,
@@ -55,36 +59,33 @@ const Sidebar = () => {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar backgroundColor="#6b46c1" barStyle="light-content" />
-      
+
       {/* Header Section */}
       <View className="bg-purple px-6 py-6 flex-row items-center justify-between">
         <View className="flex-row items-center flex-1">
-          {/* Profile Avatar */}
           <View className="w-16 h-16 bg-white rounded-full items-center justify-center mr-4">
             <View className="w-12 h-12 bg-black rounded-full items-center justify-center">
-              {/* Custom pattern for avatar */}
               <View className="flex-row flex-wrap w-8 h-8">
-                <View className="w-2 h-2 bg-white m-0.5 rounded-sm" />
-                <View className="w-2 h-2 bg-white m-0.5 rounded-sm" />
-                <View className="w-2 h-2 bg-black m-0.5 rounded-sm" />
-                <View className="w-2 h-2 bg-white m-0.5 rounded-sm" />
-                <View className="w-2 h-2 bg-white m-0.5 rounded-sm" />
-                <View className="w-2 h-2 bg-black m-0.5 rounded-sm" />
-                <View className="w-2 h-2 bg-black m-0.5 rounded-sm" />
-                <View className="w-2 h-2 bg-white m-0.5 rounded-sm" />
+                {/* Avatar dots */}
+                {new Array(8).fill(0).map((_, i) => (
+                  <View
+                    key={i}
+                    className={`w-2 h-2 ${
+                      i % 3 === 0 ? 'bg-black' : 'bg-white'
+                    } m-0.5 rounded-sm`}
+                  />
+                ))}
               </View>
             </View>
           </View>
-          
-          {/* User Info */}
+
           <View className="flex-1">
             <Text className="text-white text-lg font-semibold">Test Test</Text>
             <Text className="text-white text-sm opacity-90">Zepto</Text>
             <Text className="text-white text-sm opacity-90">+918248694043</Text>
           </View>
         </View>
-        
-        {/* Notification Icon */}
+
         <TouchableOpacity className="p-2">
           <BellIcon size={24} color="white" />
         </TouchableOpacity>
@@ -96,6 +97,10 @@ const Sidebar = () => {
           {menuItems.map((item) => (
             <TouchableOpacity
               key={item.id}
+              onPress={() => {
+                item.onPress?.();
+                navigation.closeDrawer(); // close after selecting
+              }}
               className="flex-row items-center px-6 py-4 active:bg-gray-50"
             >
               <View className="w-10 h-10 items-center justify-center mr-4">
@@ -113,7 +118,7 @@ const Sidebar = () => {
           <Text className="text-gray text-sm font-medium px-6 py-3 uppercase tracking-wide">
             Account
           </Text>
-          
+
           <TouchableOpacity className="flex-row items-center px-6 py-4 active:bg-gray-50">
             <View className="w-10 h-10 items-center justify-center mr-4">
               <PlusIcon size={24} color="#6b46c1" strokeWidth={2} />
@@ -130,11 +135,6 @@ const Sidebar = () => {
         <Text className="text-red-500 text-sm font-medium text-center">
           r121 v5.37.1
         </Text>
-      </View>
-
-      {/* Bottom Navigation Indicator */}
-      <View className="h-1 bg-white">
-        <View className="w-32 h-1 bg-white rounded-full mx-auto" />
       </View>
     </SafeAreaView>
   );

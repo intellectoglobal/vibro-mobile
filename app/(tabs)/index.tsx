@@ -1,4 +1,3 @@
-import { Header } from '@/componets/Header';
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';

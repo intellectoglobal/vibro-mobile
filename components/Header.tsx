@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Sidebar from './sidebar';
-
 interface HeaderProps {
   title: string;
   showBack?: boolean;
@@ -18,8 +16,6 @@ export const Header: React.FC<HeaderProps> = ({
   showNotification = true,
 }) => {
   
-  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-
   return (
     <SafeAreaView className="bg-primary">
       <View className="relative flex-row items-center justify-between px-4 py-3 bg-primary">
@@ -44,13 +40,8 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Right Icon */}
         <View className="w-10 items-end">
           {showNotification ? (
-            <TouchableOpacity className="p-2" onPress={() => setIsSidebarVisible(true)}>
+            <TouchableOpacity className="p-2">
               <Icon name="notifications" size={24} color="#ffffff" />
-              {
-                isSidebarVisible?? (
-                  <Sidebar/>
-                )
-              }
             </TouchableOpacity>
           ) : null}
         </View>
