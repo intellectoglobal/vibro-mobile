@@ -1,44 +1,125 @@
 import React from "react";
-import { StatusBar, View, Text, TextInput, TouchableOpacity } from "react-native";
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import {
+  SafeAreaView,
+  StatusBar,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Platform,
+  StyleSheet,
+} from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { useNavigation } from "@react-navigation/native";
+import styles from "@/styles/commonStyles";
 
 const CompletedTasks = () => {
   const navigation = useNavigation();
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar barStyle="light-content" className="bg-primary" />
+    <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={styles.header.backgroundColor}
+      />
 
       {/* Header */}
-      <View className="flex-row items-center px-4 py-5 bg-primary shadow-md border-b border-gray-100 mt-9">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3">
-          <View className="flex-row items-center justify-center gap-10">
-            <Icon name="arrow-back" color="white" size={20} />
-            <Text className="text-lg font-semibold text-white">Completed Tasks Screen</Text>
-          </View>
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="arrow-back" color="#fff" size={20} />
+          <Text style={styles.headerTitle}>Completed Tasks Screen</Text>
         </TouchableOpacity>
       </View>
 
-
       {/* Search Bar */}
-      <View className="mx-4 mt-4 px-3 py-2.5 rounded-lg flex-row items-center shadow-sm bg-white">
-        <Icon name="search" size={20} color="#9CA3AF" style={{ marginRight: 8 }} />
+      <View style={styles.searchContainer}>
+        <Icon
+          name="search"
+          size={20}
+          color="#9CA3AF"
+          style={styles.searchIcon}
+        />
         <TextInput
           placeholder="Search"
-          className="flex-1 text-base text-neutral-800"
+          style={styles.searchInput}
           placeholderTextColor="#9CA3AF"
         />
       </View>
 
       {/* Main Content */}
-      <View className="mt-10 items-center">
-        <Text className="text-2xl text-secondary font-bold">
-          Completed Tasks Screen!
-        </Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>Completed Tasks Screen!</Text>
       </View>
-    </View>
+      <View>
+        <View style={taskStyle.darkMode}>
+          <Text style={taskStyle.darkModeText}>
+            Style inheritance <Text style={taskStyle.boldText}> BoldText</Text>
+          </Text>
+        </View>
+        <View
+          style={[taskStyle.box, taskStyle.lightGreenBg, taskStyle.boxShadow]}
+        >
+          <Text>Light Green</Text>
+        </View>
+        <View
+          style={[
+            taskStyle.box,
+            taskStyle.lightBlueBg,
+            taskStyle.androidShadow,
+          ]}
+        >
+          <Text>light Blue</Text>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 };
+
+const taskStyle = StyleSheet.create({
+  box: {
+    height: 250,
+    width: 250,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+    marginVertical: 10,
+    borderWidth: 10,
+    borderColor: "red",
+    borderRadius: 5,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  lightGreenBg: {
+    backgroundColor: "lightgreen",
+  },
+  lightBlueBg: {
+    backgroundColor: "lightblue",
+  },
+  boxShadow: {
+    // shadowColor: "#333333",
+    // shadowOffset: {
+    //   width: 6,
+    //   height: 6,
+    // },
+    // shadowOpacity: 0.6,
+    // shadowRadius: 4,
+  },
+  androidShadow: {
+    elevation: 10,
+    shadowColor: "#333333",
+  },
+  darkMode: {
+    backgroundColor: "black",
+  },
+  darkModeText: {
+    color: "white",
+  },
+  boldText: {
+    fontWeight: "bold",
+  },
+});
 
 export default CompletedTasks;
