@@ -1,61 +1,96 @@
-import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
-import type { DrawerNavigationProp } from '@react-navigation/drawer';
-import { useRouter } from 'expo-router';
+import type { DrawerNavigationProp } from "@react-navigation/drawer";
+import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 interface HeaderProps {
   title: string;
   showBack?: boolean;
-  onBackPress?: () => void;
   showNotification?: boolean;
+  onMenuPress?: () => void;
+  onBackPress?: () => void;
+  onNotificationPress?: () => void;
 }
 
 type RootDrawerParamList = {
-  '(tabs)': undefined;
+  "(tabs)": undefined;
 };
 
 export const Header: React.FC<HeaderProps> = ({
   title,
-  showBack = false,
+  // onMenuPress,
   onBackPress,
   showNotification = true,
+  showBack = false,
+  // onNotificationPress,
 }) => {
   const navigation = useNavigation<DrawerNavigationProp<RootDrawerParamList>>();
-  const router = useRouter()
-
+  const router = useRouter();
   return (
     <SafeAreaView className="bg-primary">
-      <View className="relative flex-row items-center justify-between px-4 py-3 bg-primary">
-        {/* Left Icon */}
-        <View className="w-10">
-          {showBack ? (
-            <TouchableOpacity onPress={onBackPress} className="p-2">
-              <Icon name="arrow-back" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={() => navigation.openDrawer()} className="p-2">
-              <Icon name="menu" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          )}
-        </View>
+      <StatusBar barStyle="light-content" className="bg-primary" />
+      <View
+        style={{ paddingBottom: 15 }}
+        className="flex-row items-center justify-between h-14 px-4 bg-primary"
+      >
+        {showBack ? (
+          <TouchableOpacity onPress={onBackPress} className="p-2">
+            <Icon name="arrow-back" size={24} color="#ffffff" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={() => navigation.openDrawer()}
+            className="p-2"
+          >
+            <Ionicons name="menu" size={24} color="#fff" />
+          </TouchableOpacity>
+        )}
 
-        {/* Center Title */}
-        <Text className="left-1/2 -translate-x-1/2  text-lg font-semibold text-white">
+        <Text
+          className="left-1/2 -translate-x-1/2 text-lg font-semibold text-white"
+          style={styles.title}
+        >
           {title}
         </Text>
-
-        {/* Right Icon */}
-        <View className="w-10 items-end">
-          {showNotification && (
-            <TouchableOpacity className="p-2" onPress={() => router.push("/screens/Notification/notification")}>
-              <Icon name="notifications" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          )}
-        </View>
+        {showNotification && (
+          <TouchableOpacity
+            onPress={() => router.push("/screens/Notification/notification")}
+            className="p-2"
+          >
+            <Ionicons name="notifications-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: "#fff",
+  },
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 56,
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    backgroundColor: "#fff",
+  },
+  iconButton: {
+    padding: 8,
+  },
+  title: {
+    color: "#fff",
+  },
+});

@@ -1,16 +1,8 @@
-import { View, Text } from 'react-native';
-import React from 'react';
-import { Header } from '../../components/Header'; // Adjust path if needed
+import React from "react";
+import FormStack from "../screens/forms/forms-stack";
 
-const Forms = () => {
-  return (
-    <>
-      <Header title="Forms" />
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-5xl text-secondary font-bold">Forms!</Text>
-      </View>
-    </>
-  );
+const forms = () => {
+  return <FormStack />;
 };
 
-export default Forms;
+export default forms;
