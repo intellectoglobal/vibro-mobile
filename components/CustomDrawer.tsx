@@ -1,13 +1,12 @@
-import React, { memo, useCallback } from "react";
 import {
+  DrawerContentComponentProps,
   DrawerContentScrollView,
   DrawerItem,
-  DrawerContentComponentProps,
 } from "@react-navigation/drawer";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import React, { memo, useCallback } from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import ReactIcon from "../assets/images/react-logo.png";
-import Index from "@/app/(tabs)";
 
 // Define types for better type safety
 interface DrawerItemConfig {
@@ -76,12 +75,13 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
     // Add your navigation or action logic here
   }, []);
 
-  const renderIcon = useCallback(
-    (iconName: string) =>
-      ({ color, size }: { color: string; size: number }) =>
-        <Icon name={iconName} color={color} size={size} />,
-    []
-  );
+  const renderIcon = useCallback((iconName: string) => {
+    const IconRenderer = ({ color, size }: { color: string; size: number }) => (
+      <Icon name={iconName} color={color} size={size} />
+    );
+    IconRenderer.displayName = `DrawerIcon-${iconName}`;
+    return IconRenderer;
+  }, []);
 
   return (
     <DrawerContentScrollView
