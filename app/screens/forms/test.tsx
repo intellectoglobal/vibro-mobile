@@ -1,139 +1,136 @@
-// import React from "react";
-// import {
-//   Dimensions,
-//   ScrollView,
-//   StyleSheet,
-//   Text,
-//   TouchableOpacity,
-//   View,
-// } from "react-native";
+import React, { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-// type Step = {
-//   label: string;
-//   key: string | number;
-// };
+const TABS = [{ key: "tab1", title: "Step 1 of 5" }];
 
-// type StepIndicatorProps = {
-//   steps: Step[];
-//   currentStep: number;
-//   onStepPress?: (index: number) => void;
-// };
+const ACCORDION_DATA = [
+  {
+    title: "Accordion 1",
+    content: "Content for Accordion 1",
+  },
+];
 
-// const { width } = Dimensions.get("window");
+const Accordion = ({ title, content, expanded, onPress }: any) => (
+  <View style={styles.accordionContainer}>
+    <TouchableOpacity onPress={onPress} style={styles.accordionHeader}>
+      <Text style={styles.accordionTitle}>{title}</Text>
+    </TouchableOpacity>
+    {expanded && (
+      <View style={styles.accordionContent}>
+        <Text>{content}</Text>
+      </View>
+    )}
+  </View>
+);
 
-// const StepIndicator: React.FC<StepIndicatorProps> = ({
-//   steps,
-//   currentStep,
-//   onStepPress,
-// }) => {
-//   return (
-//     <ScrollView
-//       horizontal
-//       showsHorizontalScrollIndicator={false}
-//       contentContainerStyle={styles.container}
-//     >
-//       {steps.map((step, idx) => (
-//         <React.Fragment key={step.key}>
-//           <TouchableOpacity
-//             style={styles.stepContainer}
-//             onPress={() => onStepPress && onStepPress(idx)}
-//             activeOpacity={0.7}
-//           >
-//             <View
-//               style={[
-//                 styles.circle,
-//                 idx === currentStep
-//                   ? styles.activeCircle
-//                   : idx < currentStep
-//                   ? styles.completedCircle
-//                   : styles.inactiveCircle,
-//               ]}
-//             >
-//               <Text style={styles.circleText}>{idx + 1}</Text>
-//             </View>
-//             <Text
-//               style={[styles.label, idx === currentStep && styles.activeLabel]}
-//               numberOfLines={1}
-//             >
-//               {step.label}
-//             </Text>
-//           </TouchableOpacity>
-//           {idx < steps.length - 1 && (
-//             <View
-//               style={[
-//                 styles.line,
-//                 idx < currentStep ? styles.completedLine : styles.inactiveLine,
-//               ]}
-//             />
-//           )}
-//         </React.Fragment>
-//       ))}
-//     </ScrollView>
-//   );
-// };
+const TabAccordionScreen = () => {
+  const [activeTab, setActiveTab] = useState(TABS[0].key);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-// const CIRCLE_SIZE = 32;
+  return (
+    <View style={styles.container}>
+      {/* Tabs */}
+      <View style={styles.tabsContainer}>
+        {TABS.map((tab) => (
+          <TouchableOpacity
+            key={tab.key}
+            style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+            onPress={() => setActiveTab(tab.key)}
+          >
+            <Text
+              style={[
+                styles.tabTitle,
+                activeTab === tab.key && styles.activeTabTitle,
+              ]}
+            >
+              {tab.title}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
-// const styles = StyleSheet.create({
-//   container: {
-//     alignItems: "center",
-//     paddingHorizontal: 16,
-//     minWidth: width,
-//   },
-//   stepContainer: {
-//     alignItems: "center",
-//     width: 70,
-//   },
-//   circle: {
-//     width: CIRCLE_SIZE,
-//     height: CIRCLE_SIZE,
-//     borderRadius: CIRCLE_SIZE / 2,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     borderWidth: 2,
-//     marginBottom: 4,
-//   },
-//   activeCircle: {
-//     backgroundColor: "#4F8EF7",
-//     borderColor: "#4F8EF7",
-//   },
-//   completedCircle: {
-//     backgroundColor: "#4F8EF7",
-//     borderColor: "#4F8EF7",
-//     opacity: 0.7,
-//   },
-//   inactiveCircle: {
-//     backgroundColor: "#fff",
-//     borderColor: "#ccc",
-//   },
-//   circleText: {
-//     color: "#fff",
-//     fontWeight: "bold",
-//   },
-//   label: {
-//     fontSize: 12,
-//     color: "#888",
-//     textAlign: "center",
-//     maxWidth: 60,
-//   },
-//   activeLabel: {
-//     color: "#4F8EF7",
-//     fontWeight: "bold",
-//   },
-//   line: {
-//     height: 2,
-//     width: 32,
-//     alignSelf: "center",
-//     marginHorizontal: 2,
-//     borderRadius: 1,
-//   },
-//   completedLine: {
-//     backgroundColor: "#4F8EF7",
-//     opacity: 0.7,
-//   },
-//   inactiveLine: {
-//     backgroundColor: "#ccc",
-//   },
-// });
+      {/* Accordions */}
+      <ScrollView contentContainerStyle={styles.accordionList}>
+        {ACCORDION_DATA.map((item, idx) => (
+          <Accordion
+            key={idx}
+            title={item.title}
+            content={item.content}
+            expanded={expandedIndex === idx}
+            onPress={() => setExpandedIndex(expandedIndex === idx ? null : idx)}
+          />
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
 
-// export default StepIndicator;
+const styles = StyleSheet.create({
+  container: {},
+  tabsContainer: {
+    flexDirection: "row",
+    borderBottomWidth: 6,
+    borderColor: "#f57f17",
+  },
+  tab: {
+    flex: 0.4,
+    paddingVertical: 12,
+    alignItems: "center",
+    borderColor: "transparent",
+    backgroundColor: "#f57f17",
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  activeTab: {
+    borderColor: "#007AFF",
+  },
+  tabTitle: {
+    color: "#fff",
+    fontWeight: "500",
+  },
+  activeTabTitle: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  accordionList: {
+    padding: 0,
+    // backgroundColor: "#fff",
+    marginBottom: 20,
+  },
+  accordionContainer: {
+    marginBottom: 12,
+    // borderWidth: 1,
+    // borderColor: "#eee",
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    backgroundColor: "#ffffff",
+    // Shadow for iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    // Shadow for Android
+    elevation: 5,
+  },
+  accordionHeader: {
+    padding: 16,
+  },
+  accordionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  accordionContent: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: "#eee",
+  },
+});
+
+export default TabAccordionScreen;

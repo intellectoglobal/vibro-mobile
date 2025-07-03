@@ -20,12 +20,14 @@ type AccordionProps = {
   title: string;
   children: React.ReactNode;
   expandedDefault?: boolean;
+  className?: object;
 };
 
 const Accordion: React.FC<AccordionProps> = ({
   title,
   children,
   expandedDefault,
+  className = {},
 }) => {
   const [expanded, setExpanded] = useState(false);
 
@@ -39,7 +41,10 @@ const Accordion: React.FC<AccordionProps> = ({
   }, [expandedDefault]);
 
   return (
-    <View className="bg-white rounded-lg" style={{ width: "100%" }}>
+    <View
+      className="bg-white rounded-lg"
+      style={{ width: "100%", ...className }}
+    >
       <TouchableOpacity
         onPress={toggleAccordion}
         activeOpacity={0.8}
