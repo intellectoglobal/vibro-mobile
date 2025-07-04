@@ -53,7 +53,7 @@ const CompletedTasks = () => {
       <View style={styles.content}>
         <Text style={styles.title}>Completed Tasks Screen!</Text>
       </View>
-      <View>
+      {/* <View>
         <View style={taskStyle.darkMode}>
           <Text style={taskStyle.darkModeText}>
             Style inheritance <Text style={taskStyle.boldText}> BoldText</Text>
@@ -73,7 +73,7 @@ const CompletedTasks = () => {
         >
           <Text>light Blue</Text>
         </View>
-      </View>
+      </View> */}
     </SafeAreaView>
   );
 };
