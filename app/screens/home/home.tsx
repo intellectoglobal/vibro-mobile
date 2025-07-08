@@ -1,8 +1,9 @@
-import { Header } from "@/components/Header";
+
 import React, { useState } from "react";
 import { FlatList, Text, TextInput, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Cards from "./Cards";
+import { Header } from "@/components/Header";
 
 type ItemData = {
   id: string;
