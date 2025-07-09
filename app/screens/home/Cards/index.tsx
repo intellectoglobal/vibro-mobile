@@ -3,7 +3,11 @@ import React from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ReactIcon from "../../../../assets/images/react-logo.png";
 
-const Cards = () => {
+interface CardsInterFace {
+    title? : string
+}
+
+const Cards:React.FC<CardsInterFace> = ({title}) => {
     return (
         <>
             {/* News Section */}
@@ -16,7 +20,7 @@ const Cards = () => {
                         <Image className='w-10 h-10 rounded-full' source={ReactIcon} />
                     </View>
                     <View className="ml-3">
-                        <Text className="text-neutral-700 text-sm font-semibold">Naveenkumar M</Text>
+                        <Text className="text-neutral-700 text-sm font-semibold">{title}</Text>
                         <Text className="text-neutral-400 text-xs mt-0.5">12 Jun</Text>
                     </View>
                 </View>
