@@ -261,7 +261,7 @@ const Test = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {mockData?.stages?.map((stage: any, idx: number) => (
-        <>
+        <View key={`stage-${idx}`}>
           <View style={styles.tabsContainer}>
             <View style={[styles.tab, styles.activeTab]}>
               <Text style={[styles.tabTitle, styles.activeTabTitle]}>
@@ -269,36 +269,30 @@ const Test = () => {
               </Text>
             </View>
           </View>
+
           {stage.questions.map((q: any, qIdx: number) => {
-            if (q.question_type === "table") {
-              return (
-                <>
-                  <Accordion key={idx} title={q.question}>
-                    <RenderTable
-                      key={qIdx}
-                      control={control}
-                      namePrefix={`stage_${idx}_question_${qIdx}`}
-                      question={q}
-                    />
-                  </Accordion>
-                </>
-              );
-            }
+            const key = `stage-${idx}-question-${qIdx}`;
             return (
-              <>
-                <Accordion key={idx} title={q.question}>
-                  <RenderQuestion
-                    key={qIdx}
+              <Accordion key={key} title={q.question}>
+                {q.question_type === "table" ? (
+                  <RenderTable
                     control={control}
                     namePrefix={`stage_${idx}_question_${qIdx}`}
                     question={q}
                   />
-                </Accordion>
-              </>
+                ) : (
+                  <RenderQuestion
+                    control={control}
+                    namePrefix={`stage_${idx}_question_${qIdx}`}
+                    question={q}
+                  />
+                )}
+              </Accordion>
             );
           })}
-        </>
+        </View>
       ))}
+
       <TouchableOpacity
         onPress={handleSubmit(onSubmit)}
         style={styles.submitBtn}
@@ -308,6 +302,7 @@ const Test = () => {
     </ScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: { padding: 5 },
@@ -383,19 +378,19 @@ const styles = StyleSheet.create({
   tabsContainer: {
     flexDirection: "row",
     borderBottomWidth: 6,
-    borderColor: "#f57f17",
+    borderColor: "#2196f3",
   },
   tab: {
     flex: 0.4,
     paddingVertical: 12,
     alignItems: "center",
     borderColor: "transparent",
-    backgroundColor: "#f57f17",
+    backgroundColor: "#2196f3",
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
   activeTab: {
-    borderColor: "#007AFF",
+    borderColor: "#2196f3",
   },
   tabTitle: {
     color: "#fff",

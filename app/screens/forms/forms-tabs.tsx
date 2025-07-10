@@ -25,7 +25,7 @@ const FormsTabs = ({ navigation }: FormsTabsProps) => {
   const [activeTab, setActiveTab] = useState(TABS[0].key);
   return (
     <>
-      <Header title={"Forms"} />
+      <Header title={"Vibro"} />
       <View className="flex-1 m-2.5">
         <View className="bg-white shadow-lg rounded-lg mb-3">
           <FormSearch placeholder="Filter" />
@@ -39,7 +39,7 @@ const FormsTabs = ({ navigation }: FormsTabsProps) => {
               activeOpacity={0.7}
             >
               <Text
-                className={`text-base text-sm pt-3 pb-3  ${
+                className={`text-base pt-3 pb-3  ${
                   activeTab === tab.key
                     ? "text-blue-500 font-bold"
                     : "text-gray-500"

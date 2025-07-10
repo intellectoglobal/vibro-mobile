@@ -1,0 +1,437 @@
+    {
+        "form_type": "audit",
+        "title": "Comprehensive Compliance Audits",
+        "folder": 22,
+        "prefix": "CCA-001",
+        "GPS": true,
+        "share_reponse": false,
+        "allow_editing": true,
+        "can_edit_previos_state": false,
+        "auto_share_reponse": false,
+        "pass_percentage": 85,
+        "max_score": 100,
+        "form_admin": 25,
+        "stages": [
+            {
+                "name": "Compliance Stage",
+                "order": 1,
+                "questions": [
+                    {
+                        "question_uuid": "uuid-001",
+                        "question": "Audit Compliance Check",
+                        "question_type": "audit",
+                        "question_sub_type": "text",
+                        "input_type": "radio",
+                        "is_required": true,
+                        "order": 1,
+                        "is_other": true,
+                        "max_score": 10,
+                        "options": [
+                            {"option": "Compliant", "order": 1, "score": 10, "failed": false},
+                            {"option": "Non-Compliant", "order": 2, "score": 0, "failed": true}
+                        ]
+                    },
+                    {
+                        "question_uuid": "uuid-002",
+                        "question": "Inspection Checklist Table",
+                        "question_type": "table",
+                        "question_sub_type": "text",
+                        "input_type": "table_group",
+                        "is_required": true,
+                        "order": 2,
+                        "sub_questions": [
+                            {
+                                "question_uuid": "uuid-002-1",
+                                "question": "Checkpoint Description",
+                                "question_type": "short_answer",
+                                "question_sub_type": "text",
+                                "input_type": "text",
+                                "is_required": true,
+                                "order": 1
+                            },
+                            {
+                                "question_uuid": "uuid-002-2",
+                                "question": "Status",
+                                "question_type": "multiple_choice",
+                                "question_sub_type": "text",
+                                "input_type": "radio",
+                                "is_required": true,
+                                "order": 2,
+                                "options": [
+                                    {"option": "Pass", "order": 1},
+                                    {"option": "Fail", "order": 2}
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "question_uuid": "uuid-003",
+                        "question": "Select Location",
+                        "question_type": "location",
+                        "question_sub_type": "text",
+                        "input_type": "map_picker",
+                        "is_required": true,
+                        "order": 3
+                    },
+                    {
+                        "question_uuid": "uuid-004",
+                        "question": "Select Division",
+                        "question_type": "division",
+                        "question_sub_type": "text",
+                        "input_type": "select",
+                        "is_required": true,
+                        "order": 4
+                    },
+                    {
+                        "question_uuid": "uuid-005",
+                        "question": "Select Sub-Division",
+                        "question_type": "sub_division",
+                        "question_sub_type": "text",
+                        "input_type": "select",
+                        "is_required": true,
+                        "order": 5
+                    },
+                    {
+                        "question_uuid": "uuid-006",
+                        "question": "Audit Notes",
+                        "question_type": "title_and_description",
+                        "question_sub_type": "text",
+                        "input_type": "info_text",
+                        "is_required": false,
+                        "order": 6
+                    },
+                    {
+                        "question_uuid": "uuid-007",
+                        "question": "Enter Your Name",
+                        "question_type": "short_answer",
+                        "question_sub_type": "text",
+                        "input_type": "text",
+                        "is_required": true,
+                        "order": 7
+                    },
+                    {
+                        "question_uuid": "uuid-008",
+                        "question": "Detailed Observations",
+                        "question_type": "long_answer",
+                        "question_sub_type": "text",
+                        "input_type": "textarea",
+                        "is_required": true,
+                        "order": 8
+                    },
+                    {
+                        "question_uuid": "uuid-009",
+                        "question": "Safety Measures Taken",
+                        "question_type": "multiple_choice",
+                        "question_sub_type": "text",
+                        "input_type": "radio",
+                        "is_required": true,
+                        "order": 9,
+                        "is_other": true,
+                        "options": [
+                            {"option": "Fire Extinguisher", "order": 1},
+                            {"option": "Safety Gear", "order": 2}
+                        ]
+                    },
+                    {
+                        "question_uuid": "uuid-010",
+                        "question": "Equipment Used",
+                        "question_type": "checkboxes",
+                        "question_sub_type": "text",
+                        "input_type": "checkbox_group",
+                        "is_required": true,
+                        "order": 10,
+                        "options": [
+                            {"option": "Helmet", "order": 1},
+                            {"option": "Gloves", "order": 2}
+                        ]
+                    },
+                    {
+                        "question_uuid": "uuid-011",
+                        "question": "Department",
+                        "question_type": "dropdown",
+                        "question_sub_type": "text",
+                        "input_type": "select",
+                        "is_required": true,
+                        "order": 11,
+                        "options": [
+                            {"option": "Engineering", "order": 1},
+                            {"option": "Operations", "order": 2}
+                        ]
+                    },
+                    {
+                        "question_uuid": "uuid-012",
+                        "question": "Compliance Score",
+                        "question_type": "linear_scale",
+                        "question_sub_type": "number",
+                        "input_type": "slider",
+                        "is_required": true,
+                        "order": 12,
+                        "min_value": 1,
+                        "max_value": 5
+                    },
+                    {
+                        "question_uuid": "uuid-013",
+                        "question": "Inspection Date and Time",
+                        "question_type": "datetime",
+                        "question_sub_type": "text",
+                        "input_type": "datetime-local",
+                        "is_required": true,
+                        "order": 13
+                    },
+                    {
+                        "question_uuid": "uuid-014",
+                        "question": "Inspection Date",
+                        "question_type": "date",
+                        "question_sub_type": "text",
+                        "input_type": "date",
+                        "is_required": true,
+                        "order": 14
+                    },
+                    {
+                        "question_uuid": "uuid-015",
+                        "question": "Inspection Time",
+                        "question_type": "time",
+                        "question_sub_type": "text",
+                        "input_type": "time",
+                        "is_required": true,
+                        "order": 15
+                    },
+                    {
+                        "question_uuid": "uuid-016",
+                        "question": "Provide Signature",
+                        "question_type": "signature",
+                        "question_sub_type": "text",
+                        "input_type": "signature_pad",
+                        "is_required": true,
+                        "order": 16
+                    },
+                    {
+                        "question_uuid": "uuid-017",
+                        "question": "Upload Inspection Photos",
+                        "question_type": "upload_image",
+                        "question_sub_type": "text",
+                        "input_type": "file",
+                        "is_required": true,
+                        "order": 17,
+                        "number_of_file_allowed": 2
+                    },
+                    {
+                        "question_uuid": "uuid-018",
+                        "question": "Upload Inspection Video",
+                        "question_type": "upload_video",
+                        "question_sub_type": "text",
+                        "input_type": "file",
+                        "is_required": true,
+                        "order": 18,
+                        "number_of_file_allowed": 1
+                    },
+                    {
+                        "question_uuid": "uuid-019",
+                        "question": "Upload Inspection Report",
+                        "question_type": "upload_file",
+                        "question_sub_type": "text",
+                        "input_type": "file",
+                        "is_required": true,
+                        "order": 19,
+                        "number_of_file_allowed": 1
+                    },
+                    {
+                        "question_uuid": "uuid-020",
+                        "question": "Scan QR Code",
+                        "question_type": "qr_code",
+                        "question_sub_type": "text",
+                        "input_type": "qr_scanner",
+                        "is_required": true,
+                        "order": 20
+                    },
+                    {
+                        "question_uuid": "uuid-021",
+                        "question": "Calculated Score",
+                        "question_type": "formula",
+                        "question_sub_type": "number",
+                        "input_type": "calculated",
+                        "is_required": false,
+                        "order": 21,
+                        "formula": "q12 * 2"
+                    },
+                    {
+                        "question_uuid": "uuid-022",
+                        "question": "Select Audit Supervisor",
+                        "question_type": "user",
+                        "question_sub_type": "text",
+                        "input_type": "user_picker",
+                        "is_required": true,
+                        "order": 22
+                    }
+                ]
+            }
+        ],
+        "audit_info": {
+            "name": "Compliance Audit Info",
+            "questions": []
+        },
+        "audit_group": [
+            {
+                "name": "Safety Group",
+                "questions": []
+            }
+        ]
+    }
+
+    [
+        user: 22
+        {
+            "formid": 1,
+            "stage_id": 1,
+            "que_id":1,
+            "questye": "string",
+            "answer":  "ans1|ans2"
+        },
+        {
+            "formid": 1,
+            "stage_id": 1,
+            "que_id":1,
+            "questye": "string",
+            "answer":  
+        },
+        {
+            "formid": 1,
+            "stage_id": 1,
+            "que_id":1,
+            "group_id": 1,
+            "questye": string,
+            "answer":  
+        },
+        {
+            "formid": 1,
+            "stage_id": 1,
+            "que_id":1,
+            "questye": string,
+            "answer":   string
+        },
+    ]
+
+
+    {
+  "form_id": 1001,
+  "user_id": 2001,
+  "responses": [
+  "stages" : [{
+        "stage_id" :1,
+        "answers": [
+        {
+      "question_id": "q1",
+      "answer": "John Doe"
+    },
+    {
+      "question_id": "q2",
+      "answer": "There was a minor fire incident in Zone B."
+    },
+]
+    }]
+    {
+      "question_id": "q3",
+      "answer": {
+        "selected_option_id": "opt2",
+        "other_text": null
+      }
+    },
+    {
+      "question_id": "q4",
+      "answer": "14:30"
+    },
+    {
+      "question_id": "q5",
+      "answer": "2025-07-07"
+    },
+    {
+      "question_id": "q6",
+      "answer": "2025-07-07T14:30:00Z"
+    },
+    {
+      "question_id": "q7",
+      "answer": 4
+    },
+    {
+      "question_id": "q8",
+      "answer": ["opt1", "opt3"]
+    },
+    {
+      "question_id": "q9",
+      "answer": "yes"
+    },
+    {
+      "question_id": "q10",
+      "answer": {
+        "latitude": 12.9716,
+        "longitude": 77.5946
+      }
+    },
+    {
+      "question_id": "q11",
+      "answer": [
+        { "file_url": "https://example.com/img1.jpg" },
+        { "file_url": "https://example.com/img2.jpg" }
+      ]
+    },
+    {
+      "question_id": "q12",
+      "answer": [
+        { "file_url": "https://example.com/video.mp4" }
+      ]
+    },
+    {
+      "question_id": "q13",
+      "answer": [
+        { "file_url": "https://example.com/doc.pdf" }
+      ]
+    },
+    {
+      "question_id": "q14",
+      "answer": "data:image/png;base64,..."
+    },
+    {
+      "question_id": "q15",
+      "answer": "SCANNED_QR_CODE_RESULT"
+    },
+    {
+      "question_id": "q16",
+      "answer": "user_345"
+    },
+    {
+      "question_id": "q17",
+      "answer": "division_1"
+    },
+    {
+      "question_id": "q18",
+      "answer": "sub_division_2"
+    },
+    {
+      "question_id": "q19",
+      "answer": "Risk Score: 12.5"
+    },
+    {
+      "question_id": "q20",
+      "answer": [
+        {
+          "row": 1,
+          "answers": [
+            { "question_id": "q20_1", "answer": "Check gas valve" },
+            { "question_id": "q20_2", "answer": "pass" }
+          ]
+        },
+        {
+          "row": 2,
+          "answers": [
+            { "question_id": "q20_1", "answer": "Inspect fire extinguisher" },
+            { "question_id": "q20_2", "answer": "fail" }
+          ]
+        }
+      ]
+    },
+    {
+      "question_id": "q21",
+      "answer": null
+    }
+  ]
+}

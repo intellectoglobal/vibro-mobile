@@ -4,7 +4,7 @@ import {
   DrawerItem,
 } from "@react-navigation/drawer";
 import React, { memo, useCallback } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import ReactIcon from "../assets/images/react-logo.png";
 
@@ -12,7 +12,7 @@ import ReactIcon from "../assets/images/react-logo.png";
 interface DrawerItemConfig {
   label: string;
   iconName: string;
-  onPress: () => void;
+  route: string;
 }
 
 interface UserProfile {
@@ -31,48 +31,53 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
     avatar: ReactIcon,
   };
 
-  // Memoized drawer items configuration
+  // Helper to navigate and close drawer on web
+  const navigateAndClose = (route: string) => {
+    props.navigation.navigate(route);
+    if (Platform.OS === "web") {
+      props.navigation.closeDrawer();
+    }
+  };
+
+  // Drawer items configuration
   const drawerItems: DrawerItemConfig[] = [
     {
       label: "Completed Tasks",
       iconName: "check-circle",
-      onPress: () =>
-        props.navigation.navigate("screens/CompletedTasks/completed-tasks"),
+      route: "screens/CompletedTasks/completed-tasks",
     },
     {
       label: "Sent Messages",
       iconName: "send",
-      onPress: () =>
-        props.navigation.navigate("screens/Sentmessage/sentmessage"),
+      route: "screens/Sentmessage/sentmessage",
     },
     {
       label: "Bookmarks",
       iconName: "bookmark",
-      onPress: () => props.navigation.navigate("screens/Bookmarks/bookmarks"),
+      route: "screens/Bookmarks/bookmarks",
     },
     {
       label: "Leaderboard",
       iconName: "bar-chart",
-      onPress: () =>
-        props.navigation.navigate("screens/Leaderboard/leaderboard"),
+      route: "screens/Leaderboard/leaderboard",
     },
     {
       label: "Admin and Settings",
       iconName: "settings",
-      onPress: () => props.navigation.navigate("screens/Settings/settings"),
+      route: "screens/Settings/settings",
     },
     {
       label: "Search",
       iconName: "search",
-      onPress: () => props.navigation.navigate("screens/Search/search"),
+      route: "screens/Search/search",
     },
   ];
 
-  // Memoized callbacks
   const handleAddAccount = useCallback(() => {
-    console.log("Add Account pressed");
     props.navigation.navigate("screens/Login/login");
-    // Add your navigation or action logic here
+    if (Platform.OS === "web") {
+      props.navigation.closeDrawer();
+    }
   }, []);
 
   const renderIcon = useCallback((iconName: string) => {
@@ -90,13 +95,13 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
       showsVerticalScrollIndicator={false}
     >
       {/* Profile Section */}
-      <View className="flex flex-row  items-center">
+      <View className="flex flex-row items-center p-4">
         <Image
           source={userProfile.avatar}
-          className="w-16 h-16 rounded-full mb-2 "
+          className="w-16 h-16 rounded-full mr-4"
           resizeMode="cover"
         />
-        <View className="">
+        <View>
           <Text className="text-black text-base font-bold mb-0.5">
             {userProfile.name}
           </Text>
@@ -114,7 +119,7 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
             key={`${item.label}-${index}`}
             label={item.label}
             icon={renderIcon(item.iconName)}
-            onPress={item.onPress}
+            onPress={() => navigateAndClose(item.route)}
             activeTintColor="#2662f0"
             inactiveTintColor="#666"
           />
@@ -122,7 +127,7 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
       </View>
 
       {/* Add Account Section */}
-      <View className="border-t border-gray-300 px-4 py-3">
+      <View className="border-t border-gray-300 px-4 py-3 mt-auto">
         <Text className="text-gray-500 text-sm mb-2">Account</Text>
         <TouchableOpacity
           className="flex-row items-center py-1"
