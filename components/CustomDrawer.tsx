@@ -71,7 +71,7 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
   // Memoized callbacks
   const handleAddAccount = useCallback(() => {
     console.log("Add Account pressed");
-    props.navigation.navigate("screens/Login/login");
+    props.navigation.navigate("screens/login/login");
     // Add your navigation or action logic here
   }, []);
 

@@ -14,7 +14,7 @@ type Step = {
 };
 
 type StepIndicatorProps = {
-  steps: Step[];
+  steps: any[];
   currentStep: number;
   onStepPress?: (index: number) => void;
 };
@@ -32,8 +32,8 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
     >
-      {steps.map((step, idx) => (
-        <React.Fragment key={step.key}>
+      {steps.map((_step, idx) => (
+        <React.Fragment key={`step-${idx}`}>
           <TouchableOpacity
             style={styles.stepContainer}
             onPress={() => onStepPress && onStepPress(idx)}
@@ -55,7 +55,8 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
               style={[styles.label, idx === currentStep && styles.activeLabel]}
               numberOfLines={1}
             >
-              {step.label}
+              {`Step ${idx + 1}`}
+              {/* {step.label} */}
             </Text>
           </TouchableOpacity>
           {idx < steps.length - 1 && (

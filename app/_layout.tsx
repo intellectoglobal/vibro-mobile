@@ -1,25 +1,29 @@
-import { Drawer } from 'expo-router/drawer';
-import CustomDrawer from '../components/CustomDrawer'; // adjust if needed
-import './globals.css';
+import { Drawer } from "expo-router/drawer";
+import { Provider } from "react-redux";
+import CustomDrawer from "../components/CustomDrawer"; // adjust if needed
+import store from "../store/";
+import "./globals.css";
 
 export default function RootLayout() {
   return (
-    <Drawer
-      drawerContent={(props) => <CustomDrawer {...props} />}
-      screenOptions={{
-        headerShown: false,
-        drawerStyle: {
-          width: 280,
-        },
-      }}
-    >
-      <Drawer.Screen
-        name="(tabs)"
-        options={{
+    <Provider store={store}>
+      <Drawer
+        drawerContent={(props) => <CustomDrawer {...props} />}
+        screenOptions={{
           headerShown: false,
-          drawerLabel: 'Main Tabs',
+          drawerStyle: {
+            width: 280,
+          },
         }}
-      />
-    </Drawer>
+      >
+        <Drawer.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+            drawerLabel: "Main Tabs",
+          }}
+        />
+      </Drawer>
+    </Provider>
   );
 }

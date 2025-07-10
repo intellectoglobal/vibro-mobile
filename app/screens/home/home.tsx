@@ -56,10 +56,8 @@ const Home = () => {
         <FlatList
           contentContainerStyle={{ paddingBottom: 30 }}
           data={filteredData}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <Cards title={item.title}/>
-          )}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <Cards title={item.title} />}
           ListEmptyComponent={
             <Text className="text-center text-neutral-400 mt-10">
               No items found

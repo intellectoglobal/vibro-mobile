@@ -1,7 +1,7 @@
-
-import axiosInstance from '@/utility/Services';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { loginRequest } from "@/Redux/reducer/auth/authSlice";
+import axiosInstance from "@/utility/Services";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
   RefreshControl,
   SafeAreaView,
@@ -10,25 +10,33 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectAuthError,
+  selectAuthLoading,
+} from "../../../Redux/reducer/auth/authSelectors";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-
-  const router = useRouter()
+  const dispatch = useDispatch();
+  const isLoading = useSelector(selectAuthLoading);
+  const error = useSelector(selectAuthError);
+  console.log("isLoading", isLoading);
+  const router = useRouter();
 
   const handleSendOtp = async () => {
     setLoading(true);
     try {
-      console.log('Sending OTP to:', email);
-      await axiosInstance.post('/auth/request-otp/', { email });
+      console.log("Sending OTP to:", email);
+      await axiosInstance.post("/auth/request-otp/", { email });
       setIsOtpSent(true);
     } catch (error) {
-      console.error('Failed to send OTP:', error);
+      console.error("Failed to send OTP:", error);
     } finally {
       setLoading(false);
     }
@@ -37,26 +45,31 @@ const Login = () => {
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
-      console.log('Verifying OTP:', otp);
-      await axiosInstance.post('/auth/verify-otp/', { email, otp });
-      console.log('Login successful');
-      router.push("/screens/home/home")
+      console.log("Verifying OTP:", otp);
+      await axiosInstance.post("/auth/verify-otp/", { email, otp });
+      console.log("Login successful");
+      router.push("/screens/home/home");
     } catch (error) {
-      console.error('Invalid OTP:', error);
+      console.error("Invalid OTP:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleLogin = (email: string, password: string) => {
+    dispatch(loginRequest({ email, password }));
+  };
+
   const onRefresh = () => {
-    setRefreshing(true);
-    setEmail('');
-    setOtp('');
-    setIsOtpSent(false);
-    setLoading(false);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    handleLogin("admin@gmaocm", "12123");
+    // setRefreshing(true);
+    // setEmail("");
+    // setOtp("");
+    // setIsOtpSent(false);
+    // setLoading(false);
+    // setTimeout(() => {
+    //   setRefreshing(false);
+    // }, 1000);
   };
 
   return (
@@ -75,8 +88,12 @@ const Login = () => {
               <View className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#bfdbff]" />
               <View className="absolute -bottom-2 -left-2 w-4 h-4 rounded-full bg-[#bfdbff]" />
             </View>
-            <Text className="text-3xl font-bold text-white mb-1">Welcome to Vibro</Text>
-            <Text className="text-base text-white text-center">Login with your email</Text>
+            <Text className="text-3xl font-bold text-white mb-1">
+              Welcome to Vibro
+            </Text>
+            <Text className="text-base text-white text-center">
+              Login with your email
+            </Text>
           </View>
 
           {/* Email or OTP Section */}
@@ -100,7 +117,7 @@ const Login = () => {
                   disabled={loading || !email}
                 >
                   <Text className="text-[#0f172a] text-lg font-semibold">
-                    {loading ? 'Sending...' : 'Send OTP'}
+                    {loading ? "Sending..." : "Send OTP"}
                   </Text>
                 </TouchableOpacity>
               </>
@@ -123,7 +140,7 @@ const Login = () => {
                   disabled={loading || otp.length !== 6}
                 >
                   <Text className="text-[#0f172a] text-lg font-semibold">
-                    {loading ? 'Verifying...' : 'Verify OTP'}
+                    {loading ? "Verifying..." : "Verify OTP"}
                   </Text>
                 </TouchableOpacity>
               </>
