@@ -4,9 +4,18 @@ import {
   DrawerItem,
 } from "@react-navigation/drawer";
 import React, { memo, useCallback } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  Alert,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import ReactIcon from "../assets/images/react-logo.png";
+import { useDispatch } from "react-redux";
+import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
 
 // Define types for better type safety
 interface DrawerItemConfig {
@@ -23,6 +32,7 @@ interface UserProfile {
 }
 
 const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
+  const dispatch = useDispatch();
   // User profile data - could come from props or context
   const userProfile: UserProfile = {
     name: "Test Test",
@@ -133,10 +143,55 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
           <Text className="ml-2 text-purple-800 text-base">Add Account</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.divider} />
+      <View>
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert("Logout", "Are you sure you want to logout?", [
+              {
+                text: "Cancel",
+                style: "cancel",
+              },
+              {
+                text: "Logout",
+                onPress: () => dispatch(logoutRequest()),
+                style: "destructive",
+              },
+            ]);
+          }}
+        >
+          <Text>Logout</Text>
+        </TouchableOpacity>
+      </View>
     </DrawerContentScrollView>
   );
 });
 
 CustomDrawer.displayName = "CustomDrawer";
+
+const styles = StyleSheet.create({
+  drawerHeader: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  drawerHeaderText: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  drawerHeaderEmail: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 4,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#ccc",
+    marginVertical: 10,
+  },
+  logoutLabel: {
+    color: "red",
+  },
+});
 
 export default CustomDrawer;
