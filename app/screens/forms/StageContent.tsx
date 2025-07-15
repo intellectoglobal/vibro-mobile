@@ -27,7 +27,7 @@ const StageContent: React.FC<StageContentProps> = ({
 
   const handleStageSubmit = async () => {
     const fieldNames = stage.questions.map(
-      (q) => `stage-${stage.order}-${q.id}`
+      (q) => `stage-${stage.id}-${q.id}`
     );
 
     const isValid = await trigger(fieldNames);
@@ -36,7 +36,7 @@ const StageContent: React.FC<StageContentProps> = ({
       const values = getValues();
       console.log("Stage values:", values);
       await onCompleteStage();
-      Alert.alert("Success", `Stage ${stage.order} completed!`);
+      Alert.alert("Success", `Stage ${stage.id} completed!`);
     }
   };
 
@@ -52,9 +52,9 @@ const StageContent: React.FC<StageContentProps> = ({
     <View style={styles.content}>
       {stage.questions.map((question) => (
         <FieldRenderer
-          key={`${stage.order}-${question.id}`}
+          key={`${stage.id}-${question.id}`}
           question={question}
-          stageOrder={stage.order}
+          stageOrder={stage.id}
           isEnabled={isEnabled}
           control={control}
           errors={errors}
@@ -63,7 +63,7 @@ const StageContent: React.FC<StageContentProps> = ({
 
       <TouchableOpacity style={styles.submitButton} onPress={handleStageSubmit}>
         <Text style={styles.submitButtonText}>
-          {isLastStage ? "Submit All" : `Complete Stage ${stage.order}`}
+          {isLastStage ? "Submit All" : `Complete Stage ${stage.id}`}
         </Text>
       </TouchableOpacity>
     </View>

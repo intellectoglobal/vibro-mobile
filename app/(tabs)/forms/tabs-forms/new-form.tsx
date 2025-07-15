@@ -44,16 +44,17 @@ export default function NewForm() {
       params: { folderName: folder.name, folderId: folder.id  }, // Example parameter
     });
   };
-  const routeFormsFileList = () => {
+  const routeFormsFileList = (forms: any) => {
+    // console.log("forms details ::", forms)
     router.push({
       pathname: "/(tabs)/forms/multi-stage-form",
-      // params: { folderName: "Documents" }, // Example parameter
+      params: { formTitle: forms.title, formId: forms.id }, // Example parameter
     });
   };
 
   const getOrgFolder = async () => {
     try {
-      const response = await axiosInstance.get("/folder/");
+      const response = await axiosInstance.get("/user/assigned-folders/");
       // console.log("folders ::", response.data);
       setFolders(response.data);
     } catch (error: any) {
@@ -61,19 +62,19 @@ export default function NewForm() {
     }
   };
 
-  const getFolderLessFormsForUser = async () => {
+  const getAllFormsForUser = async () => {
     try {
-      const response = await axiosInstance.get("/form/form-details/");
+      const response = await axiosInstance.get("/user/assigned-forms/");
       // console.log("Forms ::", response.data);
       setForms(response.data);
     } catch (error: any) {
-      console.error("Error Occurred in the getOrgFolder ::", error.message);
+      console.error("Error Occurred in the getAllFormsForUser ::", error.message);
     }
   };
 
   useEffect(() => {
     getOrgFolder();
-    getFolderLessFormsForUser()
+    getAllFormsForUser()
   }, []);
 
 

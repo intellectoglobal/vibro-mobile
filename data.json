@@ -1,0 +1,487 @@
+{
+  "form_type": "standard",
+  "title": "Standard Health & Safety Checklist4",
+  "folder": 18,
+  "prefix": "HSC",
+  "GPS": true,
+  "share_reponse": false,
+  "allow_editing": true,
+  "can_edit_previos_state": false,
+  "auto_share_reponse": false,
+  "pass_percentage": 80,
+  "max_score": 100,
+  "form_admin": 25,
+  "is_archived": false,
+  "stages": [
+    {
+      "name": "Stage 1",
+      "order": 1,
+      "stage_access": {
+        "access_type": "organization",
+        "allow_group": null,
+        "allow_stage": null,
+        "allow_user": null
+      },
+      "questions": [
+        {
+          "question": "Stage 1 - Question 1 - table",
+          "question_type": "table",
+          "question_uuid": "question_uuid1",
+          "order": 1,
+          "is_required": true,
+          "min_value": 1,
+          "max_value": 2,
+          "sub_questions": [
+            {
+              "question": "Stage 1 - Table Child Question 1 - location",
+              "question_type": "location",
+              "question_uuid": "question_uuid2",
+              "order": 1,
+              "is_required": true
+            },
+            {
+              "question": "Stage 1 - Table Child Question 2 - division",
+              "question_type": "division",
+              "question_uuid": "question_uuid3",
+              "order": 2,
+              "is_required": true
+            },
+            {
+              "question": "Stage 1 - Table Child Question 3 - dropdown",
+              "question_type": "dropdown",
+              "question_sub_type": "text",
+              "question_uuid": "question_uuid4",
+              "order": 3,
+              "is_required": true,
+              "is_other": true,
+              "options": [
+                {
+                  "option": "Stage 1 - Table Child Question 3 - Option 1",
+                  "order": 1
+                },
+                {
+                  "option": "Stage 1 - Table Child Question 3 - Option 2",
+                  "order": 2
+                },
+                {
+                  "option": "Stage 1 - Table Child Question 3 - Option 3",
+                  "order": 3
+                }
+              ]
+            }
+          ],
+          "logics": [
+            {
+              "logic_type": "is",
+              "logic_value": "YES",
+              "order": 1,
+              "follow_up":{
+                  "title": "LOGIC 1 - Followup title 1",
+                  "deadline": 30,
+                  "assign_to": "form_submitter",
+                  "task_close_questions": [
+                      {
+                            "question": "LOGIC 1 - FOLLOW UP TASK CLOSE QUESTION 1",
+                            "question_type": "date",
+                            "question_uuid": "question_uuid5",
+                            "order": 1,
+                            "is_required": true 
+                      },
+                      {
+                            "question": "LOGIC 1 - FOLLOW UP TASK CLOSE QUESTION 2",
+                            "question_type": "time",
+                            "question_uuid": "question_uuid6",
+                            "order": 2,
+                            "is_required": true 
+                      }
+                  ]
+              },
+              "logic_questions": [
+                {
+                  "question": "Logic 1 question 1",
+                  "question_type": "division",
+                  "question_uuid": "question_uuid7",
+                  "order": 1,
+                  "is_required": true,
+                  "min_value": 1,
+                  "max_value": 2
+                },
+				{
+                  "question": "Logic 1 question 2",
+                  "question_type": "division",
+                  "question_uuid": "question_uuid8",
+                  "order": 2,
+                  "is_required": true,
+                  "min_value": 1,
+                  "max_value": 2
+                }
+              ]
+            },
+			{
+              "logic_type": "is",
+              "logic_value": "NO",
+              "order": 2,
+              "follow_up":{
+                  "title": "LOGIC 2 - Followup title 2",
+                  "deadline": 30,
+                  "assign_to": "form_submitter",
+                  "task_close_questions": [
+                      {
+                            "question": "LOGIC 2 - FOLLOW UP TASK CLOSE QUESTION 1",
+                            "question_type": "date",
+                            "question_uuid": "question_uuid9",
+                            "order": 1,
+                            "is_required": true 
+                      },
+                      {
+                            "question": "LOGIC 2 - FOLLOW UP TASK CLOSE QUESTION 1",
+                            "question_type": "time",
+                            "question_uuid": "question_uuid10",
+                            "order": 2,
+                            "is_required": true 
+                      }
+                  ]
+              },
+              "logic_questions": [
+                {
+                  "question": "Logic 2 question 1",
+                  "question_type": "division",
+                  "question_uuid": "question_uuid11",
+                  "order": 1,
+                  "is_required": true,
+                  "min_value": 1,
+                  "max_value": 2
+                },
+				{
+                  "question": "Logic 2 question 2",
+                  "question_type": "division",
+                  "question_uuid": "question_uuid12",
+                  "order": 2,
+                  "is_required": true,
+                  "min_value": 1,
+                  "max_value": 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "question": "Stage 2- Question 2 - location",
+          "question_type": "location",
+          "question_uuid": "question_uuid13",
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    },
+    {
+      "name": "Stage 2",
+      "order": 2,
+      "stage_access": {
+        "access_type": "organization",
+        "allow_group": null,
+        "allow_stage": null,
+        "allow_user": null
+      },
+      "questions": [
+        {
+          "question": "Stage 2 - Question 1 - division",
+          "question_type": "division",
+          "question_uuid": "question_uuid14",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "question": "Stage 2 - Question 2 - sub_division",
+          "question_type": "sub_division",
+          "question_uuid": "question_uuid15",
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    },
+    {
+      "name": "Stage 3",
+      "order": 3,
+      "stage_access": {
+        "access_type": "organization",
+        "allow_group": null,
+        "allow_stage": null,
+        "allow_user": null
+      },
+      "questions": [
+        {
+          "question": "Stage 3 - Question 1 - title_and_description",
+          "question_type": "title_and_description",
+          "question_uuid": "question_uuid16",
+          "description": "Question Description",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "question": "Stage 3 - Question 2 - short_answer",
+          "question_type": "short_answer",
+          "question_uuid": "question_uuid17",
+          "question_hint": "Question Hint",
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    },
+    {
+      "name": "Stage 4",
+      "order": 4,
+      "stage_access": {
+        "access_type": "organization",
+        "allow_group": null,
+        "allow_stage": null,
+        "allow_user": null
+      },
+      "questions": [
+        {
+          "question": "Stage 4 - Question 1 - long_answer",
+          "question_type": "long_answer",
+          "question_uuid": "question_uuid18",
+          "question_hint": "Question Hint",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "question": "Stage 4 - Question 2 - multiple_choice",
+          "question_type": "multiple_choice",
+          "question_uuid": "question_uuid19",
+          "question_sub_type": "text",
+          "order": 2,
+          "is_required": true,
+          "is_other": true,
+          "options": [
+            {
+              "option": "Stage 4 - Question 2 - Option 1",
+              "order": 1
+            },
+            {
+              "option": "Stage 4 - Question 2 - Option 2",
+              "order": 2
+            },
+            {
+              "option": "Stage 4 - Question 2 - Option 3",
+              "order": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Stage 5",
+      "order": 5,
+      "stage_access": {
+        "access_type": "organization",
+        "allow_group": null,
+        "allow_stage": null,
+        "allow_user": null
+      },
+      "questions": [
+        {
+          "question": "Stage 5 - Question 1 - checkboxes",
+          "question_type": "checkboxes",
+          "question_uuid": "question_uuid20",
+          "order": 1,
+          "is_required": true,
+          "is_other": false,
+          "options": [
+            {
+              "option": "Stage 5 - Question 1 - Option 1",
+              "order": 1
+            },
+            {
+              "option": "Stage 5 - Question 1 - Option 2",
+              "order": 2
+            },
+            {
+              "option": "Stage 5 - Question 1 - Option 3",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "question": "Stage 5 - Question 2 - dropdown",
+          "question_type": "dropdown",
+          "question_uuid": "question_uuid21",
+          "question_sub_type": "text",
+          "order": 2,
+          "is_required": true,
+          "is_other": true,
+          "options": [
+            {
+              "option": "Stage 5 - Question 2 - Option 1",
+              "order": 1
+            },
+            {
+              "option": "Stage 5 - Question 2 - Option 2",
+              "order": 2
+            },
+            {
+              "option": "Stage 5 - Question 2 - Option 3",
+              "order": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Stage 6",
+      "order": 6,
+      "stage_access": {
+        "access_type": "organization",
+        "allow_group": null,
+        "allow_stage": null,
+        "allow_user": null
+      },
+      "questions": [
+        {
+          "question": "Stage 6 - Question 1 - linear_scale",
+          "question_type": "linear_scale",
+          "question_uuid": "question_uuid22",
+          "order": 1,
+          "is_required": true,
+          "min_value": 1,
+          "max_value": 2,
+          "options": [
+            {
+              "option": "Stage 6 - Question 1 - Option 1",
+              "order": 1
+            },
+            {
+              "option": "Stage 6 - Question 1 - Option 2",
+              "order": 2
+            }
+          ]
+        },
+        {
+          "question": "Stage 6 - Question 2 - datetime",
+          "question_type": "datetime",
+          "question_uuid": "question_uuid23",
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    },
+    {
+      "name": "Stage 7",
+      "order": 7,
+      "stage_access": {
+        "access_type": "organization",
+        "allow_group": null,
+        "allow_stage": null,
+        "allow_user": null
+      },
+      "questions": [
+        {
+          "question": "Stage 7 - Question 1 - date",
+          "question_type": "date",
+          "question_uuid": "question_uuid24",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "question": "Stage 7 - Question 2 - time",
+          "question_type": "time",
+          "question_uuid": "question_uuid25",
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    },
+    {
+      "name": "Stage 8",
+      "order": 8,
+      "stage_access": {
+        "access_type": "organization",
+        "allow_group": null,
+        "allow_stage": null,
+        "allow_user": null
+      },
+      "questions": [
+        {
+          "question": "Stage 8 - Question 1 - signature",
+          "question_type": "signature",
+          "question_uuid": "question_uuid26",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "question": "Stage 8 - Question 2 - upload_image",
+          "question_type": "upload_image",
+          "question_uuid": "question_uuid27",
+          "require_live": true,
+          "number_of_file_allowed": 5,
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    },
+    {
+      "name": "Stage 9",
+      "order": 9,
+      "stage_access": {
+        "access_type": "organization",
+        "allow_group": null,
+        "allow_stage": null,
+        "allow_user": null
+      },
+      "questions": [
+        {
+          "question": "Stage 9 - Question 1 - upload_video",
+          "question_type": "upload_video",
+          "question_uuid": "question_uuid28",
+          "order": 1,
+          "is_required": true,
+          "require_live": true
+        },
+        {
+          "question": "Stage 9 - Question 2 - upload_file",
+          "question_type": "upload_file",
+          "question_uuid": "question_uuid29",
+          "number_of_file_allowed": 3,
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    },
+    {
+      "name": "Stage 10",
+      "order": 10,
+      "stage_access": {
+        "access_type": "organization",
+        "allow_group": null,
+        "allow_stage": null,
+        "allow_user": null
+      },
+      "questions": [
+        {
+          "question": "Stage 10 - Question 1 - qr_code",
+          "question_type": "qr_code",
+          "question_uuid": "question_uuid30",
+          "question_hint": "Stage 10 - Question 1 - qr_code - Question Hint",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "question": "Stage 10 - Question 2 - formula",
+          "question_type": "formula",
+          "question_uuid": "question_uuid31",
+          "formula": "SUM(asdasd+asdasd)*asdsd",
+          "order": 2,
+          "is_required": true
+        },
+        {
+          "question": "Stage 10 - Question 3 - user",
+          "question_type": "user",
+          "question_uuid": "question_uuid32",
+          "order": 3,
+          "is_required": true
+        }
+      ]
+    }
+  ]
+}

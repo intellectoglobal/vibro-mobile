@@ -33,10 +33,10 @@ const Login = () => {
     setLoading(true);
     try {
       console.log("Sending OTP to:", email);
-      await axiosInstance.post("/auth/request-otp/", { email });
+      await axiosInstance.post("auth/request-otp/", { email });
       setIsOtpSent(true);
-    } catch (error) {
-      console.error("Failed to send OTP:", error);
+    } catch (error:any) {
+      console.error("Failed to send OTP:", error.message);
     } finally {
       setLoading(false);
     }
@@ -46,11 +46,11 @@ const Login = () => {
     setLoading(true);
     try {
       console.log("Verifying OTP:", otp);
-      await axiosInstance.post("/auth/verify-otp/", { email, otp });
-      console.log("Login successful");
+      const res = await axiosInstance.post("auth/verify-otp/", { email, otp });
+      console.log("Login successful", res.data);
       router.push("/screens/home/home");
-    } catch (error) {
-      console.error("Invalid OTP:", error);
+    } catch (error:any) {
+      console.error("Invalid OTP:", error.message);
     } finally {
       setLoading(false);
     }

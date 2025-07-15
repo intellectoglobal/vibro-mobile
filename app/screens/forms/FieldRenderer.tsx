@@ -1,11 +1,14 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-import { Textarea, Textbox } from "@/components/FormFields";
+import {MultiSelectBox, SelectBox, Textarea, Textbox } from "@/components/FormFields";
 import styles from "./styles";
 
 import { FieldRendererProps } from "@/types/forms";
 import getValidationRules from "./validation";
+import CustomCheckbox from "@/components/FormFields/vibro-checkbox";
+import CustomLinearScale from "@/components/FormFields/vibro-linearscale";
+import CustomDateAndTime from "@/components/FormFields/vibro-datetime";
 
 const FieldRenderer: React.FC<FieldRendererProps> = ({
   control,
@@ -19,8 +22,8 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
   const validationRules = getValidationRules(question);
 
   const renderInput1 = () => {
-    switch (question.input_type) {
-      case "text":
+    switch (question.question_type) {
+      case "short_answer":
         return (
           <Textbox
             control={control}
@@ -34,7 +37,8 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
             label={question.question}
           />
         );
-      case "textarea":
+      case "long_answer":
+      case "title_and_description":
         return (
           <Textarea
             control={control}
@@ -50,22 +54,62 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
         );
       case "dropdown":
         return (
-          <View style={styles.dropdown}>
-            <Text>Checkboxes will be rendered here</Text>
-          </View>
+          <SelectBox
+            control={control}
+            name={fieldName}
+            label={question.question}
+            options={question.options}
+          />
         );
-      case "checkbox":
+      case "checkboxes":
         return (
-          <View style={styles.checkboxContainer}>
-            <Text>Checkboxes will be rendered here</Text>
-          </View>
+          <CustomCheckbox 
+           control={control}
+           name={fieldName}
+           label={question.question}
+           options={question.options}
+          />
         );
-      case "radio":
+      case "multiple_choice":
+        //radio
         return (
-          <View style={styles.radioContainer}>
-            <Text>Radio buttons will be rendered here</Text>
-          </View>
+          <MultiSelectBox
+           control={control}
+           name={fieldName}
+           label={question.question}
+           options={question.options}
+          />
         );
+      case "linear_scale":
+        return (
+          <CustomLinearScale
+            control={control}
+            name="linearScale_242"
+            label="Stage 6 - Question 1 - linear_scale"
+            options={question.options}
+            minValue={question?.min_value }
+            maxValue={question?.max_value }
+            isRequired={question.is_required}
+            rules={{ required: "This field is required" }}
+            error={errors?.linearScale_242}
+          />
+          // <View>
+          //   <Text>hi</Text>
+          // </View>
+        );
+        case "datetime":
+          return (
+            <CustomDateAndTime
+                control={control}
+                name={`answers.${question.id}`}
+                label={question.question}
+                question_type={question.question_type as "date" | "time" | "datetime"}
+                isRequired={question.is_required}
+              />
+            // <View>
+            //   <Text> hi for the date and time</Text>
+            // </View>
+          );
       default:
         return null;
     }

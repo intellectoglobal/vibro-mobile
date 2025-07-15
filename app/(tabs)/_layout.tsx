@@ -14,21 +14,6 @@ const _layout = () => {
       }}
     >
       <Tabs.Screen
-        name="forms"
-        options={{
-          title: "Forms",
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <Icon
-              name="assignment"
-              size={24}
-              color={focused ? "#2662f0" : "#9CA3AF"}
-            />
-          ),
-          tabBarLabelStyle: { fontSize: 10, color: "#2662f0" },
-        }}
-      />
-      <Tabs.Screen
         name="index"
         options={{
           title: "Home",
@@ -41,6 +26,22 @@ const _layout = () => {
             />
           ),
           tabBarLabelStyle: { fontSize: 10, color: "#2662f0" }, // `primary`
+        }}
+      />
+
+      <Tabs.Screen
+        name="forms"
+        options={{
+          title: "Forms",
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <Icon
+              name="assignment"
+              size={24}
+              color={focused ? "#2662f0" : "#9CA3AF"}
+            />
+          ),
+          tabBarLabelStyle: { fontSize: 10, color: "#2662f0" },
         }}
       />
 

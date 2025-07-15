@@ -3,7 +3,7 @@ import axios from "axios";
 
 // const baseUrl = "https://vibro.onrender.com/api/";
 // const baseUrl = "http://localhost:8000/api/";
-const baseUrl = "http://192.168.1.7:8000/api/";
+const baseUrl = "http://192.168.0.103:8000/api/";
 
 const axiosInstance = axios.create({
   baseURL: baseUrl,
@@ -15,7 +15,7 @@ const axiosInstance = axios.create({
 // 🔐 Interceptor to attach token
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTU1ODAxLCJpYXQiOjE3NTIxMzkwMDEsImp0aSI6IjQ5MWYwMzRjMGU3MzRlMjE4MTZiY2NmMDE3ZTdmNjQwIiwidXNlcl9pZCI6MjV9.AdoMXdDz494eVUGXDgyvqa8FOoQ0eaZzrZWh3g2rIVE"
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyNTE4MDQyLCJpYXQiOjE3NTI1MDEyNDIsImp0aSI6IjUwNmI2YWFmNDdkYTRhMTdhZGVjNzk2ZWM2ZTZhNDE1IiwidXNlcl9pZCI6MjV9.jhB4aj-SlO6KtFX0ZmyKYdvx2BmiUbjdvCMual8XyfU"
         if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }

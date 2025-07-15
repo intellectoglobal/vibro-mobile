@@ -28,47 +28,43 @@ type RootDrawerParamList = {
 
 export const Header: React.FC<HeaderProps> = ({
   title,
-  // onMenuPress,
   onBackPress,
   showNotification = true,
   showBack = false,
-  // onNotificationPress,
 }) => {
   const navigation = useNavigation<DrawerNavigationProp<RootDrawerParamList>>();
   const router = useRouter();
+
   return (
-    <SafeAreaView className="bg-primary">
-      <StatusBar barStyle="light-content" className="bg-primary" />
-      <View
-        style={{ paddingBottom: 15 }}
-        className="flex-row items-center justify-between h-14 px-4 bg-primary"
-      >
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563EB" />
+      <View style={styles.container}>
         {showBack ? (
-          <TouchableOpacity onPress={onBackPress} className="p-2">
+          <TouchableOpacity onPress={onBackPress} style={styles.iconButton}>
             <Icon name="arrow-back" size={24} color="#ffffff" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
             onPress={() => navigation.openDrawer()}
-            className="p-2"
+            style={styles.iconButton}
           >
-            <Ionicons name="menu" size={24} color="#fff" />
+            <Ionicons name="menu" size={24} color="#ffffff" />
           </TouchableOpacity>
         )}
 
-        <Text
-          className="left-1/2 -translate-x-1/2 text-lg font-semibold text-white"
-          style={styles.title}
-        >
-          {title}
-        </Text>
-        {showNotification && (
+        <View style={styles.titleWrapper}>
+          <Text style={styles.title}>{title}</Text>
+        </View>
+
+        {showNotification ? (
           <TouchableOpacity
             onPress={() => router.push("/screens/Notification/notification")}
-            className="p-2"
+            style={styles.iconButton}
           >
-            <Ionicons name="notifications-outline" size={24} color="#fff" />
+            <Ionicons name="notifications-outline" size={24} color="#ffffff" />
           </TouchableOpacity>
+        ) : (
+          <View style={styles.iconButton} /> // empty view to balance layout
         )}
       </View>
     </SafeAreaView>
@@ -77,20 +73,32 @@ export const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: "#fff",
+    backgroundColor: "#2563EB",
   },
   container: {
     flexDirection: "row",
     alignItems: "center",
-    height: 56,
     justifyContent: "space-between",
+    height: 56,
     paddingHorizontal: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#2563EB",
+    position: "relative",
   },
   iconButton: {
     padding: 8,
+    zIndex: 1, // ensure it's tappable
+  },
+  titleWrapper: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
-    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#ffffff",
+    textAlign: "center",
   },
 });
