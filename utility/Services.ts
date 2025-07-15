@@ -1,9 +1,9 @@
 // axiosInstance.ts
 import axios from "axios";
 
-// const baseUrl = "https://vibro.onrender.com/api/";
+const baseUrl = "https://vibro.onrender.com/api/";
 // const baseUrl = "http://localhost:8000/api/";
-const baseUrl = "http://192.168.1.7:8000/api/";
+// const baseUrl = "http://192.168.1.7:8000/api/";
 
 const axiosInstance = axios.create({
   baseURL: baseUrl,
