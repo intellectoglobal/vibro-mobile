@@ -6,7 +6,7 @@ import { FlatList, StyleSheet, View } from "react-native";
 import FileList from "../ListItems/FileList";
 import FolderList from "../ListItems/FolderList";
 import * as Api from "@/services";
-import { FOLDER, FORM_DETAILS } from "@/services/constants";
+import { FOLDER, FORMS } from "@/services/constants";
 
 export const DATA = [
   { id: "1", name: "Documents" },
@@ -52,7 +52,8 @@ export default function NewForm() {
   const getOrgFolder = async () => {
     try {
       const response = (await Api.get(FOLDER)) as any;
-      setFolders(response.data || []);
+      console.log("response", response)
+      setFolders(response || []);
     } catch (error: any) {
       console.error("Error Occurred in the getOrgFolder ::", error);
     }
@@ -60,8 +61,9 @@ export default function NewForm() {
 
   const getFolderLessFormsForUser = async () => {
     try {
-      const response = (await Api.get(FORM_DETAILS)) as any;
-      setForms(response.data || []);
+      const response = (await Api.get(FORMS)) as any;
+      console.log("response", response)
+      setForms(response || []);
     } catch (error: any) {
       console.error("Error Occurred in the getOrgFolder ::", error.message);
     }
