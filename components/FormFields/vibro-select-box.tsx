@@ -1,3 +1,4 @@
+import { Option } from "@/types/forms";
 import { Picker } from "@react-native-picker/picker";
 import { useTheme } from "@react-navigation/native";
 import React from "react";
@@ -8,7 +9,8 @@ interface SelectBoxProps {
   control: Control<FieldValues>;
   name: string;
   label?: string;
-  options: { label: string; value: string | number }[];
+  // options: { label: string; value: string | number }[];
+  options: Option[];
   rules?: any;
   placeholder?: string;
   disabled?: boolean;
@@ -55,9 +57,9 @@ const SelectBox: React.FC<SelectBoxProps> = ({
               <Picker.Item label={placeholder} value="" />
               {options.map((option) => (
                 <Picker.Item
-                  key={option.value.toString()}
-                  label={option.label}
-                  value={option.value}
+                  key={option.id.toString()}
+                  label={option.option}
+                  value={option.id}
                 />
               ))}
             </Picker>
@@ -80,7 +82,7 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 8,
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "bold",
   },
   pickerContainer: {
     borderWidth: 1,

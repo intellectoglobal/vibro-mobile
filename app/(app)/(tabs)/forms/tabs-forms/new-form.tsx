@@ -45,8 +45,12 @@ export default function NewForm() {
       params: { folderName: folder.name, folderId: folder.id }, // Example parameter
     });
   };
-  const routeFormsFileList = () => {
-    router.push("/(app)/(tabs)/forms/multi-stage-form");
+  const routeFormsFileList = (forms: any) => {
+    // console.log("forms details ::", forms)
+    router.push({
+      pathname: "/(app)/(tabs)/forms/multi-stage-form",
+      params: { formTitle: forms.title, formId: forms.id }, // Example parameter
+    });
   };
 
   const getOrgFolder = async () => {
@@ -59,19 +63,19 @@ export default function NewForm() {
     }
   };
 
-  const getFolderLessFormsForUser = async () => {
+  const getAllFormsForUser = async () => {
     try {
       const response = (await Api.get(FORMS)) as any;
       console.log("response", response)
       setForms(response || []);
     } catch (error: any) {
-      console.error("Error Occurred in the getOrgFolder ::", error.message);
+      console.error("Error Occurred in the getAllFormsForUser ::", error.message);
     }
   };
 
   useEffect(() => {
     getOrgFolder();
-    getFolderLessFormsForUser();
+    getAllFormsForUser();
   }, []);
 
   return (

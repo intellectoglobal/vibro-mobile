@@ -1,21 +1,18 @@
+import { Option } from "@/types/forms";
 import { useTheme } from "@react-navigation/native";
 import React, { useState } from "react";
 import { Control, Controller, FieldError, FieldValues } from "react-hook-form";
 import {
   FlatList,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { Checkbox } from "react-native-paper"; // or your preferred checkbox component
+import { RadioButton } from "react-native-paper";
 
-interface Option {
-  label: string;
-  value: string | number;
-}
-
-interface MultiSelectBoxProps {
+interface MultiRadioStyleSelectProps {
   control: Control<FieldValues>;
   name: string;
   label?: string;
@@ -27,7 +24,7 @@ interface MultiSelectBoxProps {
   style?: any;
 }
 
-const MultiSelectBox: React.FC<MultiSelectBoxProps> = ({
+const MultiRadioStyleSelect: React.FC<MultiRadioStyleSelectProps> = ({
   control,
   name,
   label,
@@ -39,93 +36,84 @@ const MultiSelectBox: React.FC<MultiSelectBoxProps> = ({
   style,
 }) => {
   const { colors } = useTheme();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <View style={[styles.container, style]}>
+    <View>
       {label && (
         <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
       )}
+      <View style={[styles.container, style]}>
+        <Controller
+          control={control}
+          name={name}
+          rules={rules}
+          defaultValue={[]}
+          render={({ field: { value, onChange } }) => {
+            const selectedValues: (string | number)[] = value || [];
 
-      <Controller
-        control={control}
-        render={({ field: { onChange, value } }) => {
-          const selectedValues = value || [];
+            const toggleItem = (itemId: string | number) => {
+              const newValue = selectedValues.includes(itemId)
+                ? selectedValues.filter((id) => id !== itemId)
+                : [...selectedValues, itemId];
+              onChange(newValue);
+            };
 
-          const toggleItem = (itemValue: string | number) => {
-            const newValue = selectedValues.includes(itemValue)
-              ? selectedValues.filter((v: string | number) => v !== itemValue)
-              : [...selectedValues, itemValue];
-            onChange(newValue);
-          };
+            const selectedLabels = options
+              .filter((opt) => selectedValues.includes(opt.id))
+              .map((opt) => opt.option)
+              .join(", ");
 
-          const selectedLabels = options
-            .filter((opt) => selectedValues.includes(opt.value))
-            .map((opt) => opt.label)
-            .join(", ");
-
-          return (
-            <View>
-              <TouchableOpacity
-                style={[
-                  styles.dropdownButton,
-                  { borderColor: error ? "red" : colors.border },
-                  disabled && styles.disabled,
-                ]}
-                onPress={() => !disabled && setIsOpen(!isOpen)}
-                disabled={disabled}
-              >
-                <Text
+            return (
+              <View>
+                <TouchableOpacity
                   style={[
-                    styles.buttonText,
-                    {
-                      color: selectedLabels ? colors.text : colors?.placeholder,
-                    },
+                    styles.dropdownButton,
+                    { borderColor: error ? "red" : colors.border },
+                    disabled && styles.disabled,
                   ]}
+                  onPress={() => !disabled && setIsOpen(!isOpen)}
                 >
-                  {selectedLabels || placeholder}
-                </Text>
-              </TouchableOpacity>
+                  <Text style={[styles.buttonText, { color: colors.text }]}>
+                    {selectedLabels || placeholder}
+                  </Text>
+                </TouchableOpacity>
 
-              {isOpen && (
-                <View style={[styles.dropdown, { borderColor: colors.border }]}>
-                  <FlatList
-                    data={options}
-                    keyExtractor={(item) => item.value.toString()}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity
-                        style={styles.option}
-                        onPress={() => toggleItem(item.value)}
-                      >
-                        <Checkbox.Android
-                          status={
-                            selectedValues.includes(item.value)
-                              ? "checked"
-                              : "unchecked"
-                          }
-                          onPress={() => toggleItem(item.value)}
-                          color={colors.primary}
-                          disabled={disabled}
-                        />
-                        <Text
-                          style={[styles.optionText, { color: colors.text }]}
-                        >
-                          {item.label}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  />
-                </View>
-              )}
-            </View>
-          );
-        }}
-        name={name}
-        rules={rules}
-        defaultValue={[]}
-      />
+                {isOpen && (
+                  <View style={[styles.dropdown, { borderColor: colors.border }]}>
+                    <ScrollView style={{ maxHeight: 200 }}>
+                      {options.map((item) => {
+                        const selected = selectedValues.includes(item.id);
+                        return (
+                          <TouchableOpacity
+                            key={item.id.toString()}
+                            style={styles.option}
+                            onPress={() => toggleItem(item.id)}
+                          >
+                            <RadioButton
+                              value={item.id.toString()}
+                              status={selected ? "checked" : "unchecked"}
+                              onPress={() => toggleItem(item.id)}
+                              color={colors.primary}
+                              disabled={disabled}
+                            />
+                            <Text style={[styles.optionText, { color: colors.text }]}>
+                              {item.option}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </ScrollView>
 
-      {error && <Text style={styles.errorText}>{error.message}</Text>}
+                  </View>
+                )}
+              </View>
+            );
+          }}
+        />
+
+        {error && <Text style={styles.errorText}>{error.message}</Text>}
+      </View>
     </View>
   );
 };
@@ -133,48 +121,50 @@ const MultiSelectBox: React.FC<MultiSelectBoxProps> = ({
 const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
-    position: "relative",
-    zIndex: 1,
   },
   label: {
-    marginBottom: 8,
+    marginBottom: 10,
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "bold",
   },
   dropdownButton: {
     borderWidth: 1,
-    borderRadius: 4,
-    padding: 12,
-    minHeight: 50,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    minHeight: 48,
     justifyContent: "center",
+    backgroundColor: "#fff",
+    marginBottom: 10,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 15,
   },
   dropdown: {
     borderWidth: 1,
-    borderRadius: 4,
+    borderRadius: 6,
     marginTop: 4,
     maxHeight: 200,
-    backgroundColor: "white",
+    backgroundColor: "#fff",
   },
   option: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
   optionText: {
     marginLeft: 8,
-    fontSize: 16,
+    fontSize: 15,
   },
   disabled: {
-    opacity: 0.5,
+    opacity: 0.6,
   },
   errorText: {
-    color: "red",
-    fontSize: 12,
     marginTop: 4,
+    fontSize: 12,
+    color: "red",
   },
 });
 
-export default MultiSelectBox;
+export default MultiRadioStyleSelect;

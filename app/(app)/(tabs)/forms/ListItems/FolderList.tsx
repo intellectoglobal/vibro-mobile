@@ -14,7 +14,8 @@ const FolderList = (props: ItemsProps) => (
       name="file-directory"
       size={24}
       color="#6b7280"
-      className="mr-4"
+      // className="mr-4"
+      style={{marginRight:6}}
     />
     <Text className="text-base text-gray-900">{props.items.name}</Text>
   </TouchableOpacity>
