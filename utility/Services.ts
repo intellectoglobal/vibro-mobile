@@ -15,10 +15,11 @@ const axiosInstance = axios.create({
 // 🔐 Interceptor to attach token
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTU1ODAxLCJpYXQiOjE3NTIxMzkwMDEsImp0aSI6IjQ5MWYwMzRjMGU3MzRlMjE4MTZiY2NmMDE3ZTdmNjQwIiwidXNlcl9pZCI6MjV9.AdoMXdDz494eVUGXDgyvqa8FOoQ0eaZzrZWh3g2rIVE"
-        if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
+    // const token =
+    //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTU1ODAxLCJpYXQiOjE3NTIxMzkwMDEsImp0aSI6IjQ5MWYwMzRjMGU3MzRlMjE4MTZiY2NmMDE3ZTdmNjQwIiwidXNlcl9pZCI6MjV9.AdoMXdDz494eVUGXDgyvqa8FOoQ0eaZzrZWh3g2rIVE";
+    // if (token) {
+    //   config.headers["Authorization"] = `Bearer ${token}`;
+    // }
     return config;
   },
   (error) => {

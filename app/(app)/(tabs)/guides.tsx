@@ -1,6 +1,6 @@
-import { View, Text } from 'react-native';
-import React from 'react';
-import { Header } from '../../components/Header'; // Adjust path if needed
+import React from "react";
+import { Text, View } from "react-native";
+import { Header } from "../../../components/Header"; // Adjust path if needed
 
 const Guides = () => {
   return (

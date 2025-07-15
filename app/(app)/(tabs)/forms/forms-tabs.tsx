@@ -15,27 +15,9 @@ const TABS = [
 
 const FormsTabs = () => {
   const [activeTab, setActiveTab] = useState("new");
-  //const [content, setContent] = useState("New Content");
 
   const handleTabPress = (tabKey: string) => {
     setActiveTab(tabKey);
-    // Update content based on selected tab
-    // switch (tabKey) {
-    //   case "new":
-    //     setContent("New Content");
-    //     break;
-    //   case "drafts":
-    //     setContent("Drafts Content");
-    //     break;
-    //   case "sent":
-    //     setContent("Sent Content");
-    //     break;
-    //   case "received":
-    //     setContent("Received Content");
-    //     break;
-    //   default:
-    //     setContent("Default Content");
-    // }
   };
 
   return (

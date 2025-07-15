@@ -4,7 +4,6 @@ import authReducer from "../reducer/auth/authSlice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  // Add other reducers here
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

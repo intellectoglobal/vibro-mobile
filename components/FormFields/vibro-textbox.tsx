@@ -16,6 +16,8 @@ interface TextboxProps extends TextInputProps {
   error?: FieldError;
   isRequired?: boolean;
   style?: object;
+  styleLabel?: object;
+  errorLabel?: object;
 }
 
 const Textbox: React.FC<TextboxProps> = ({
@@ -26,11 +28,13 @@ const Textbox: React.FC<TextboxProps> = ({
   error,
   isRequired,
   style,
+  styleLabel,
+  errorLabel,
   ...textInputProps
 }) => (
   <View style={styles.container}>
     {label && (
-      <Text style={styles.label}>
+      <Text style={[styles.label, styleLabel]}>
         {label}
         {isRequired && <Text style={styles.required}> *</Text>}
       </Text>
@@ -49,7 +53,9 @@ const Textbox: React.FC<TextboxProps> = ({
         />
       )}
     />
-    {error && <Text style={styles.errorText}>{error.message}</Text>}
+    {error && (
+      <Text style={[styles.errorText, errorLabel]}>{error.message}</Text>
+    )}
   </View>
 );
 

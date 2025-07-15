@@ -1,35 +1,46 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AuthState, LoginPayload, LoginSuccessPayload } from "./authTypes";
-
-const initialState: AuthState = {
-  token: null,
-  isLoading: false,
-  error: null,
-};
+import { initialState } from "./authTypes";
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    loginRequest: (state, action: PayloadAction<LoginPayload>) => {
-      state.isLoading = true;
+    checkRefetchToken: (state, action: PayloadAction<any>) => {
+      state.loading = true;
       state.error = null;
     },
-    loginSuccess: (state, action: PayloadAction<LoginSuccessPayload>) => {
-      state.token = action.payload.token;
-      state.isLoading = false;
-      state.error = null;
+    refetchTokenSuccess: (state, action: PayloadAction<any>) => {
+      return {
+        ...state,
+        loading: false,
+        ...action?.payload,
+      };
     },
-    loginFailure: (state, action: PayloadAction<string>) => {
-      state.isLoading = false;
-      state.error = action.payload;
+    refetchTokenSuccessFailure: (state, action: PayloadAction<any>) => {
+      state.loading = false;
+      state.error = action?.payload;
     },
-    logout: (state) => {
-      state.token = null;
+    logoutRequest: (state) => {
+      return {
+        ...state,
+        ...initialState,
+        loading: true,
+      };
+    },
+    logoutSuccess: (state) => {
+      return {
+        ...initialState,
+      };
     },
   },
 });
 
-export const { loginRequest, loginSuccess, loginFailure, logout } =
-  authSlice.actions;
+export const {
+  checkRefetchToken,
+  refetchTokenSuccess,
+  refetchTokenSuccessFailure,
+  logoutRequest,
+  logoutSuccess,
+} = authSlice.actions;
+
 export default authSlice.reducer;

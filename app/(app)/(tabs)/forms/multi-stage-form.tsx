@@ -1,14 +1,14 @@
 import { Header } from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import StepIndicator from "@/components/StepIndicator";
+import { Stage } from "@/types/forms";
 import { router } from "expo-router";
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import StageForm from "../../screens/forms/";
+import StageForm from "../../../screens/forms";
 import stages from "./ListItems/mockData";
-import { Stage } from "@/types/forms";
 
-const stagesData:Stage[] = [
+const stagesData: Stage[] = [
   {
     name: "Personal Information",
     order: 1,

@@ -5,7 +5,8 @@ import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import FileList from "../ListItems/FileList";
 import FolderList from "../ListItems/FolderList";
-import axiosInstance from "@/utility/Services";
+import * as Api from "@/services";
+import { FOLDER, FORM_DETAILS } from "@/services/constants";
 
 export const DATA = [
   { id: "1", name: "Documents" },
@@ -40,32 +41,27 @@ export default function NewForm() {
 
   const routeFormsFolder = (folder: any) => {
     router.push({
-      pathname: "/(tabs)/forms/folder-list",
-      params: { folderName: folder.name, folderId: folder.id  }, // Example parameter
+      pathname: "/(app)/(tabs)/forms/folder-list",
+      params: { folderName: folder.name, folderId: folder.id }, // Example parameter
     });
   };
   const routeFormsFileList = () => {
-    router.push({
-      pathname: "/(tabs)/forms/multi-stage-form",
-      // params: { folderName: "Documents" }, // Example parameter
-    });
+    router.push("/(app)/(tabs)/forms/multi-stage-form");
   };
 
   const getOrgFolder = async () => {
     try {
-      const response = await axiosInstance.get("/folder/");
-      // console.log("folders ::", response.data);
-      setFolders(response.data);
+      const response = (await Api.get(FOLDER)) as any;
+      setFolders(response.data || []);
     } catch (error: any) {
-      console.error("Error Occurred in the getOrgFolder ::", error.message);
+      console.error("Error Occurred in the getOrgFolder ::", error);
     }
   };
 
   const getFolderLessFormsForUser = async () => {
     try {
-      const response = await axiosInstance.get("/form/form-details/");
-      // console.log("Forms ::", response.data);
-      setForms(response.data);
+      const response = (await Api.get(FORM_DETAILS)) as any;
+      setForms(response.data || []);
     } catch (error: any) {
       console.error("Error Occurred in the getOrgFolder ::", error.message);
     }
@@ -73,9 +69,8 @@ export default function NewForm() {
 
   useEffect(() => {
     getOrgFolder();
-    getFolderLessFormsForUser()
+    getFolderLessFormsForUser();
   }, []);
-
 
   return (
     <>

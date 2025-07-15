@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import FileList from "./ListItems/FileList";
-import { useLocalSearchParams, useSearchParams } from "expo-router/build/hooks";
+import { useLocalSearchParams } from "expo-router/build/hooks";
 import axiosInstance from "@/utility/Services";
 import { Form } from "./tabs-forms/new-form";
 
@@ -58,7 +58,7 @@ export default function FolderList() {
 
   const routeFormsFileList = () => {
     router.push({
-      pathname: "/(tabs)/forms/multi-stage-form",
+      pathname: "/(app)/(tabs)/forms/multi-stage-form",
       // params: { folderName: "Documents" }, // Example parameter
     });
   };
@@ -66,7 +66,7 @@ export default function FolderList() {
   useEffect(() => {
     getFolderFormsForUser();
   }, []);
-  
+
   return (
     <>
       <Header
