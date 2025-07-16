@@ -1,8 +1,15 @@
 import Accordion from "@/components/Accordion";
 import { ALL_FORMS, FOLDERS } from "@/constants/forms";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  View,
+  Text,
+  RefreshControl,
+} from "react-native";
 import FileList from "../ListItems/FileList";
 import FolderList from "../ListItems/FolderList";
 import * as Api from "@/services";
@@ -38,18 +45,21 @@ export interface Form {
 export default function NewForm() {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [forms, setForms] = useState<Form[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formRefreshing, setFormRefreshing] = useState(false);
+  const [folderRefreshing, setFolderRefreshing] = useState(false);
 
   const routeFormsFolder = (folder: any) => {
     router.push({
       pathname: "/(app)/(tabs)/forms/folder-list",
-      params: { folderName: folder.name, folderId: folder.id }, // Example parameter
+      params: { folderName: folder.name, folderId: folder.id },
     });
   };
-  const routeFormsFileList = (forms: any) => {
-    // console.log("forms details ::", forms)
+
+  const routeFormsFileList = (form: any) => {
     router.push({
       pathname: "/(app)/(tabs)/forms/multi-stage-form",
-      params: { formTitle: forms.title, formId: forms.id }, // Example parameter
+      params: { formTitle: form.title, formId: form.id },
     });
   };
 
@@ -73,16 +83,68 @@ export default function NewForm() {
     }
   };
 
+    const fetchData = async () => {
+    try {
+      await getOrgFolder()
+      await getAllFormsForUser()
+    } catch (error: any) {
+      console.error("Error while fetching data:", error.message);
+    } finally {
+      setLoading(false); // ✅ Important fix
+    }
+  };
+
   useEffect(() => {
-    getOrgFolder();
-    getAllFormsForUser();
+    fetchData()
   }, []);
 
+  const onFolderRefresh = useCallback(async () => {
+    setFolderRefreshing(true);
+    await getOrgFolder()
+    setFolderRefreshing(false);
+  }, []);
+
+  const onFormRefresh = useCallback(async () => {
+    setFormRefreshing(true);
+    await getAllFormsForUser()
+    setFormRefreshing(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2196f3" />
+      </View>
+    );
+  }
+
   return (
-    <>
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <Accordion
+        title={FOLDERS}
+        containerStyle={styles.accordionContainer}
+        headerStyle={styles.accordionHeader}
+        titleStyle={styles.accordionTitle}
+        iconColor="#6200ee"
+        expanded={true}
+        onPress={(expanded) => console.log("Accordion expanded:", expanded)}
+      >
+          <FlatList
+            style={{ maxHeight: 125 }}
+            data={folders}
+            keyExtractor={(item) => item.id}
+            refreshing={folderRefreshing} 
+            onRefresh={onFolderRefresh}
+            renderItem={({ item }) => (
+              <FolderList items={item} onClick={routeFormsFolder} />
+            )}
+            ListEmptyComponent={<Text style={styles.emptyText}>You don’t have any assigned folders.</Text>}
+          />
+      </Accordion>
+
+      <View style={{ flex: 3, marginBottom: 35 }}>
         <Accordion
-          title={FOLDERS}
+          title={ALL_FORMS}
           containerStyle={styles.accordionContainer}
           headerStyle={styles.accordionHeader}
           titleStyle={styles.accordionTitle}
@@ -90,39 +152,20 @@ export default function NewForm() {
           expanded={true}
           onPress={(expanded) => console.log("Accordion expanded:", expanded)}
         >
-          <FlatList
-            style={{ maxHeight: 125 }}
-            data={folders}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <FolderList items={item} onClick={routeFormsFolder} />
-            )}
-          />
-        </Accordion>
-        <View style={{ flex: 3, marginBottom: 35 }}>
-          <Accordion
-            title={ALL_FORMS}
-            containerStyle={styles.accordionContainer}
-            headerStyle={styles.accordionHeader}
-            titleStyle={styles.accordionTitle}
-            iconColor="#6200ee"
-            expanded={true}
-            onPress={(expanded) => console.log("Accordion expanded:", expanded)}
-          >
             <FlatList
               data={forms}
+              keyExtractor={(item) => item.id}
               contentContainerStyle={{ paddingBottom: 50 }}
-              showsVerticalScrollIndicator={false}
-              showsHorizontalScrollIndicator={false}
+              refreshing={formRefreshing}
+              onRefresh={onFormRefresh}
               renderItem={({ item }) => (
                 <FileList items={item} onClick={routeFormsFileList} />
               )}
+              ListEmptyComponent={<Text style={styles.emptyText}>You don’t have any assigned forms.</Text>}
             />
-          </Accordion>
-        </View>
+        </Accordion>
       </View>
-    </>
+    </View>
   );
 }
 
@@ -130,7 +173,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 5,
-    //backgroundColor: "#f5f5f5",
   },
   accordionContainer: {
     marginBottom: 10,
@@ -142,9 +184,15 @@ const styles = StyleSheet.create({
     color: "#6200ee",
     fontWeight: "bold",
   },
-  contentText: {
-    fontSize: 14,
-    marginBottom: 8,
-    color: "#333",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    padding: 15,
+    textAlign: "center",
+    color: "gray",
+    fontStyle: "italic",
   },
 });
