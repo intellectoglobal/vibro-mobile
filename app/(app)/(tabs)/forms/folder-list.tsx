@@ -49,7 +49,7 @@ export default function FolderList() {
 
   const getFolderFormsForUser = async () => {
     try {
-      const response = await api.get(`${ASSIGNEDFOLDERFORMS}${folderId}/`);
+      const response = await api.get(`/user/assigned-forms/${folderId}/`);
       console.log("Forms of the folder ::", response.data.forms);
       setForms(response.data.forms);
     } catch (error: any) {
