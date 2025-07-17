@@ -17,15 +17,15 @@ const StageForm: React.FC<MultiStageFormProps> = ({
   const methods = useForm();
 
 //for prod 
-  // useEffect(() => {
-  //   const initiallyEnabled = stages.map((stage) => stage.id); // Enable all stages initially or change logic if needed
-  //   setEnabledStages(initiallyEnabled.length > 0 ? [initiallyEnabled[0]] : []);
-  // }, [stages]);
-//for testing
   useEffect(() => {
-    const initiallyEnabled = stages.map((stage) => stage.id);
-    setEnabledStages(initiallyEnabled); // Enables all stages for testing
+    const initiallyEnabled = stages.map((stage) => stage.id); // Enable all stages initially or change logic if needed
+    setEnabledStages(initiallyEnabled.length > 0 ? [initiallyEnabled[0]] : []);
   }, [stages]);
+//for testing
+  // useEffect(() => {
+  //   const initiallyEnabled = stages.map((stage) => stage.id);
+  //   setEnabledStages(initiallyEnabled); // Enables all stages for testing
+  // }, [stages]);
 
 
 
@@ -64,8 +64,8 @@ const StageForm: React.FC<MultiStageFormProps> = ({
             key={`stage-${stage.id}`} 
             stage={stage}
             index={index}
-            // isActive={activeSections.includes(stage.id)}
-            isActive={true}
+            isActive={activeSections.includes(stage.id)}
+            // isActive={true}
             isEnabled={enabledStages.includes(stage.id)}
             isCompleted={completedStages.includes(stage.id)}
             isLastStage={index === stages.length - 1}

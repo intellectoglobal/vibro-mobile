@@ -104,6 +104,8 @@ export interface Option {
   audit_info: any | null; // Adjust type as needed if structure is known
   audit_group: any | null; // Adjust type as needed if structure is known
   form: number;
+  name?: string;
+  username?: string
 }
 
 export interface Logic {

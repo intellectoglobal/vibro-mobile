@@ -59,10 +59,10 @@ export default function FolderList() {
     }
   };
 
-  const routeFormsFileList = () => {
+  const routeFormsFileList = (form: any) => {
     router.push({
       pathname: "/(app)/(tabs)/forms/multi-stage-form",
-      // params: { folderName: "Documents" }, // Example parameter
+      params: { formTitle: form.title, formId: form.id },
     });
   };
 

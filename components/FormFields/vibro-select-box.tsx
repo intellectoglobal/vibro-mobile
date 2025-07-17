@@ -1,7 +1,8 @@
+import api from "@/services";
 import { Option } from "@/types/forms";
 import { Picker } from "@react-native-picker/picker";
 import { useTheme } from "@react-navigation/native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Control, Controller, FieldError, FieldValues } from "react-hook-form";
 import { Platform, StyleSheet, Text, View } from "react-native";
 
@@ -9,11 +10,11 @@ interface SelectBoxProps {
   control: Control<FieldValues>;
   name: string;
   label?: string;
-  // options: { label: string; value: string | number }[];
-  options: Option[];
+  options: Option[]; // fallback static options
   rules?: any;
   placeholder?: string;
   disabled?: boolean;
+  question_type?: "user" | "division" | "sub_division" | "location" | "dropdown";
   error?: FieldError;
   style?: any;
 }
@@ -26,16 +27,65 @@ const SelectBox: React.FC<SelectBoxProps> = ({
   rules,
   placeholder = "Select an option",
   disabled = false,
+  question_type,
   error,
   style,
 }) => {
   const { colors } = useTheme();
+  const [dropOptions, setDropOptions] = useState<Option[]>(options);
+
+  // Unified function to load dropdown options based on type
+  const fetchOptions = async () => {
+    try {
+      let response;
+      let mapped: Option[] = [];
+
+      switch (question_type) {
+        case "user":
+          response = await api.get("/users/list");
+          mapped = response?.data.map((item: any) => ({
+            id: item.id,
+            option: `${item.first_name ?? ""} ${item.last_name ?? ""}`.trim(),
+          }));
+          break;
+
+        case "division":
+        case "sub_division":
+          response = await api.get("/division/");
+          mapped = response?.data.map((item: any) => ({
+            id: item.id,
+            option: item.name ?? "Unnamed Division",
+          }));
+          break;
+
+        case "location":
+          response = await api.get("/location/");
+          mapped = response?.data.map((item: any) => ({
+            id: item.id,
+            option: item.name ?? "Unnamed Location",
+          }));
+          break;
+
+        default:
+          mapped = options; 
+          break;
+      }
+
+      setDropOptions(mapped);
+    } catch (error: any) {
+      console.log("❌ Failed to fetch dropdown options:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (question_type) {
+      fetchOptions();
+    }
+  }, [question_type]);
 
   return (
     <View style={[styles.container, style]}>
-      {label && (
-        <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-      )}
+      {label && <Text style={[styles.label, { color: colors.text }]}>{label}</Text>}
 
       <Controller
         control={control}
@@ -55,12 +105,8 @@ const SelectBox: React.FC<SelectBoxProps> = ({
               dropdownIconColor={colors.text}
             >
               <Picker.Item label={placeholder} value="" />
-              {options.map((option) => (
-                <Picker.Item
-                  key={option.id.toString()}
-                  label={option.option}
-                  value={option.id}
-                />
+              {dropOptions.map((option) => (
+                <Picker.Item key={option.id.toString()} label={option.option} value={option.id} />
               ))}
             </Picker>
           </View>
@@ -89,12 +135,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: "hidden",
     ...Platform.select({
-      ios: {
-        height: 100,
-      },
-      android: {
-        height: 50,
-      },
+      ios: { height: 100 },
+      android: { height: 50 },
     }),
   },
   picker: {

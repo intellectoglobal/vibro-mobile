@@ -4,10 +4,11 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Modal,
+  Platform,
+  SafeAreaView,
 } from "react-native";
 import { Controller, Control, FieldValues, FieldError } from "react-hook-form";
-// import DatePicker from "react-native-date-picker";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface DateTimeProps {
   control: Control<FieldValues>;
@@ -17,8 +18,9 @@ interface DateTimeProps {
   disabled?: boolean;
   error?: FieldError;
   style?: any;
-  question_type: "date" | "time" | "datetime"; // required to determine picker mode
+  question_type: "date" | "time" | "datetime";
   isRequired?: boolean;
+  initialDate?: Date; // New prop for initial date
 }
 
 const CustomDateAndTime: React.FC<DateTimeProps> = ({
@@ -31,73 +33,90 @@ const CustomDateAndTime: React.FC<DateTimeProps> = ({
   style,
   question_type,
   isRequired = false,
+  initialDate = new Date(),
 }) => {
-  const [open, setOpen] = useState(false);
-
-  const getMode = () => {
-    if (question_type === "datetime") return "datetime";
-    return question_type;
+  const [show, setShow] = useState(false);
+  
+  // Determine picker mode based on question_type
+  const getPickerMode = () => {
+    switch (question_type) {
+      case "date":
+        return "date";
+      case "time":
+        return "time";
+      case "datetime":
+        return Platform.OS === "ios" ? "datetime" : "date";
+      default:
+        return "date";
+    }
   };
 
-  const formatDisplay = (date: Date | null) => {
-    if (!date) return "";
-    const options: Intl.DateTimeFormatOptions =
-      question_type === "date"
-        ? { year: "numeric", month: "short", day: "numeric" }
-        : question_type === "time"
-        ? { hour: "2-digit", minute: "2-digit" }
-        : {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          };
-    return new Intl.DateTimeFormat("en-IN", options).format(date);
+  const formatDisplayDate = (date: Date | undefined) => {
+    if (!date) return placeholder;
+    
+    switch (question_type) {
+      case "date":
+        return date.toLocaleDateString();
+      case "time":
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      case "datetime":
+        return date.toLocaleString();
+      default:
+        return date.toLocaleString();
+    }
   };
 
   return (
-    <View style={[styles.container, style]}>
-      {label && (
-        <Text style={styles.label}>
-          {label}
-          {isRequired && <Text style={styles.required}> *</Text>}
-        </Text>
-      )}
+    <Controller
+      control={control}
+      name={name}
+      render={({ field: { onChange, value } }) => (
+        <View style={[styles.container, style]}>
+          {label && (
+            <Text style={styles.label}>
+              {label}
+              {isRequired && <Text style={styles.required}> *</Text>}
+            </Text>
+          )}
 
-      {/* <Controller
-        control={control}
-        name={name}
-        defaultValue={null}
-        render={({ field: { onChange, value } }) => (
-          <>
-            <TouchableOpacity
-              onPress={() => !disabled && setOpen(true)}
-              style={[styles.input, error && styles.inputError, disabled && styles.disabled]}
-              disabled={disabled}
-            >
-              <Text style={styles.inputText}>
-                {value ? formatDisplay(new Date(value)) : placeholder}
-              </Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.input,
+              disabled && styles.disabled,
+              error && styles.inputError,
+            ]}
+            onPress={() => !disabled && setShow(true)}
+            disabled={disabled}
+          >
+            <Text style={styles.inputText}>
+              {formatDisplayDate(value || initialDate)}
+            </Text>
+          </TouchableOpacity>
 
-            <DatePicker
-              modal
-              open={open}
-              mode={getMode()}
-              date={value ? new Date(value) : new Date()}
-              onConfirm={(selectedDate:any) => {
-                setOpen(false);
-                onChange(selectedDate.toISOString());
+          {show && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={value || initialDate}
+              mode={getPickerMode()}
+              is24Hour={true}
+              onChange={(event, selectedDate) => {
+                setShow(Platform.OS === "ios");
+                if (selectedDate) {
+                  onChange(selectedDate);
+                  // For datetime on Android, show time picker after date
+                  if (question_type === "datetime" && Platform.OS === "android" && event.type === "set" && getPickerMode() === "date") {
+                    setShow(true);
+                    setTimeout(() => setShow(true), 100);
+                  }
+                }
               }}
-              onCancel={() => setOpen(false)}
             />
-          </>
-        )}
-      /> */}
+          )}
 
-      {error && <Text style={styles.error}>{error.message}</Text>}
-    </View>
+          {error && <Text style={styles.error}>{error.message}</Text>}
+        </View>
+      )}
+    />
   );
 };
 

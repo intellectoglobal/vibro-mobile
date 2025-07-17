@@ -1,10 +1,12 @@
 /* eslint-disable import/no-named-as-default-member */
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { SecureStoreKeys, SecureStoreService } from "./secureStore";
+import store from "@/store";
+import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
 
 // Configure your base API URL
 const BASE_URL = "https://vibro.onrender.com/api";
-// const BASE_URL = "http://192.168.0.103:8000/api";
+// const BASE_URL = "http://192.168.0.107:8000/api";
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
@@ -55,7 +57,8 @@ api.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
+  async (error) => {
+    const res = error.response
     if (axios.isAxiosError(error)) {
       if (__DEV__) {
         console.error("❌ [API ERROR]", {
@@ -65,6 +68,23 @@ api.interceptors.response.use(
           data: error.response?.data,
         });
       }
+       // 🔒 Handle expired token
+    if (
+      res?.data?.code === "token_not_valid" &&
+      res?.data?.messages?.some((msg: any) =>
+        msg.message === "Token is invalid or expired"
+      )
+    ) {
+
+      store.dispatch(logoutRequest());
+
+      return Promise.reject({
+        message: "Session expired. Redirecting to login.",
+        status: 401,
+        data: res.data,
+        isAxiosError: true,
+      });
+    }
 
       return Promise.reject({
         message: error.response?.data?.message || error.message,

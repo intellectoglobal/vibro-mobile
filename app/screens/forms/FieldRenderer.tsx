@@ -1,14 +1,22 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
-import {MultiSelectBox, SelectBox, Textarea, Textbox } from "@/components/FormFields";
+import {
+  MultiSelectBox,
+  SelectBox,
+  Textarea,
+  Textbox,
+} from "@/components/FormFields";
 import styles from "./styles";
 
+import CustomCheckbox from "@/components/FormFields/vibro-checkbox";
+import CustomDateAndTime from "@/components/FormFields/vibro-datetime";
+import CustomLinearScale from "@/components/FormFields/vibro-linearscale";
 import { FieldRendererProps } from "@/types/forms";
 import getValidationRules from "./validation";
-import CustomCheckbox from "@/components/FormFields/vibro-checkbox";
-import CustomLinearScale from "@/components/FormFields/vibro-linearscale";
-import CustomDateAndTime from "@/components/FormFields/vibro-datetime";
+import CustomSignature from "@/components/FormFields/vibro-signature";
+import CustomMediaUpload from "@/components/FormFields/vibro-upload";
+import CustomQRScanner from "@/components/FormFields/vibro-qr";
 
 const FieldRenderer: React.FC<FieldRendererProps> = ({
   control,
@@ -52,6 +60,10 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
             label={question.question}
           />
         );
+      case "user":
+      case "division":
+      case "sub_division":
+      case "location":
       case "dropdown":
         return (
           <SelectBox
@@ -59,25 +71,26 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
             name={fieldName}
             label={question.question}
             options={question.options}
+            question_type={question.question_type}
           />
         );
       case "checkboxes":
         return (
-          <CustomCheckbox 
-           control={control}
-           name={fieldName}
-           label={question.question}
-           options={question.options}
+          <CustomCheckbox
+            control={control}
+            name={fieldName}
+            label={question.question}
+            options={question.options}
           />
         );
       case "multiple_choice":
         //radio
         return (
           <MultiSelectBox
-           control={control}
-           name={fieldName}
-           label={question.question}
-           options={question.options}
+            control={control}
+            name={fieldName}
+            label={question.question}
+            options={question.options}
           />
         );
       case "linear_scale":
@@ -87,8 +100,8 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
             name="linearScale_242"
             label="Stage 6 - Question 1 - linear_scale"
             options={question.options}
-            minValue={question?.min_value }
-            maxValue={question?.max_value }
+            minValue={question?.min_value}
+            maxValue={question?.max_value}
             isRequired={question.is_required}
             rules={{ required: "This field is required" }}
             error={errors?.linearScale_242}
@@ -97,19 +110,53 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
           //   <Text>hi</Text>
           // </View>
         );
-        case "datetime":
-          return (
-            <CustomDateAndTime
-                control={control}
-                name={`answers.${question.id}`}
-                label={question.question}
-                question_type={question.question_type as "date" | "time" | "datetime"}
-                isRequired={question.is_required}
-              />
-            // <View>
-            //   <Text> hi for the date and time</Text>
-            // </View>
-          );
+      case "date":
+      case "time":
+      case "datetime":
+        return (
+          <CustomDateAndTime
+            control={control}
+            name={`answers.${question.id}`}
+            label={question.question}
+            question_type={
+              question.question_type as "date" | "time" | "datetime"
+            }
+            isRequired={question.is_required}
+          />
+          // <View>
+          //   <Text> hi for the date and time</Text>
+          // </View>
+        );
+      case "signature":
+        return (
+          <CustomSignature
+            control={control}
+            name={fieldName}
+            label={question.question}
+          />
+        );
+      case "upload_image":
+      case "upload_video":
+      case "upload_file":
+        return (
+          <View>
+            <CustomMediaUpload
+              control={control}
+              name={fieldName}
+              label={question.question}
+              question_type={question.question_type}
+            />
+          </View>
+        );
+      case "qr_code":
+        return (
+          <CustomQRScanner
+            control={control}
+            name={fieldName}
+            label={question.question}
+          />
+          // <View></View>
+        );
       default:
         return null;
     }
