@@ -1,0 +1,32 @@
+ switch (question.question_type) {
+    case 'location':
+      return <LocationField {...fieldProps} />;
+    case 'division':
+    case 'sub_division':
+      return <DivisionField {...fieldProps} />;
+    case 'dropdown':
+      return <DropdownField {...fieldProps} />;
+    case 'short_answer':
+    case 'long_answer':
+      return <TextInputField {...fieldProps} />;
+    case 'date':
+      return <DateField {...fieldProps} />;
+    case 'time':
+      return <TimeField {...fieldProps} />;
+    case 'datetime':
+      return <DateTimeField {...fieldProps} />;
+    case 'checkboxes':
+      return <CheckboxField {...fieldProps} />;
+    case 'multiple_choice':
+      return <MultipleChoiceField {...fieldProps} />;
+    case 'linear_scale':
+      return <LinearScaleField {...fieldProps} />;
+    case 'upload_image':
+    case 'upload_file':
+    case 'upload_video':
+      return <UploadField {...fieldProps} />;
+    case 'signature':
+      return <SignatureField {...fieldProps} />;
+    default:
+      return <TextInputField {...fieldProps} />;
+  }
