@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     minHeight: 100,
   },
   questionContainer: {
-    marginBottom: 16,
+    marginBottom: 5,
   },
   questionText: {
     fontSize: 14,

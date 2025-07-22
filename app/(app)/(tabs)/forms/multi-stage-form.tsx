@@ -2,63 +2,31 @@ import { Header } from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import StepIndicator from "@/components/StepIndicator";
 import { Stage } from "@/types/forms";
-import { router } from "expo-router";
-import React from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import StageForm from "../../../screens/forms";
-import stages from "./ListItems/mockData";
-
-const stagesData: Stage[] = [
-  {
-    name: "Personal Information",
-    order: 1,
-    isStateEnable: true,
-    questions: [
-      {
-        id: "name",
-        question: "Full Name",
-        question_type: "short_answer",
-        input_type: "text",
-        is_required: true,
-        validation: {
-          minLength: {
-            value: 3,
-            message: "Name must be at least 3 characters",
-          },
-        },
-      },
-      {
-        id: "email",
-        question: "Email Address",
-        question_type: "short_answer",
-        input_type: "text",
-        is_required: true,
-        validation: {
-          pattern: {
-            value: /^\S+@\S+$/i,
-            message: "Enter a valid email address",
-          },
-        },
-      },
-    ],
-  },
-  {
-    name: "Additional Details",
-    order: 2,
-    isStateEnable: false,
-    questions: [
-      {
-        id: "bio",
-        question: "About You",
-        question_type: "long_answer",
-        input_type: "textarea",
-        is_required: true,
-      },
-    ],
-  },
-];
+import { stagesData } from "@/app/screens/forms/stageData";
+import api from "@/services";
 
 export default function MultiStageForm() {
+  const { formTitle, formId } = useLocalSearchParams();
+  const [stage, setStage] = useState<Stage[]>([]);
+  console.log("forms Details ::", formTitle, formId);
+
+  const getFormStages = async(formId: number) => {
+    try {
+      const response = await api.get(`form/${formId}/`)
+      console.log("response ::", response.data.stages)
+      setStage(response.data.stages)
+    } catch(error:any) {
+      console.error("Error Occurred in the getFormStages ::", error.message)
+    }
+  }
+
+  useEffect(() => {
+    getFormStages(Number(formId))
+  },[formId])
   return (
     <>
       <Header
@@ -70,14 +38,14 @@ export default function MultiStageForm() {
       />
       <View style={styles.container}>
         <View style={styles.header}>
-          <StepIndicator steps={stages} currentStep={0} />
+          <StepIndicator steps={stage} currentStep={0} />
         </View>
         <View style={{ marginBottom: 16 }}>
           <SearchBar placeholder="Search..." />
         </View>
         <StageForm
-          stages={stagesData}
-          stageLen={stagesData.length}
+          stages={stage}
+          stageLen={stage.length}
           onSubmit={() => {}}
         />
         {/* Uncomment the FlatList when you have the FileList component ready */}

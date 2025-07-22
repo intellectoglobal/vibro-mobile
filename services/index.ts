@@ -1,43 +1,91 @@
 /* eslint-disable import/no-named-as-default-member */
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { SecureStoreKeys, SecureStoreService } from "./secureStore";
+import store from "@/store";
+import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
 
 // Configure your base API URL
-const BASE_URL = "https://vibro.onrender.com/api/";
-// const BASE_URL = "http://192.168.0.108:8000/api/";
+const BASE_URL = "https://vibro.onrender.com/api";
+// const BASE_URL = "http://192.168.0.107:8000/api";
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000, // 10 seconds timeout
+  timeout: 20000, // 10 seconds timeout
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Add request interceptor for auth token or other headers
+// Request interceptor
 api.interceptors.request.use(
   async (config) => {
-    // You can modify the config here (e.g., add auth token)
-    const authInfo = (await SecureStoreService?.get(
-      SecureStoreKeys.AUTH_INFO
-    )) as any;
-    if (authInfo && authInfo?.isAuthenticated) {
-      config.headers.Authorization = `Bearer ${authInfo?.access}`;
+    const authInfo = (await SecureStoreService?.get(SecureStoreKeys.AUTH_INFO)) as any;
+    if (authInfo?.isAuthenticated) {
+      config.headers.Authorization = `Bearer ${authInfo.access}`;
     }
+
+    if (__DEV__) {
+      console.log("📤 [API REQUEST]", {
+        url: `${config.baseURL ?? ''}${config.url ?? ''}`,
+        method: config.method,
+        headers: config.headers,
+        data: config.data,
+        params: config.params,
+      });
+    }
+
     return config;
   },
   (error) => {
+    if (__DEV__) {
+      console.error("❌ [REQUEST ERROR]", error);
+    }
     return Promise.reject(error);
   }
 );
 
-// Add response interceptor for error handling
+// Response interceptor
 api.interceptors.response.use(
-  (response: AxiosResponse) => response,
-  (error: any) => {
+  (response) => {
+    if (__DEV__) {
+      console.log("📥 [API RESPONSE]", {
+        url: `${response.config.baseURL ?? ''}${response.config.url ?? ''}`,
+        status: response.status,
+        data: response.data,
+      });
+    }
+    return response;
+  },
+  async (error) => {
+    const res = error.response
     if (axios.isAxiosError(error)) {
-      // Transform all API errors here
+      if (__DEV__) {
+        console.error("❌ [API ERROR]", {
+          url: `${error.config?.baseURL ?? ''}${error.config?.url ?? ''}`,
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+        });
+      }
+       // 🔒 Handle expired token
+    if (
+      res?.data?.code === "token_not_valid" &&
+      res?.data?.messages?.some((msg: any) =>
+        msg.message === "Token is invalid or expired"
+      )
+    ) {
+
+      store.dispatch(logoutRequest());
+
+      return Promise.reject({
+        message: "Session expired. Redirecting to login.",
+        status: 401,
+        data: res.data,
+        isAxiosError: true,
+      });
+    }
+
       return Promise.reject({
         message: error.response?.data?.message || error.message,
         status: error.response?.status,
@@ -49,13 +97,7 @@ api.interceptors.response.use(
   }
 );
 
-/**
- * GET request
- * @param endpoint - The API endpoint
- * @param params - Query parameters
- * @param config - Additional axios config
- * @returns Promise with response data
- */
+// GET request
 export const get = async <T>(
   endpoint: string,
   params?: Record<string, any>,
@@ -69,13 +111,7 @@ export const get = async <T>(
   }
 };
 
-/**
- * POST request
- * @param endpoint - The API endpoint
- * @param data - Request body data
- * @param config - Additional axios config
- * @returns Promise with response data
- */
+// POST request
 export const post = async <T>(
   endpoint: string,
   data?: Record<string, any>,
@@ -89,13 +125,7 @@ export const post = async <T>(
   }
 };
 
-/**
- * PUT request
- * @param endpoint - The API endpoint
- * @param data - Request body data
- * @param config - Additional axios config
- * @returns Promise with response data
- */
+// PUT request
 export const put = async <T>(
   endpoint: string,
   data?: Record<string, any>,
@@ -109,12 +139,7 @@ export const put = async <T>(
   }
 };
 
-/**
- * DELETE request
- * @param endpoint - The API endpoint
- * @param config - Additional axios config
- * @returns Promise with response data
- */
+// DELETE request
 export const del = async <T>(
   endpoint: string,
   config?: AxiosRequestConfig
@@ -127,5 +152,5 @@ export const del = async <T>(
   }
 };
 
-// Export the configured axios instance in case needed directly
+// Export the configured axios instance
 export default api;

@@ -55,7 +55,7 @@ const Textarea: React.FC<TextareaProps> = ({
 );
 
 const styles = StyleSheet.create({
-  container: { marginVertical: 8 },
+  container: { marginVertical: 8, gap:10 },
   label: { marginBottom: 4, fontWeight: "bold" },
   textarea: {
     borderWidth: 1,

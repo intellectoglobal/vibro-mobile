@@ -41,4 +41,5 @@ app-example
 
 expo-env.d.ts
 android
+.idea/
 # @end expo-cli
