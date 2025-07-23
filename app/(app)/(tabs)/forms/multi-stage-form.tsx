@@ -37,13 +37,13 @@ export default function MultiStageForm() {
 
   return (
     <>
-      <Header
-        title={formTitle}
+      {/* <Header
+        title={"Forms Stage"}
         showBack
         onBackPress={() => {
           router.back();
         }}
-      />
+      /> */}
       <View style={styles.container}>
         <View style={{ marginBottom: 16 }}>
           <SearchBar placeholder="Search..." />

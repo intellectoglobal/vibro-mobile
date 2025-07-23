@@ -50,8 +50,8 @@ export default function LoginScreen() {
           <View style={styles.viewContainer}>
             <View style={styles.circularContainer}>
               <Text style={styles.largeBoldText}>V</Text>
-              <View style={styles.circleBadgeOne} />
-              <View style={styles.circleBadgeTwo} />
+              {/* <View style={styles.circleBadgeOne} />
+              <View style={styles.circleBadgeTwo} /> */}
             </View>
             <Text style={styles.headingText}>Welcome to Vibro</Text>
             <Text style={styles.headingSmallText}>Login with your email</Text>
