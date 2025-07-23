@@ -6,21 +6,12 @@ import {
   DropdownField,
   FileUploadField,
   LinearScaleField,
+  MultipleChoiceField,
+  QRScannerField,
+  SignatureField,
+  TextareaField,
   TextInputField,
 } from "./index";
-// import CheckboxField from "./CheckboxField";
-// import DateField from "./DateField";
-// import DateTimeField from "./DateTimeField";
-// import DivisionField from "./DivisionField";
-// import DropdownField from "./DropdownField";
-// import LinearScaleField from "./LinearScaleField";
-// import LocationField from "./LocationField";
-// import MultipleChoiceField from "./MultipleChoiceField";
-// import SignatureField from "./SignatureField";
-// import TextInputField from "./TextInputField";
-// import TimeField from "./TimeField";
-// import UploadField from "./UploadField";
-
 interface FormFieldProps {
   question: Question;
   control: any;
@@ -42,20 +33,15 @@ const FormField: React.FC<FormFieldProps> = ({
   };
 
   switch (question.question_type) {
-    // case "location":
-    //   return <LocationField {...fieldProps} />;
-    // case "division":
-    // case "sub_division":
-    //   return <DivisionField {...fieldProps} />;
+    case "user":
+    case "division":
+    case "sub_division":
+    case "location":
     case "dropdown":
       return <DropdownField {...fieldProps} />;
-    case "short_answer":
     case "long_answer":
-      return <TextInputField {...fieldProps} />;
-    // case "date":
-    //   return <DateTimeField {...fieldProps} />;
-    // case "time":
-    //   return <TimeField {...fieldProps} />;
+    case "title_and_description":
+      return <TextareaField {...fieldProps} />;
     case "time":
     case "date":
     case "datetime":
@@ -63,15 +49,18 @@ const FormField: React.FC<FormFieldProps> = ({
     case "checkboxes":
       return <CheckboxField {...fieldProps} />;
     case "multiple_choice":
-    //   return <MultipleChoiceField {...fieldProps} />;
+      return <MultipleChoiceField {...fieldProps} />;
     case "linear_scale":
       return <LinearScaleField {...fieldProps} />;
     case "upload_image":
     case "upload_file":
     case "upload_video":
+    case "upload_audio":
       return <FileUploadField {...fieldProps} />;
-    // case "signature":
-    //   return <SignatureField {...fieldProps} />;
+    case "signature":
+      return <SignatureField {...fieldProps} />;
+    case "qr_code":
+      return <QRScannerField {...fieldProps} />;
     default:
       return <TextInputField {...fieldProps} />;
   }

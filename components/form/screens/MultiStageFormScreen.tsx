@@ -1,5 +1,7 @@
-import React from "react";
+import api from "@/services";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,9 +13,26 @@ import StageIndicator from "../Accordion/StageIndicator";
 import FormField from "../FormFields/FormField";
 import TableField from "../FormFields/TableField";
 import { useMultiStageForm } from "../hooks/useMultiStageForm";
-import mockData from "../utils/mockData";
+import { Stage } from "../types/formTypes";
 
-const MultiStageFormScreen = (stages: any) => {
+const MultiStageFormScreen = ({ formId }: any) => {
+  const [stages, setStage] = useState<Stage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const getFormStages = async (formId: number) => {
+    try {
+      const response = await api.get(`form/${formId}/`);
+      setStage(response.data?.stages);
+    } catch (error: any) {
+      console.error("Error Occurred in the getFormStages ::", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getFormStages(Number(formId));
+  }, [formId]);
+
   const {
     currentStage,
     currentStageIndex,
@@ -27,7 +46,15 @@ const MultiStageFormScreen = (stages: any) => {
     onSubmit,
     goToPrevStage,
     // goToNextStage,
-  } = useMultiStageForm(mockData);
+  } = useMultiStageForm(stages) as any;
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2196f3" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -37,7 +64,7 @@ const MultiStageFormScreen = (stages: any) => {
       >
         <View style={styles.stageIndicator}>
           <StageIndicator
-            stages={mockData}
+            stages={stages}
             currentStageIndex={currentStageIndex}
             completedStages={completedStages}
           />
@@ -138,6 +165,11 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     // Shadow for Android
     elevation: 5,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

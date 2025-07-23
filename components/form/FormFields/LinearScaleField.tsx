@@ -36,8 +36,9 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
     x: 0,
     width: SLIDER_WIDTH,
   });
-  const thumbPosition = useRef(new Animated.Value(0)).current as any;
+  const thumbPosition = useRef(new Animated.Value(0)).current;
   const sliderRef = useRef<View>(null);
+  const isDragging = useRef(false);
 
   const calculateValue = (position: number) => {
     const percentage = position / sliderLayout.width;
@@ -69,39 +70,45 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
         control={control}
         name={name}
         render={({ field: { onChange, value } }) => {
-          // Initialize or update thumb position when value changes
-          useEffect(() => {
-            updateThumbPosition(value || minValue);
-          }, [value]);
-
+          // Initialize pan responder inside Controller render to access onChange
           const panResponder = PanResponder.create({
             onStartShouldSetPanResponder: () => true,
             onMoveShouldSetPanResponder: () => true,
-            onPanResponderGrant: () => {
-              thumbPosition.setOffset(thumbPosition._value);
-              thumbPosition.setValue(0);
+            onPanResponderGrant: (evt) => {
+              isDragging.current = true;
+              const touchX = evt.nativeEvent.locationX;
+              const newValue = calculateValue(touchX);
+              thumbPosition.setValue(touchX);
+              onChange(newValue); // Use onChange instead of control.setValue
             },
-            onPanResponderMove: (_, gestureState) => {
+            onPanResponderMove: (evt, gestureState) => {
+              if (!isDragging.current) return;
               const newPosition = Math.min(
-                Math.max(gestureState.dx, 0),
+                Math.max(gestureState.moveX - sliderLayout.x, 0),
                 sliderLayout.width
               );
+              const newValue = calculateValue(newPosition);
               thumbPosition.setValue(newPosition);
+              onChange(newValue); // Use onChange instead of control.setValue
             },
-            onPanResponderRelease: (_, gestureState) => {
-              thumbPosition.flattenOffset();
-              const finalPosition = Math.min(
-                Math.max(gestureState.dx + (thumbPosition._offset || 0), 0),
-                sliderLayout.width
-              );
-              const newValue = calculateValue(finalPosition);
-              onChange(newValue); // Use the Controller's onChange instead of control.setValue
+            onPanResponderRelease: () => {
+              isDragging.current = false;
+            },
+            onPanResponderTerminate: () => {
+              isDragging.current = false;
             },
           });
 
+          // Update thumb position when value changes
+          useEffect(() => {
+            if (!isDragging.current) {
+              updateThumbPosition(value || minValue);
+            }
+          }, [value]);
+
           return (
             <View style={styles.sliderContainer}>
-              {/* Custom endpoint labels if provided */}
+              {/* End labels if provided */}
               {question.options?.length >= 2 && (
                 <View style={styles.labelsContainer}>
                   <Text style={styles.endLabel}>
@@ -122,6 +129,7 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
                   setSliderLayout({ x: x + SLIDER_MARGIN, width });
                   updateThumbPosition(value || minValue);
                 }}
+                {...panResponder.panHandlers}
               >
                 {/* Track line */}
                 <View style={styles.trackLine} />
@@ -147,7 +155,7 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
                   )}
                 </View>
 
-                {/* Thumb with drag handling */}
+                {/* Thumb */}
                 <Animated.View
                   style={[
                     styles.thumb,
@@ -160,10 +168,7 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
                       elevation: 3,
                     },
                   ]}
-                  {...panResponder.panHandlers}
-                >
-                  <View style={styles.thumbInner} />
-                </Animated.View>
+                />
               </View>
 
               {/* Value indicators */}

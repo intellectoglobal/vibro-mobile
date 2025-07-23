@@ -19,6 +19,11 @@ export const generateValidationSchema = (questions: Question[]) => {
         )
         .min(question.min_value || 1)
         .max(question.max_value || 10);
+    }
+    if (question.question_type === "signature" && question.is_required) {
+      schema[question.question_uuid] = yup
+        .string()
+        .required("Signature is required");
     } else {
       schema[question.question_uuid] = getFieldValidation(question);
     }

@@ -9,7 +9,6 @@ export const useMultiStageForm = (stages: Stage[] | any) => {
   const [completedStages, setCompletedStages] = useState<number[]>([]);
 
   const currentStage = stages[currentStageIndex];
-  console.log("currentStage", stages?.stages);
   const isFirstStage = currentStageIndex === 0;
   const isLastStage = currentStageIndex === stages.length - 1;
 

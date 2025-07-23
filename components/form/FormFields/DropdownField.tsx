@@ -6,6 +6,7 @@ import {
   Modal,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -52,7 +53,10 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 styles.dropdownButton,
                 errors[name] && styles.dropdownButtonError,
               ]}
-              onPress={() => setModalVisible(true)}
+              onPress={() => {
+                setSearchQuery(""); // Reset search when opening modal
+                setModalVisible(true);
+              }}
             >
               <Text style={styles.dropdownButtonText}>
                 {value
@@ -77,13 +81,33 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                     </TouchableOpacity>
                   </View>
 
-                  {/* Optional Search - uncomment if you have many options */}
-                  {/* <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search options..."
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                  /> */}
+                  {/* Search Input */}
+                  <View style={styles.searchContainer}>
+                    <MaterialIcons
+                      name="search"
+                      size={20}
+                      color="#999"
+                      style={styles.searchIcon}
+                    />
+                    <TextInput
+                      style={styles.searchInput}
+                      placeholder="Search options..."
+                      placeholderTextColor="#999"
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                      autoFocus={true}
+                    />
+                    {searchQuery.length > 0 && (
+                      <TouchableOpacity onPress={() => setSearchQuery("")}>
+                        <MaterialIcons
+                          name="cancel"
+                          size={20}
+                          color="#999"
+                          style={styles.clearIcon}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
 
                   <FlatList
                     data={filteredOptions}
@@ -112,6 +136,11 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                     ItemSeparatorComponent={() => (
                       <View style={styles.separator} />
                     )}
+                    ListEmptyComponent={
+                      <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>No options found</Text>
+                      </View>
+                    }
                   />
                 </View>
               </View>
@@ -188,13 +217,27 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     flex: 1,
   },
-  searchInput: {
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 8,
-    padding: 12,
     margin: 16,
     marginBottom: 8,
+    paddingHorizontal: 12,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  clearIcon: {
+    marginLeft: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    paddingVertical: 12,
+    color: "#333",
   },
   optionItem: {
     padding: 16,
@@ -213,6 +256,15 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#eee",
     marginHorizontal: 16,
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#999",
   },
   errorText: {
     color: "red",
