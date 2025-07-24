@@ -1,19 +1,18 @@
 import Accordion from "@/components/Accordion";
 import { ALL_FORMS, FOLDERS } from "@/constants/forms";
+import * as Api from "@/services";
+import { ASSIGNED_FOLDER_FORMS, FOLDER } from "@/services/constants";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
-  View,
   Text,
-  RefreshControl,
+  View,
 } from "react-native";
 import FileList from "../ListItems/FileList";
 import FolderList from "../ListItems/FolderList";
-import * as Api from "@/services";
-import { FOLDER, FORMS } from "@/services/constants";
 
 export const DATA = [
   { id: "1", name: "Documents" },
@@ -66,7 +65,6 @@ export default function NewForm() {
   const getOrgFolder = async () => {
     try {
       const response = (await Api.get(FOLDER)) as any;
-      console.log("response", response)
       setFolders(response || []);
     } catch (error: any) {
       console.error("Error Occurred in the getOrgFolder ::", error);
@@ -75,18 +73,20 @@ export default function NewForm() {
 
   const getAllFormsForUser = async () => {
     try {
-      const response = (await Api.get(FORMS)) as any;
-      console.log("response", response)
+      const response = (await Api.get(ASSIGNED_FOLDER_FORMS)) as any;
       setForms(response || []);
     } catch (error: any) {
-      console.error("Error Occurred in the getAllFormsForUser ::", error.message);
+      console.error(
+        "Error Occurred in the getAllFormsForUser ::",
+        error.message
+      );
     }
   };
 
-    const fetchData = async () => {
+  const fetchData = async () => {
     try {
-      await getOrgFolder()
-      await getAllFormsForUser()
+      await getOrgFolder();
+      await getAllFormsForUser();
     } catch (error: any) {
       console.error("Error while fetching data:", error.message);
     } finally {
@@ -95,18 +95,18 @@ export default function NewForm() {
   };
 
   useEffect(() => {
-    fetchData()
+    fetchData();
   }, []);
 
   const onFolderRefresh = useCallback(async () => {
     setFolderRefreshing(true);
-    await getOrgFolder()
+    await getOrgFolder();
     setFolderRefreshing(false);
   }, []);
 
   const onFormRefresh = useCallback(async () => {
     setFormRefreshing(true);
-    await getAllFormsForUser()
+    await getAllFormsForUser();
     setFormRefreshing(false);
   }, []);
 
@@ -129,17 +129,21 @@ export default function NewForm() {
         expanded={true}
         onPress={(expanded) => console.log("Accordion expanded:", expanded)}
       >
-          <FlatList
-            style={{ maxHeight: 125 }}
-            data={folders}
-            keyExtractor={(item) => item.id}
-            refreshing={folderRefreshing} 
-            onRefresh={onFolderRefresh}
-            renderItem={({ item }) => (
-              <FolderList items={item} onClick={routeFormsFolder} />
-            )}
-            ListEmptyComponent={<Text style={styles.emptyText}>You don’t have any assigned folders.</Text>}
-          />
+        <FlatList
+          style={{ maxHeight: 125 }}
+          data={folders}
+          keyExtractor={(item) => item.id}
+          refreshing={folderRefreshing}
+          onRefresh={onFolderRefresh}
+          renderItem={({ item }) => (
+            <FolderList items={item} onClick={routeFormsFolder} />
+          )}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              You don’t have any assigned folders.
+            </Text>
+          }
+        />
       </Accordion>
 
       <View style={{ flex: 3, marginBottom: 35 }}>
@@ -152,17 +156,21 @@ export default function NewForm() {
           expanded={true}
           onPress={(expanded) => console.log("Accordion expanded:", expanded)}
         >
-            <FlatList
-              data={forms}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={{ paddingBottom: 50 }}
-              refreshing={formRefreshing}
-              onRefresh={onFormRefresh}
-              renderItem={({ item }) => (
-                <FileList items={item} onClick={routeFormsFileList} />
-              )}
-              ListEmptyComponent={<Text style={styles.emptyText}>You don’t have any assigned forms.</Text>}
-            />
+          <FlatList
+            data={forms}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingBottom: 50 }}
+            refreshing={formRefreshing}
+            onRefresh={onFormRefresh}
+            renderItem={({ item }) => (
+              <FileList items={item} onClick={routeFormsFileList} />
+            )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>
+                You don’t have any assigned forms.
+              </Text>
+            }
+          />
         </Accordion>
       </View>
     </View>
