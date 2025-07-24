@@ -25,7 +25,7 @@ export const generateValidationSchema = (questions: Question[]) => {
         .string()
         .required("Signature is required");
     } else {
-      schema[question.question_uuid] = getFieldValidation(question);
+      // schema[question.question_uuid] = getFieldValidation(question);
     }
   });
 
@@ -40,6 +40,10 @@ const getFieldValidation = (question: Question) => {
     case "long_answer":
       validator = yup.string();
       break;
+    case "user":
+    case "division":
+    case "sub_division":
+    case "location":
     case "dropdown":
     case "multiple_choice":
       validator = yup.string().required();
@@ -56,16 +60,16 @@ const getFieldValidation = (question: Question) => {
     case "datetime":
       validator = yup.date().required();
       break;
-    case "location":
-      validator = yup.object().shape({
-        latitude: yup.number().required(),
-        longitude: yup.number().required(),
-      });
-      break;
-    case "division":
-    case "sub_division":
-      validator = yup.string().required();
-      break;
+    // case "location":
+    //   validator = yup.object().shape({
+    //     latitude: yup.number().required(),
+    //     longitude: yup.number().required(),
+    //   });
+    //   break;
+    // case "division":
+    // case "sub_division":
+    //   validator = yup.string().required();
+    //   break;
     case "linear_scale":
       validator = yup.object().shape({
         [question.question_uuid]: yup

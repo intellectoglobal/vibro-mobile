@@ -1,7 +1,12 @@
+/* eslint-disable import/no-named-as-default-member */
+/* eslint-disable react-hooks/exhaustive-deps */
+import api from "@/services";
+import { DIVISION, LOCATION, USERS_LIST } from "@/services/constants";
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import {
+  ActivityIndicator,
   FlatList,
   Modal,
   StyleSheet,
@@ -19,18 +24,74 @@ interface DropdownFieldProps {
   name: string;
 }
 
+const URLS = {
+  division: DIVISION,
+  users: USERS_LIST,
+  location: LOCATION,
+} as any;
+
 const DropdownField: React.FC<DropdownFieldProps> = ({
   question,
   control,
   errors,
   name,
 }) => {
+  const [options, setOption] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredOptions = question.options.filter((option) =>
-    option.option.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // const filteredOptions = question.options.filter((option) =>
+  //   option.option.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+
+  const filteredOptions = useMemo(() => {
+    return options.filter((option) =>
+      option.option.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, options]);
+
+  const fetchOptions = async () => {
+    setLoading(true);
+    try {
+      const url = URLS[question?.question_type];
+      if (url) {
+        const response = await api.get(url);
+        const options = response?.data.map((item: any) => {
+          let option = item.name ?? `Unnamed ${question?.question_type}`;
+          option =
+            question?.question_type === "user"
+              ? `${item.first_name ?? ""} ${item.last_name ?? ""}`.trim()
+              : option;
+          return {
+            id: item.id,
+            option,
+          };
+        });
+        setOption(options);
+      } else {
+        setOption(question.options);
+      }
+    } catch (error: any) {
+      console.log("❌ Failed to fetch dropdown options:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (question?.question_type) {
+      fetchOptions();
+    }
+  }, [question?.question_type]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="small" color="#2196f3" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -60,7 +121,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
             >
               <Text style={styles.dropdownButtonText}>
                 {value
-                  ? question.options.find((opt) => opt.id === value)?.option
+                  ? filteredOptions.find((opt) => opt.id === value)?.option
                   : question.question_hint || "Select an option"}
               </Text>
               <MaterialIcons name="arrow-drop-down" size={24} color="#666" />
@@ -270,6 +331,16 @@ const styles = StyleSheet.create({
     color: "red",
     marginTop: 5,
     fontSize: 14,
+  },
+  loadingContainer: {
+    flex: 1,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    margin: 16,
   },
 });
 
