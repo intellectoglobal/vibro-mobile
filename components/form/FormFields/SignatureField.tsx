@@ -1,173 +1,217 @@
-import { MaterialIcons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
-import { Controller } from "react-hook-form";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
 import SignatureCanvas from "react-native-signature-canvas";
-import { Question } from "../types/formTypes";
+import { Control, FieldError, FieldValues } from "react-hook-form";
 
-interface SignatureFieldProps {
-  question: Question;
-  control: any;
-  errors: any;
+interface CustomSignatureProps {
+  control: Control<FieldValues>;
   name: string;
+  label?: string;
+  rules?: any;
+  disabled?: boolean;
+  error?: FieldError;
+  style?: any;
+  isRequired?: boolean;
 }
 
-const SignatureField: React.FC<SignatureFieldProps> = ({
-  question,
-  control,
-  errors,
-  name,
+const CustomSignature: React.FC<CustomSignatureProps> = ({
+  label,
+  error,
+  style,
+  isRequired = false,
 }) => {
-  const signatureRef = useRef<any>(null);
-  const [isSignatureEmpty, setIsSignatureEmpty] = useState(true);
+  const [signature, setSignature] = useState<string | null>(null); // saved image
+  const [modalVisible, setModalVisible] = useState(false);
+  const [tempSignature, setTempSignature] = useState<string | null>(null);
+  const sigRef = useRef<any>(null);
 
-  const handleSignature = (signature: string) => {
-    control.setValue(name, signature);
-    setIsSignatureEmpty(!signature);
+  const handleOK = (sig: string) => {
+    setTempSignature(sig);
+  };
+
+  const handleEnd = () => {
+    sigRef.current?.readSignature();
+  };
+
+  const handleSave = () => {
+    if (tempSignature) {
+      setSignature(tempSignature);
+      setModalVisible(false);
+    }
   };
 
   const handleClear = () => {
-    signatureRef.current?.clearSignature();
-    control.setValue(name, "");
-    setIsSignatureEmpty(true);
+    setTempSignature(null);
+    sigRef.current?.clearSignature();
   };
 
-  const handleConfirm = () => {
-    if (isSignatureEmpty && question.is_required) {
-      Alert.alert(
-        "Signature Required",
-        "Please provide your signature before continuing"
-      );
-      return;
-    }
-    // Signature is automatically saved via handleSignature
+  const handleReset = () => {
+    setSignature(null);
+    setTempSignature(null);
   };
 
   return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field: { value } }) => (
-        <View style={styles.container}>
-          <Text style={styles.label}>
-            {question.question}
-            {question.is_required && <Text style={styles.required}> *</Text>}
-          </Text>
+    <View style={[styles.questionContainer, style]}>
+      {label && (
+        <Text style={styles.questionText}>
+          {label}
+          {isRequired && <Text style={styles.required}> *</Text>}
+        </Text>
+      )}
 
-          {question.description && (
-            <Text style={styles.description}>{question.description}</Text>
-          )}
+      {signature ? (
+        <View style={styles.previewWrapper}>
+          <Image
+            source={{ uri: signature }}
+            style={styles.signaturePreview}
+            resizeMode="contain"
+          />
+          <TouchableOpacity onPress={handleReset} style={styles.button}>
+            <Text style={styles.buttonText}>Reset</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={styles.addButton}
+        >
+          <Text style={{ color: "#007AFF" }}>Add Signature</Text>
+        </TouchableOpacity>
+      )}
 
-          <View style={styles.signatureContainer}>
+      {error && <Text style={styles.errorText}>{error.message}</Text>}
+
+      {/* Modal */}
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Sign Below</Text>
+          <View style={styles.signatureBox}>
             <SignatureCanvas
-              ref={signatureRef}
-              onOK={handleSignature}
-              onEmpty={handleSignature}
-              descriptionText={question.question_hint || "Sign above"}
+              ref={sigRef}
+              onOK={handleOK}
+              onEnd={handleEnd}
+              autoClear={false}
+              penColor="#000"
+              backgroundColor="#fff"
+              webviewProps={{
+                androidLayerType: "hardware",
+              }}
+              descriptionText=""
               clearText=""
               confirmText=""
-              webStyle={webStyle}
-              style={styles.canvas}
-              penColor="#000000"
-              backgroundColor="#FFFFFF"
             />
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={handleSave} style={styles.button}>
+                <Text style={styles.buttonText}>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleClear} style={styles.button}>
+                <Text style={styles.buttonText}>Clear</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={[styles.button, styles.cancelButton]}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-
-          <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
-              <MaterialIcons name="delete" size={20} color="#FF3B30" />
-              <Text style={styles.clearButtonText}>Clear</Text>
-            </TouchableOpacity>
-
-            {value && (
-              <View style={styles.confirmContainer}>
-                <MaterialIcons name="check-circle" size={20} color="#34C759" />
-                <Text style={styles.confirmText}>Signed</Text>
-              </View>
-            )}
-          </View>
-
-          {errors[name] && (
-            <Text style={styles.errorText}>{errors[name].message}</Text>
-          )}
         </View>
-      )}
-    />
+      </Modal>
+    </View>
   );
 };
 
-// Styles for the web-based canvas (react-native-signature-canvas uses a webview)
-const webStyle = `
-  .m-signature-pad {
-    box-shadow: none;
-    border: 1px dashed #ccc;
-    border-radius: 4px;
-  }
-  .m-signature-pad--body {
-    border: none;
-  }
-  .m-signature-pad--footer {
-    display: none;
-  }
-`;
+export default CustomSignature;
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 24,
+  questionContainer: {
+    marginTop: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
   },
-  label: {
+  questionText: {
     fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
+    fontWeight: "500",
     color: "#333",
+    marginBottom: 12,
+    lineHeight: 22,
   },
   required: {
-    color: "red",
-  },
-  description: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 12,
-  },
-  signatureContainer: {
-    height: 200,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    overflow: "hidden",
-    backgroundColor: "#fff",
-  },
-  canvas: {
-    flex: 1,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 12,
-  },
-  clearButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 8,
-  },
-  clearButtonText: {
-    marginLeft: 4,
     color: "#FF3B30",
   },
-  confirmContainer: {
-    flexDirection: "row",
+  signaturePreview: {
+    width: "100%",
+    height: 200,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+  },
+  previewWrapper: {
     alignItems: "center",
   },
-  confirmText: {
-    marginLeft: 4,
-    color: "#34C759",
-  },
   errorText: {
-    color: "red",
-    marginTop: 8,
-    fontSize: 14,
+    color: "#FF3B30",
+    fontSize: 12,
+    marginTop: 5,
+  },
+  button: {
+    backgroundColor: "#007AFF",
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    marginHorizontal: 8,
+    marginTop: 12,
+  },
+  cancelButton: {
+    backgroundColor: "#999",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  addButton: {
+    borderWidth: 1,
+    borderColor: "#007AFF",
+    borderRadius: 6,
+    padding: 10,
+    alignItems: "center",
+  },
+  modalContainer: {
+    // flex: 1,
+    height: 400,
+    padding: 16,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    // alignItems: "center"
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  signatureBox: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingVertical: 20,
   },
 });
-
-export default SignatureField;

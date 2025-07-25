@@ -40,9 +40,11 @@ const StageIndicator: React.FC<StageIndicatorProps> = ({
               styles.stageContainer,
               isCurrent && styles.currentStageContainer,
             ]}
-            onPress={() => !isDisabled && onStagePress?.(index)}
-            disabled={isDisabled}
-            activeOpacity={0.7}
+            // onPress={() => !isDisabled && onStagePress?.(index)}
+            // disabled={isDisabled}
+            onPress={() => onStagePress?.(index)}
+            // disabled={isDisabled}
+            activeOpacity={0.1}
           >
             <View
               style={[

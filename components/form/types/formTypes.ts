@@ -38,6 +38,9 @@ export interface Logic {
 }
 
 export interface Stage {
+  form: any;
+  assigned_to_user_id: number;
+  is_completed: boolean;
   id: number;
   name: string;
   order: number;

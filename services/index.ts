@@ -5,8 +5,10 @@ import store from "@/store";
 import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
 
 // Configure your base API URL
-const BASE_URL = "https://vibro.onrender.com/api";
-// const BASE_URL = "http://192.168.1.47:8000/api";
+// const BASE_URL = "https://vibro.onrender.com/api";
+const BASE_URL = "http://192.168.61.141:8000/api";
+// const BASE_URL = "http://192.168.1.22:8000/api";
+
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
@@ -27,7 +29,7 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${authInfo.access}`;
     }
 
-    if (__DEV__) {
+    if (false) {
       console.log("📤 [API REQUEST]", {
         url: `${config.baseURL ?? ""}${config.url ?? ""}`,
         method: config.method,
@@ -40,7 +42,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    if (__DEV__) {
+    if (false) {
       console.error("❌ [REQUEST ERROR]", error);
     }
     return Promise.reject(error);
@@ -50,7 +52,7 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    if (__DEV__) {
+    if (false) {
       console.log("📥 [API RESPONSE]", {
         url: `${response.config.baseURL ?? ""}${response.config.url ?? ""}`,
         status: response.status,
@@ -62,7 +64,7 @@ api.interceptors.response.use(
   async (error) => {
     const res = error.response
     if (axios.isAxiosError(error)) {
-      if (__DEV__) {
+      if (false) {
         console.error("❌ [API ERROR]", {
           url: `${error.config?.baseURL ?? ""}${error.config?.url ?? ""}`,
           message: error.message,

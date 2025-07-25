@@ -20,7 +20,7 @@ export default function FolderList() {
 
   const getFolderFormsForUser = async () => {
     try {
-      const response = await api.get(`${ASSIGNED_FOLDER_FORMS}/${folderId}/`);
+      const response = await api.get(`${ASSIGNED_FOLDER_FORMS}${folderId}/`);
       setForms(response.data.forms);
     } catch (error: any) {
       console.error("Error Occurred in the getOrgFolder ::", error.message);
@@ -48,13 +48,13 @@ export default function FolderList() {
 
   return (
     <>
-      <Header
+      {/* <Header
         title={"File List"}
         showBack
         onBackPress={() => {
           router.back();
         }}
-      />
+      /> */}
       {!loading ? (
         <View style={styles.container}>
           <FlatList
