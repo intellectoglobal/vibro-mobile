@@ -7,7 +7,7 @@ const Learn = () => {
     <>
       {/* <Header title="Learn" /> */}
       <View className="flex-1 justify-center items-center">
-        <Text className="text-5xl text-secondary font-bold">Learn!</Text>
+        <Text className="text-5xl text-secondary font-bold">Approvals!</Text>
       </View>
     </>
   );

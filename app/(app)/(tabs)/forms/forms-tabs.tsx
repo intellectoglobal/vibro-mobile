@@ -33,12 +33,12 @@ const FormsTabs = () => {
         textStyle={styles.tabText}
       />
 
-      <View style={styles.contentContainer}>
+      {/* <View style={styles.contentContainer}>
         {activeTab === "new" && <NewForm />}
         {activeTab === "drafts" && <DraftsForm />}
         {activeTab === "sent" && <SentForm />}
         {activeTab === "received" && <ReceivedForm />}
-      </View>
+      </View> */}
     </View>
   );
 };

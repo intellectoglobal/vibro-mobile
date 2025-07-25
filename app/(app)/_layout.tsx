@@ -13,7 +13,7 @@ export default function AppLayout() {
   return (
     <AuthWrapper>
       {Platform.OS !== "web" && (
-        <StatusBar backgroundColor="#2196f3" barStyle="light-content" />
+        <StatusBar backgroundColor="#a26260" barStyle="light-content" />
       )}
 
       <Drawer
@@ -24,14 +24,14 @@ export default function AppLayout() {
         }}
         screenOptions={{
           headerShown: true,
-          title: "Vibro",
+          title: "Constrogen",
           drawerActiveTintColor: "#ffffff",
           drawerInactiveTintColor: "#64748b",
           drawerStyle: {
             backgroundColor: "#ffffff",
           },
           headerStyle: {
-            backgroundColor: "#2196f3",
+            backgroundColor: "#a26260",
             elevation: 0,
             shadowOpacity: 0,
           },

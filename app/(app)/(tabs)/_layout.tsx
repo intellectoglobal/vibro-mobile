@@ -22,25 +22,25 @@ const _layout = () => {
             <Icon
               name="home"
               size={24}
-              color={focused ? "#2662f0" : "#9CA3AF"}
+              color={focused ? "#a26260" : "#9CA3AF"}
             />
           ),
-          tabBarLabelStyle: { fontSize: 10, color: "#2662f0" }, // `primary`
+          tabBarLabelStyle: { fontSize: 10, color: "#a26260" }, // `primary`
         }}
       />
       <Tabs.Screen
         name="forms"
         options={{
-          title: "Forms",
+          title: "Daily Status",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Icon
-              name="assignment"
+              name="check-circle-outline"
               size={24}
-              color={focused ? "#2662f0" : "#9CA3AF"}
+              color={focused ? "#a26260" : "#9CA3AF"}
             />
           ),
-          tabBarLabelStyle: { fontSize: 10, color: "#2662f0" },
+          tabBarLabelStyle: { fontSize: 10, color: "#a26260" },
         }}
       />
 
@@ -48,36 +48,36 @@ const _layout = () => {
       <Tabs.Screen
         name="todo"
         options={{
-          title: "To-Do",
+          title: "Purchase Order",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Icon
-              name="check-circle-outline"
+              name="assignment"
               size={24}
-              color={focused ? "#2662f0" : "#9CA3AF"}
+              color={focused ? "#a26260" : "#9CA3AF"}
             />
           ),
-          tabBarLabelStyle: { fontSize: 10, color: "#2662f0" },
+          tabBarLabelStyle: { fontSize: 10, color: "#a26260" },
         }}
       />
 
       <Tabs.Screen
         name="learn"
         options={{
-          title: "Learn",
+          title: "Approvals",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Icon
-              name="school"
+              name="thumb-up"
               size={24}
-              color={focused ? "#2662f0" : "#9CA3AF"}
+              color={focused ? "#a26260" : "#9CA3AF"}
             />
           ),
-          tabBarLabelStyle: { fontSize: 10, color: "#2662f0" },
+          tabBarLabelStyle: { fontSize: 10, color: "#a26260" },
         }}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="guides"
         options={{
           title: "Guides",
@@ -86,12 +86,12 @@ const _layout = () => {
             <Icon
               name="help-outline"
               size={24}
-              color={focused ? "#2662f0" : "#9CA3AF"}
+              color={focused ? "#a26260" : "#9CA3AF"}
             />
           ),
-          tabBarLabelStyle: { fontSize: 10, color: "#2662f0" },
+          tabBarLabelStyle: { fontSize: 10, color: "#a26260" },
         }}
-      />
+      /> */}
     </Tabs>
   );
 };

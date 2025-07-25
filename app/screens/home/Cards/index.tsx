@@ -27,20 +27,20 @@ const Cards:React.FC<CardsInterFace> = ({title}) => {
 
                 <View className="mt-2">
                     <View className="flex-row items-center mb-2">
-                        <Icon name="check-circle" size={16} color="#10B981" />
-                        <Text className="text-neutral-700 text-sm font-semibold ml-1.5">
+                        {/* <Icon name="check-circle" size={16} color="#10B981" /> */}
+                        {/* <Text className="text-neutral-700 text-sm font-semibold ml-1.5">
                             Your Compliance Training Assessment is Ready!
-                        </Text>
+                        </Text> */}
                     </View>
 
-                    <Text className="text-neutral-700 text-sm mb-1">Hi All,</Text>
+                    {/* <Text className="text-neutral-700 text-sm mb-1">Hi All,</Text>
                     <Text className="text-neutral-500 text-sm leading-5 mb-4">
                         Your Compliance Training Assessment is now live in the vibro app!
-                    </Text>
+                    </Text> */}
 
                     <TouchableOpacity className="flex-row items-center bg-neutral-100 px-4 py-2.5 rounded-lg justify-between">
                         <Icon name="play-circle-outline" size={20} color="#6B46C1" />
-                        <Text className="text-primary text-sm font-medium flex-1 ml-2">Launch Course</Text>
+                        {/* <Text className="text-primary text-sm font-medium flex-1 ml-2">Launch Course</Text> */}
                         <Icon name="chevron-right" size={20} color="#6B46C1" />
                     </TouchableOpacity>
                 </View>

@@ -40,7 +40,7 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
   console.log("user ::", user.id)
   const userProfile: UserProfile = {
     name: user.first_name,
-    company: "vibro",
+    company: "Constrogen",
     phone: user.phone,
     avatar: ReactIcon,
   };
