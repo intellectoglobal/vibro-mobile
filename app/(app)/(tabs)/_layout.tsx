@@ -76,22 +76,7 @@ const _layout = () => {
           tabBarLabelStyle: { fontSize: 10, color: "#a26260" },
         }}
       />
-
-      {/* <Tabs.Screen
-        name="guides"
-        options={{
-          title: "Guides",
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <Icon
-              name="help-outline"
-              size={24}
-              color={focused ? "#a26260" : "#9CA3AF"}
-            />
-          ),
-          tabBarLabelStyle: { fontSize: 10, color: "#a26260" },
-        }}
-      /> */}
+      
     </Tabs>
   );
 };
