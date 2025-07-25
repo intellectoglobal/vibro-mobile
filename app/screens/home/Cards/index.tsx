@@ -4,14 +4,19 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import ReactIcon from "../../../../assets/images/react-logo.png";
 
 interface CardsInterFace {
-    title? : string
+    title?: string
 }
 
-const Cards:React.FC<CardsInterFace> = ({title}) => {
+const Cards: React.FC<CardsInterFace> = ({ title }) => {
     return (
         <>
+            {/* App Description */}
+            <Text className="text-neutral-700 text-base font-semibold mt-5 mb-2">
+                Constrogen is a comprehensive construction management application designed to streamline operations, enhance site collaboration, and monitor project progress with powerful built-in tools.
+            </Text>
+
             {/* News Section */}
-            <Text className="text-neutral-700 text-base font-semibold mt-5 mb-3">News</Text>
+            <Text className="text-neutral-700 text-base font-semibold mt-3 mb-3">News</Text>
 
             {/* News Item */}
             <View className="bg-white rounded-xl p-4 shadow-md">
@@ -27,28 +32,30 @@ const Cards:React.FC<CardsInterFace> = ({title}) => {
 
                 <View className="mt-2">
                     <View className="flex-row items-center mb-2">
-                        {/* <Icon name="check-circle" size={16} color="#10B981" /> */}
-                        {/* <Text className="text-neutral-700 text-sm font-semibold ml-1.5">
-                            Your Compliance Training Assessment is Ready!
-                        </Text> */}
+                        <Icon name="check-circle" size={16} color="#10B981" />
+                        <Text className="text-neutral-700 text-sm font-semibold ml-1.5">
+                            Your Site Safety Inspection Report is Ready!
+                        </Text>
                     </View>
 
-                    {/* <Text className="text-neutral-700 text-sm mb-1">Hi All,</Text>
+                    <Text className="text-neutral-700 text-sm mb-1">Hi All,</Text>
                     <Text className="text-neutral-500 text-sm leading-5 mb-4">
-                        Your Compliance Training Assessment is now live in the vibro app!
-                    </Text> */}
+                        Your Site Safety Inspection Report is now live in the Constrogen app!
+                    </Text>
 
                     <TouchableOpacity className="flex-row items-center bg-neutral-100 px-4 py-2.5 rounded-lg justify-between">
                         <Icon name="play-circle-outline" size={20} color="#6B46C1" />
-                        {/* <Text className="text-primary text-sm font-medium flex-1 ml-2">Launch Course</Text> */}
+                        <Text className="text-primary text-sm font-medium flex-1 ml-2">Documentation Video</Text>
                         <Icon name="chevron-right" size={20} color="#6B46C1" />
                     </TouchableOpacity>
                 </View>
+
                 <View className="bg-primary rounded-xl h-32 mt-5 justify-center items-center">
                     <View className="bg-accent w-20 h-20 rounded-lg justify-center items-center">
                         <Icon name="description" size={60} color="white" />
                     </View>
                 </View>
+
                 <View className="flex-row items-center bg-white py-3 px-4 mt-4 rounded-lg">
                     <View className="flex-row items-center mr-5">
                         <Icon name="favorite-border" size={16} color="#9CA3AF" />
@@ -65,4 +72,4 @@ const Cards:React.FC<CardsInterFace> = ({title}) => {
     )
 }
 
-export default Cards
+export default Cards;
