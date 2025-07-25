@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
@@ -41,6 +41,10 @@ export default function LoginScreen() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    router.replace("/(app)/(tabs)");
+  }, []);
 
   return (
     <>

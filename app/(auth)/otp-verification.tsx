@@ -1,3 +1,4 @@
+
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef } from "react";
 import {
@@ -115,10 +116,8 @@ export default function OtpVerificationScreen() {
   // }
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.replace("/(app)/(tabs)");
-    }
-  }, [isAuthenticated]);
+    router.replace("/(app)/(tabs)");
+  }, []);
 
   return (
     <>

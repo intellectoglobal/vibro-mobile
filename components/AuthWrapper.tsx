@@ -1,6 +1,6 @@
+
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Redirect } from "expo-router";
-
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { RootState } from "@/store";
 import React, { useEffect } from "react";
@@ -18,7 +18,6 @@ export default function AuthWrapper({
     (state: RootState) => state.auth
   ) as any;
 
-  // console.log("state", state);
   useEffect(() => {
     dispatch(checkRefetchToken({ isAuthenticatedVerify: true }));
   }, [isAuthenticated]);
@@ -34,12 +33,14 @@ export default function AuthWrapper({
     );
   }
 
-  if (!isAuthenticated && !loading) {
-    return <Redirect href="/(auth)/login" />;
-  }
+  // Bypassing authentication check
+  // if (!isAuthenticated && !loading) {
+  //   return <Redirect href="/(auth)/login" />;
+  // }
 
   return <>{children}</>;
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
