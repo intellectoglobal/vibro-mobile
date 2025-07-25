@@ -6,12 +6,12 @@ import NewForm from "./tabs-forms/new-form";
 import ReceivedForm from "./tabs-forms/received-form";
 import SentForm from "./tabs-forms/sent-form";
 
-const TABS = [
-  { key: "new", label: "NEW" },
-  { key: "drafts", label: "DRAFTS" },
-  { key: "sent", label: "SENT" },
-  { key: "received", label: "RECEIVED" },
-];
+// const TABS = [
+//   { key: "new", label: "NEW" },
+//   { key: "drafts", label: "DRAFTS" },
+//   { key: "sent", label: "SENT" },
+//   { key: "received", label: "RECEIVED" },
+// ];
 
 const FormsTabs = () => {
   const [activeTab, setActiveTab] = useState("new");
@@ -22,8 +22,8 @@ const FormsTabs = () => {
 
   return (
     <View style={styles.container}>
-      <Tabs
-        tabs={TABS}
+      {/* <Tabs
+        // tabs={TABS}
         activeTab={activeTab}
         onTabPress={handleTabPress}
         activeTextColor="#FF5733"
@@ -31,7 +31,7 @@ const FormsTabs = () => {
         indicatorColor="#FF5733"
         containerStyle={styles.tabsContainer}
         textStyle={styles.tabText}
-      />
+      /> */}
 
       {/* <View style={styles.contentContainer}>
         {activeTab === "new" && <NewForm />}

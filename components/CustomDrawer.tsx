@@ -64,12 +64,12 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
       iconName: "bookmark",
       onPress: () => props.navigation.navigate("screens/Bookmarks/bookmarks"),
     },
-    {
-      label: "Leaderboard",
-      iconName: "bar-chart",
-      onPress: () =>
-        props.navigation.navigate("screens/Leaderboard/leaderboard"),
-    },
+    // {
+    //   label: "Leaderboard",
+    //   iconName: "bar-chart",
+    //   onPress: () =>
+    //     props.navigation.navigate("screens/Leaderboard/leaderboard"),
+    // },
     {
       label: "Admin and Settings",
       iconName: "settings",

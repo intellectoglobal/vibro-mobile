@@ -1,42 +1,15 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import { Header } from "@/components/Header";
-import { useState } from "react";
-import SearchBar from "@/components/SearchBar";
-import { TABS } from "@/constants/forms";
-import { StyleSheet, View } from "react-native";
-import FormsTabs from "./forms-tabs";
 import React from "react";
+import { Text, View } from "react-native";
 
-const Forms = () => {
-  const [activeTab, setActiveTab] = useState(TABS[0].key);
-  const [searchResults, setSearchResults] = useState<string[]>([]);
-
-  const handleSearch = (query: string) => {
-    const results = query
-      ? ["Apple", "Banana", "Cherry"].filter((item) =>
-          item.toLowerCase().includes(query.toLowerCase())
-        )
-      : [];
-    setSearchResults(results);
-  };
-
+const Learn = () => {
   return (
     <>
-      {/* <Header title={"Forms"} /> */}
-      <View style={styles.container}>
-        <SearchBar placeholder="Filter" onSearch={handleSearch} />
-        <FormsTabs />
+      {/* <Header title="Learn" /> */}
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-5xl text-secondary font-bold">Daily Status!</Text>
       </View>
     </>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 5,
-    paddingVertical: 15,
-  },
-});
-
-export default Forms;
+export default Learn;
