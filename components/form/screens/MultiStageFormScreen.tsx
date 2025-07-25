@@ -52,7 +52,7 @@ const MultiStageFormScreen = ({ formId }: any) => {
     goToPrevStage,
     // goToNextStage,
     goToStage
-  } = useMultiStageForm(mockData) as any;
+  } = useMultiStageForm(stages) as any;
 
   if (loading) {
     return (
@@ -70,10 +70,10 @@ const MultiStageFormScreen = ({ formId }: any) => {
       >
         <View style={styles.stageIndicator}>
           <StageIndicator
-            stages={mockData}
+            stages={stages}
             currentStageIndex={currentStageIndex}
             completedStages={completedStages}
-            onStagePress={goToStage}
+            onStagePress={(index) => goToStage(index)}
           />
         </View>
 

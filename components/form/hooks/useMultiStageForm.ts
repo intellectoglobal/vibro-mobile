@@ -55,19 +55,6 @@ export const useMultiStageForm = (stages: Stage[] | any) => {
 };
 
 
-  // const onSubmit = (data: any) => {
-  //   if (!isLastStage) {
-  //     goToNextStage();
-  //   } else {
-  //     // Final submission logic
-  //     console.log("currentStage ::", currentStage)
-  //     console.log("Form submitted:", data);
-  //     if (!completedStages.includes(currentStageIndex)) {
-  //       setCompletedStages([...completedStages, currentStageIndex]);
-  //     }
-  //   }
-  // };
-
 const onSubmit = (data: any) => {
   const extractId = (val: any) =>
     typeof val === "object" && val !== null && "id" in val ? val.id : val;
