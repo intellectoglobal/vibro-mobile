@@ -1,60 +1,26 @@
+import MultiStageFormScreen from "@/components/form/screens/MultiStageFormScreen";
 import { Header } from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
-import StepIndicator from "@/components/StepIndicator";
-import { Stage } from "@/types/forms";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { StyleSheet, View } from "react-native";
-import StageForm from "../../../screens/forms";
-import { stagesData } from "@/app/screens/forms/stageData";
-import api from "@/services";
 
 export default function MultiStageForm() {
-  const { formTitle, formId } = useLocalSearchParams();
-  const [stage, setStage] = useState<Stage[]>([]);
-  console.log("forms Details ::", formTitle, formId);
-
-  const getFormStages = async(formId: number) => {
-    try {
-      const response = await api.get(`form/${formId}/`)
-      console.log("response ::", response.data.stages)
-      setStage(response.data.stages)
-    } catch(error:any) {
-      console.error("Error Occurred in the getFormStages ::", error.message)
-    }
-  }
-
-  useEffect(() => {
-    getFormStages(Number(formId))
-  },[formId])
+  const { formTitle, formId } = useLocalSearchParams() as any;
   return (
     <>
-      <Header
+      {/* <Header
         title={"Forms Stage"}
         showBack
         onBackPress={() => {
           router.back();
         }}
-      />
+      /> */}
       <View style={styles.container}>
-        <View style={styles.header}>
-          <StepIndicator steps={stage} currentStep={0} />
-        </View>
         <View style={{ marginBottom: 16 }}>
           <SearchBar placeholder="Search..." />
         </View>
-        <StageForm
-          stages={stage}
-          stageLen={stage.length}
-          onSubmit={() => {}}
-        />
-        {/* Uncomment the FlatList when you have the FileList component ready */}
-        {/* <FlatList
-          data={DATA}
-          renderItem={({ item }) => (
-            <FileList items={item} onClick={() => {}} />
-          )}
-        /> */}
+        <MultiStageFormScreen formId={formId} />
       </View>
     </>
   );
@@ -75,5 +41,10 @@ const styles = StyleSheet.create({
   folderContent: {
     fontSize: 16,
     color: "#666",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

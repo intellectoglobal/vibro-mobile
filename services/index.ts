@@ -1,17 +1,19 @@
 /* eslint-disable import/no-named-as-default-member */
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { SecureStoreKeys, SecureStoreService } from "./secureStore";
 import store from "@/store";
 import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
 
 // Configure your base API URL
-const BASE_URL = "https://vibro.onrender.com/api";
-// const BASE_URL = "http://192.168.0.107:8000/api";
+// const BASE_URL = "https://vibro.onrender.com/api";
+const BASE_URL = "http://192.168.61.141:8000/api";
+// const BASE_URL = "http://192.168.1.22:8000/api";
+
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 20000, // 10 seconds timeout
+  timeout: 30000, // 30 seconds timeout
   headers: {
     "Content-Type": "application/json",
   },
@@ -20,14 +22,16 @@ const api: AxiosInstance = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   async (config) => {
-    const authInfo = (await SecureStoreService?.get(SecureStoreKeys.AUTH_INFO)) as any;
+    const authInfo = (await SecureStoreService?.get(
+      SecureStoreKeys.AUTH_INFO
+    )) as any;
     if (authInfo?.isAuthenticated) {
       config.headers.Authorization = `Bearer ${authInfo.access}`;
     }
 
-    if (__DEV__) {
+    if (false) {
       console.log("📤 [API REQUEST]", {
-        url: `${config.baseURL ?? ''}${config.url ?? ''}`,
+        url: `${config.baseURL ?? ""}${config.url ?? ""}`,
         method: config.method,
         headers: config.headers,
         data: config.data,
@@ -38,7 +42,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    if (__DEV__) {
+    if (false) {
       console.error("❌ [REQUEST ERROR]", error);
     }
     return Promise.reject(error);
@@ -48,9 +52,9 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    if (__DEV__) {
+    if (false) {
       console.log("📥 [API RESPONSE]", {
-        url: `${response.config.baseURL ?? ''}${response.config.url ?? ''}`,
+        url: `${response.config.baseURL ?? ""}${response.config.url ?? ""}`,
         status: response.status,
         data: response.data,
       });
@@ -60,9 +64,9 @@ api.interceptors.response.use(
   async (error) => {
     const res = error.response
     if (axios.isAxiosError(error)) {
-      if (__DEV__) {
+      if (false) {
         console.error("❌ [API ERROR]", {
-          url: `${error.config?.baseURL ?? ''}${error.config?.url ?? ''}`,
+          url: `${error.config?.baseURL ?? ""}${error.config?.url ?? ""}`,
           message: error.message,
           status: error.response?.status,
           data: error.response?.data,

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import api from "@/services";
 import { Option } from "@/types/forms";
 import { Picker } from "@react-native-picker/picker";
@@ -14,7 +15,12 @@ interface SelectBoxProps {
   rules?: any;
   placeholder?: string;
   disabled?: boolean;
-  question_type?: "user" | "division" | "sub_division" | "location" | "dropdown";
+  question_type?:
+    | "user"
+    | "division"
+    | "sub_division"
+    | "location"
+    | "dropdown";
   error?: FieldError;
   style?: any;
 }
@@ -67,7 +73,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({
           break;
 
         default:
-          mapped = options; 
+          mapped = options;
           break;
       }
 
@@ -85,7 +91,9 @@ const SelectBox: React.FC<SelectBoxProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      {label && <Text style={[styles.label, { color: colors.text }]}>{label}</Text>}
+      {label && (
+        <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
+      )}
 
       <Controller
         control={control}
@@ -106,7 +114,11 @@ const SelectBox: React.FC<SelectBoxProps> = ({
             >
               <Picker.Item label={placeholder} value="" />
               {dropOptions.map((option) => (
-                <Picker.Item key={option.id.toString()} label={option.option} value={option.id} />
+                <Picker.Item
+                  key={option.id.toString()}
+                  label={option.option}
+                  value={option.id}
+                />
               ))}
             </Picker>
           </View>

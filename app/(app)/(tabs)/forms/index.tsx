@@ -22,7 +22,7 @@ const Forms = () => {
 
   return (
     <>
-      <Header title={"Forms"} />
+      {/* <Header title={"Forms"} /> */}
       <View style={styles.container}>
         <SearchBar placeholder="Filter" onSearch={handleSearch} />
         <FormsTabs />
