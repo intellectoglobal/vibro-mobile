@@ -5,8 +5,8 @@ import store from "@/store";
 import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
 
 // Configure your base API URL
-const BASE_URL = "https://vibro.onrender.com/api";
-// const BASE_URL = "http://192.168.1.47:8000/api";
+// const BASE_URL = "https://vibro.onrender.com/api";
+const BASE_URL = "http://192.168.1.47:8000/api";
 // const BASE_URL = "http://192.168.1.22:8000/api";
 
 

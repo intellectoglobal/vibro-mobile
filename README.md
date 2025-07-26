@@ -19,7 +19,10 @@ for local build :
  eas build -p android --profile preview-apk --local
  
 for Cloud Build : 
- eas build -p android --profile preview-apk 
+ eas build --profile production --platform android
+
+for Cloud Debug apk build : 
+ eas build --profile preview-apk-android --platform android
 
 In the output, you'll find options to open the app in a
 

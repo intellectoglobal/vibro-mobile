@@ -20,13 +20,13 @@ import mockData from "../utils/mockData";
 const MultiStageFormScreen = ({ formId }: any) => {
   const [stages, setStage] = useState<Stage[]>([]);
   const [loading, setLoading] = useState(true);
-  const user = useSelector((state: RootState) => state.user)
-  console.log("user ::", user.id)
+  const user = useSelector((state: RootState) => state.user);
+  console.log("user ::", user.id);
   const getFormStages = async (formId: number) => {
     try {
       const response = await api.get(`form/${formId}/`);
       setStage(response.data?.stages);
-      console.log("response ::", response.data?.stages)
+      console.log("response ::", response.data?.stages);
     } catch (error: any) {
       console.error("Error Occurred in the getFormStages ::", error.message);
     } finally {
@@ -51,8 +51,8 @@ const MultiStageFormScreen = ({ formId }: any) => {
     onSubmit,
     goToPrevStage,
     // goToNextStage,
-    goToStage
-  } = useMultiStageForm(stages) as any;
+    goToStage,
+  } = useMultiStageForm(mockData) as any;
 
   if (loading) {
     return (
@@ -70,7 +70,7 @@ const MultiStageFormScreen = ({ formId }: any) => {
       >
         <View style={styles.stageIndicator}>
           <StageIndicator
-            stages={stages}
+            stages={mockData}
             currentStageIndex={currentStageIndex}
             completedStages={completedStages}
             onStagePress={(index) => goToStage(index)}
@@ -118,7 +118,8 @@ const MultiStageFormScreen = ({ formId }: any) => {
             disabled={!isValid}
           >
             <Text style={styles.buttonText}>
-              {isLastStage ? "Submit" : "Next"}
+              {/* {isLastStage ? "Submit" : "Next"} */}
+              {"Submit"}
             </Text>
           </TouchableOpacity>
         </View>

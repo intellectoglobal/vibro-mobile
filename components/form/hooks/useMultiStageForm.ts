@@ -59,9 +59,6 @@ const onSubmit = (data: any) => {
   const extractId = (val: any) =>
     typeof val === "object" && val !== null && "id" in val ? val.id : val;
 
-  if (!isLastStage) {
-    goToNextStage();
-  } else {
     const Form = currentStage.form;
     const stageId = currentStage.id;
     const questions = currentStage.questions;
@@ -93,6 +90,7 @@ const onSubmit = (data: any) => {
                 : String(extractId(subValue));
 
             const subAnswer: any = {
+              question: subMeta.id,
               question_uuid: subQUuid,
               question_type: subMeta.question_type,
               answer: answerValue,
@@ -135,6 +133,7 @@ const onSubmit = (data: any) => {
 
         const item: any = {
           question_uuid,
+          question: questionMeta.id,
           question_type: questionMeta.question_type,
           answer: answerValue,
           stage: stageId,
@@ -163,6 +162,7 @@ const onSubmit = (data: any) => {
         payload.answers.push(item);
       }
     }
+    // goToNextStage();
 
     console.log("📦 Final Flat Payload:", payload);
 
@@ -175,7 +175,6 @@ const onSubmit = (data: any) => {
 
     // const res = api.post("/form/submit-answer/", payload)
     // console.log("response ::", res)
-  }
 };
 
 
