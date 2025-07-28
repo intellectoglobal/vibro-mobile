@@ -4,9 +4,11 @@ export const AUTH_VERIFY_OTP = `${AUTH}verify-otp/`;
 
 export const FORM = "/form/";
 export const USER = "/user";
-export const FOLDER = `${USER}/assigned-folders/`;
-export const ASSIGNED_FOLDER_FORMS = `${USER}/assigned-forms/`;
+export const FOLDER = `/form/used-folders/user`;
+export const ASSIGNED_FOLDER_FORMS = `/form/assigned/user/`;
 
 export const USERS_LIST = "/users/list";
 export const DIVISION = "/division/";
 export const LOCATION = "/location/";
+
+export const ASSIGN_API = "/form/assignments/"

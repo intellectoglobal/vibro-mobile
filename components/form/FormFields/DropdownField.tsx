@@ -55,10 +55,8 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
     setLoading(true);
     try {
       const url = URLS[question?.question_type];
-      console.log("url ::", url, question?.question_type)
       if (url) {
         const response = await api.get(url);
-        console.log("response ::", response)
         const options = response?.data.map((item: any) => {
           let option = item.name ?? `Unnamed ${question?.question_type}`;
           option =

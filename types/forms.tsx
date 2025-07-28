@@ -1,3 +1,4 @@
+import { FormType } from "@/components/form/types/formTypes";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 export interface NavigationProps {
@@ -5,6 +6,7 @@ export interface NavigationProps {
 }
 
 export interface ItemType {
+  form?: FormType
   id: string;
   title?: string;
   name?: string;

@@ -37,7 +37,6 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
   const dispatch = useDispatch();
   // User profile data - could come from props or context
   const user = useSelector((state: RootState) => state.user);
-  console.log("user ::", user.id)
   const userProfile: UserProfile = {
     name: user.first_name,
     company: "vibro",

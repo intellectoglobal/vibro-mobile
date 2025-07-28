@@ -13,7 +13,7 @@ const FileList = (props: ItemsProps) => (
   >
     <View className="flex-row items-center">
       <FeatherIcon name="file-text" size={24} color="#6b7280" />
-      <Text className="text-base text-gray-800 pl-2">{props.items.title}</Text>
+      <Text className="text-base text-gray-800 pl-2">{props.items.form? props.items.form.title : props.items.title}</Text>
     </View>
     <SimpleLineIconsIcon name="arrow-right" size={22} color="#6b7280" />
   </TouchableOpacity>

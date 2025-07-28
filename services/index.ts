@@ -6,7 +6,7 @@ import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
 
 // Configure your base API URL
 // const BASE_URL = "https://vibro.onrender.com/api";
-const BASE_URL = "http://192.168.61.141:8000/api";
+const BASE_URL = "http://172.17.208.1:8000/api"
 // const BASE_URL = "http://192.168.1.22:8000/api";
 
 
@@ -29,7 +29,7 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${authInfo.access}`;
     }
 
-    if (false) {
+    if (__DEV__) {
       console.log("📤 [API REQUEST]", {
         url: `${config.baseURL ?? ""}${config.url ?? ""}`,
         method: config.method,
@@ -158,3 +158,7 @@ export const del = async <T>(
 
 // Export the configured axios instance
 export default api;
+export function* getFormAssignments(getFormAssignments: any, payload: any): any {
+    throw new Error("Function not implemented.");
+}
+

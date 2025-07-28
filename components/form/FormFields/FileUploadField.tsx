@@ -3,8 +3,16 @@ import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import { Controller } from "react-hook-form";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Question } from "../types/formTypes";
+import { uploadToCloudinary } from "@/services/uploadToCloudinary";
 
 interface FileUploadQuestionProps {
   question: Question;
@@ -19,6 +27,95 @@ const FileUploadField: React.FC<FileUploadQuestionProps> = ({
   errors,
   name,
 }) => {
+  const handleNewFiles = async (
+    assets: any[],
+    type: "image" | "video",
+    onChange: (files: any[]) => void
+  ) => {
+    Alert.alert(
+      "Upload Confirmation",
+      "Do you want to upload the selected file(s) to Cloudinary?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Upload",
+          onPress: async () => {
+            try {
+              const uploaded: any[] = [];
+
+              for (const asset of assets) {
+                try {
+                  const mimeType =
+                    asset.mimeType ||
+                    asset.type ||
+                    (type === "video" ? "video/mp4" : "image/jpeg");
+
+                  const extension =
+                    mimeType.split("/")[1] ||
+                    (type === "video" ? "mp4" : "jpg");
+
+                  const file = {
+                    uri: asset.uri,
+                    name:
+                      asset.fileName ||
+                      asset.name ||
+                      `${type}_${Date.now()}.${extension}`,
+                    type: mimeType,
+                  };
+
+                  console.log("📤 Uploading file to Cloudinary:", file);
+
+                  const cloudinaryUrl = await uploadToCloudinary(
+                    file,
+                    "mobile_unsigned", // 🔁 Replace
+                    "dxppo6n3w" // 🔁 Replace
+                  );
+
+                  console.log("✅ Uploaded to Cloudinary:", cloudinaryUrl);
+
+                  uploaded.push({
+                    uri: cloudinaryUrl,
+                    name: file.name,
+                    type,
+                    size: asset.fileSize || asset.size || 0,
+                  });
+                } catch (uploadErr: any) {
+                  console.error("❌ Upload failed for file:", asset.uri);
+                  console.error(
+                    "🔍 Error message:",
+                    uploadErr?.message || uploadErr
+                  );
+                }
+              }
+
+              if (uploaded.length === 0) {
+                Alert.alert(
+                  "Upload Failed",
+                  "None of the files could be uploaded."
+                );
+                return;
+              }
+
+              const updatedFiles = [...files, ...uploaded].slice(
+                0,
+                question?.number_of_file_allowed || 5
+              );
+
+              setFiles(updatedFiles);
+              onChange(updatedFiles);
+            } catch (err: any) {
+              console.error("❌ Unexpected upload error:", err?.message || err);
+              Alert.alert(
+                "Upload Failed",
+                err?.message || "Something went wrong."
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const [files, setFiles] = useState<any[]>([]);
 
   const pickFile = async (onChange: (files: any[]) => void) => {
@@ -67,7 +164,7 @@ const FileUploadField: React.FC<FileUploadQuestionProps> = ({
           const fileType = result.mimeType?.startsWith("audio/")
             ? "audio"
             : "file";
-          handleNewFiles([result], fileType, onChange);
+          // handleNewFiles([result], fileType, onChange);
         }
       }
     } catch (error) {
@@ -75,26 +172,26 @@ const FileUploadField: React.FC<FileUploadQuestionProps> = ({
     }
   };
 
-  const handleNewFiles = (
-    assets: any[],
-    type: string,
-    onChange: (files: any[]) => void
-  ) => {
-    const newFiles = assets.map((asset) => ({
-      uri: asset.uri,
-      type,
-      name: asset.name || asset.fileName || `${type}_${Date.now()}`,
-      size: asset.size || 0,
-    }));
+  // const handleNewFiles = (
+  //   assets: any[],
+  //   type: string,
+  //   onChange: (files: any[]) => void
+  // ) => {
+  //   const newFiles = assets.map((asset) => ({
+  //     uri: asset.uri,
+  //     type,
+  //     name: asset.name || asset.fileName || `${type}_${Date.now()}`,
+  //     size: asset.size || 0,
+  //   }));
 
-    const updatedFiles = [...files, ...newFiles].slice(
-      0,
-      question.number_of_file_allowed || 5
-    );
+  //   const updatedFiles = [...files, ...newFiles].slice(
+  //     0,
+  //     question.number_of_file_allowed || 5
+  //   );
 
-    setFiles(updatedFiles);
-    onChange(updatedFiles);
-  };
+  //   setFiles(updatedFiles);
+  //   onChange(updatedFiles);
+  // };
 
   const removeFile = (index: number, onChange: (files: any[]) => void) => {
     const updatedFiles = files.filter((_, i) => i !== index);

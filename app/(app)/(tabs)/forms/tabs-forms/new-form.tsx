@@ -13,6 +13,12 @@ import {
 } from "react-native";
 import FileList from "../ListItems/FileList";
 import FolderList from "../ListItems/FolderList";
+import { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import FORMS from "./utility"
+import { FormListItem } from "@/components/form/types/formTypes";
+import { useDispatch } from "react-redux";
+import { fetchFormAssignments } from "@/Redux/actions/formAssignmentActions"; // 👈 action creator
 
 export const DATA = [
   { id: "1", name: "Documents" },
@@ -41,12 +47,16 @@ export interface Form {
   title: string;
 }
 
+
 export default function NewForm() {
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [forms, setForms] = useState<Form[]>([]);
+  const [forms, setForms] = useState<FormListItem[]>();
   const [loading, setLoading] = useState(true);
   const [formRefreshing, setFormRefreshing] = useState(false);
   const [folderRefreshing, setFolderRefreshing] = useState(false);
+  const user = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
+  // console.log("user ::", user.id);
 
   const routeFormsFolder = (folder: any) => {
     router.push({
@@ -65,15 +75,18 @@ export default function NewForm() {
   const getOrgFolder = async () => {
     try {
       const response = (await Api.get(FOLDER)) as any;
+      console.log("list of folders ::", response)
       setFolders(response || []);
     } catch (error: any) {
-      console.error("Error Occurred in the getOrgFolder ::", error);
+      // console.error("Error Occurred in the getOrgFolder ::", error);
     }
   };
 
   const getAllFormsForUser = async () => {
     try {
-      const response = (await Api.get(ASSIGNED_FOLDER_FORMS)) as any;
+      const response = (await Api.get(`${ASSIGNED_FOLDER_FORMS}${user.id}/`)) as any;
+      console.log("list of forms ::", response)
+      dispatch(fetchFormAssignments(response)); 
       setForms(response || []);
     } catch (error: any) {
       console.error(
@@ -157,13 +170,13 @@ export default function NewForm() {
           onPress={(expanded) => console.log("Accordion expanded:", expanded)}
         >
           <FlatList
-            data={forms}
-            keyExtractor={(item) => item.id}
+            data={FORMS}
+            keyExtractor={(item) => item.form.id}
             contentContainerStyle={{ paddingBottom: 50 }}
             refreshing={formRefreshing}
             onRefresh={onFormRefresh}
             renderItem={({ item }) => (
-              <FileList items={item} onClick={routeFormsFileList} />
+              <FileList items={item.form} onClick={routeFormsFileList} />
             )}
             ListEmptyComponent={
               <Text style={styles.emptyText}>
