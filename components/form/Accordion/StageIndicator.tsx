@@ -29,13 +29,13 @@ const StageIndicator: React.FC<StageIndicatorProps> = ({
       contentContainerStyle={styles.scrollContainer}
     >
       {stages.map((stage: any, index: number) => {
-        console.log("currentStageIndex ::",currentStageIndex, "index ::", index)
+        // console.log("currentStageIndex ::",currentStageIndex, "index ::", index)
         const isCompleted = completedStages.includes(index); //stage.is_completed 
-        console.log("isCompleted ::",isCompleted)
+        // console.log("isCompleted ::",isCompleted)
         const isCurrent = index === currentStageIndex;
-        console.log("isCurrent ::",isCurrent, currentStageIndex, index)
+        // console.log("isCurrent ::",isCurrent, currentStageIndex, index)
         const isDisabled = false //index > 0 && !completedStages.includes(index - 1);
-        console.log("isCurrent ::",isCurrent)
+        // console.log("isCurrent ::",isCurrent)
 
         return (
           <TouchableOpacity

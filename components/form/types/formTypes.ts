@@ -55,3 +55,24 @@ export interface FormOption {
   option: string;
   order: number;
 }
+
+
+export interface FormType {
+    id: string;
+    title: string;
+    form_type: string;
+    created_at: string;
+    created_by: number;
+    organization: number;
+}
+
+export interface FormListItem {
+    form: FormType;
+    stage_id: number;
+    stage_order: number;
+    stage_assignment_id: number;
+    stage_assignment_uuid: string;
+    form_submission_id: number;
+    is_stage_submission_pending: boolean;
+    is_form_submission_pending: boolean;
+}

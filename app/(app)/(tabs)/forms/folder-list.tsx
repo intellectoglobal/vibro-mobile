@@ -20,8 +20,9 @@ export default function FolderList() {
 
   const getFolderFormsForUser = async () => {
     try {
-      const response = await api.get(`${ASSIGNED_FOLDER_FORMS}${folderId}/`);
-      setForms(response.data.forms);
+      const response = await api.get(`/form/assigned/folder/${folderId}/`);
+      console.log(response.data)
+      setForms(response.data);
     } catch (error: any) {
       console.error("Error Occurred in the getOrgFolder ::", error.message);
     } finally {
