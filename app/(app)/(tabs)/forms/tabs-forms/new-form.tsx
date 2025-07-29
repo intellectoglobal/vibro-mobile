@@ -100,9 +100,11 @@ export default function NewForm() {
 
   const getAllAssingedStageAccessId = async () => {
     try {
+      console.log("userId ::", user.id)
       const response = (await Api.get(
         `${GETALLASSIGNEDSTAGESACCESSID}${user.id}/`
       )) as any;
+      console.log("assinment uuidd ::", response)
       dispatch(fetchFormAssignments(response));
     } catch (error: any) {
       console.error(

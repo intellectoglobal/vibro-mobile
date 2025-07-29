@@ -27,12 +27,11 @@ const CheckboxField: React.FC<CheckboxesQuestionProps> = ({
 }) => {
 
   const selectedIds = question?.answers?.answer
-  ? question.answers.answer.split("|").map((id: string) => Number(id))
-  : [];
+    ? question.answers.answer.split("|").map((id: string) => Number(id))
+    : [];
 
-  console.log("selectedIds ::",selectedIds)
+  const answers = question?.options.filter((opt) => selectedIds.includes(opt.id))
 
-  
   return (
     <View style={styles.container}>
       <Text style={styles.label}>
@@ -55,8 +54,8 @@ const CheckboxField: React.FC<CheckboxesQuestionProps> = ({
         }}
         render={({ field: { onChange, value } }) => (
           <View style={styles.optionsContainer}>
-            {question.options.map((option) => {
-              const isSelected = value?.includes(option.id);
+            {(isCompleted ? answers : question.options).map((option) => {
+              const isSelected = isCompleted ? true : value?.includes(option.id);
 
               return (
                 <TouchableOpacity

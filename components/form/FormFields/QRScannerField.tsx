@@ -14,6 +14,7 @@ interface QRScannerFieldProps {
   control: any;
   errors: any;
   name: string;
+  isCompleted?: boolean
 }
 
 const QRScannerField: React.FC<QRScannerFieldProps> = ({
@@ -21,26 +22,21 @@ const QRScannerField: React.FC<QRScannerFieldProps> = ({
   control,
   errors,
   name,
+  isCompleted
 }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
-  const [scannedData, setScannedData] = useState<string | null>(null);
   const [facing, setFacing] = useState<"front" | "back">("back");
 
+
+
   useEffect(() => {
-    // Request camera permissions when component mounts
     (async () => {
       if (!permission?.granted) {
         await requestPermission();
       }
     })();
   }, []);
-
-  const handleBarCodeScanned = (scanningResult: BarcodeScanningResult) => {
-    setIsScanning(false);
-    setScannedData(scanningResult.data);
-    control.setValue(name, scanningResult.data);
-  };
 
   const startScanning = () => {
     if (!permission?.granted) {
@@ -57,12 +53,6 @@ const QRScannerField: React.FC<QRScannerFieldProps> = ({
       return;
     }
     setIsScanning(true);
-    setScannedData(null);
-  };
-
-  const resetScan = () => {
-    setScannedData(null);
-    control.setValue(name, "");
   };
 
   const toggleCameraFacing = () => {
@@ -76,102 +66,138 @@ const QRScannerField: React.FC<QRScannerFieldProps> = ({
       rules={{
         required: question.is_required ? "QR code scan is required" : false,
       }}
-      render={({ field: { value } }) => (
-        <View style={styles.container}>
-          <Text style={styles.label}>
-            {question.question}
-            {question.is_required && <Text style={styles.required}> *</Text>}
-          </Text>
+      render={({ field: { value, onChange } }) => {
+        const [scannedData, setScannedData] = useState<string | null>(
+          value || ""
+        );
 
-          {question.description && (
-            <Text style={styles.description}>{question.description}</Text>
-          )}
+        const handleBarCodeScanned = (scanningResult: BarcodeScanningResult) => {
+          setIsScanning(false);
+          setScannedData(scanningResult.data);
+          onChange(scanningResult.data); // ✅ use onChange here
+        };
 
-          {isScanning ? (
-            <View style={styles.cameraContainer}>
-              <CameraView
-                style={styles.camera}
-                facing={facing}
-                barcodeScannerSettings={{
-                  barcodeTypes: ["qr"],
-                }}
-                onBarcodeScanned={
-                  scannedData ? undefined : handleBarCodeScanned
-                }
-              >
-                <View style={styles.cameraOverlay}>
-                  <View style={styles.cameraFrame} />
-                  <Text style={styles.scanText}>
-                    Align QR code within the frame
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.flipButton}
-                  onPress={toggleCameraFacing}
+        const resetScan = () => {
+          setScannedData(null);
+          onChange(""); // ✅ reset with onChange
+        };
+
+        return (
+          <View style={styles.container}>
+            <Text style={styles.label}>
+              {question.question}
+              {question.is_required && (
+                <Text style={styles.required}> *</Text>
+              )}
+            </Text>
+
+            {question.description && (
+              <Text style={styles.description}>{question.description}</Text>
+            )}
+
+            {isScanning ? (
+              <View style={styles.cameraContainer}>
+                <CameraView
+                  style={styles.camera}
+                  facing={facing}
+                  barcodeScannerSettings={{
+                    barcodeTypes: ["qr"],
+                  }}
+                  onBarcodeScanned={
+                    scannedData ? undefined : handleBarCodeScanned
+                  }
                 >
-                  <MaterialIcons
-                    name="flip-camera-ios"
-                    size={24}
-                    color="white"
-                  />
-                </TouchableOpacity>
-              </CameraView>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setIsScanning(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.scanContainer}>
-              {scannedData ? (
-                <>
-                  <View style={styles.successContainer}>
-                    <MaterialIcons
-                      name="check-circle"
-                      size={24}
-                      color="#34C759"
-                    />
-                    <Text style={styles.successText}>
-                      QR code scanned successfully
+                  <View style={styles.cameraOverlay}>
+                    <View style={styles.cameraFrame} />
+                    <Text style={styles.scanText}>
+                      Align QR code within the frame
                     </Text>
                   </View>
-                  <Text
-                    style={styles.scannedData}
-                    numberOfLines={1}
-                    ellipsizeMode="middle"
-                  >
-                    {scannedData}
-                  </Text>
                   <TouchableOpacity
-                    style={styles.rescanButton}
+                    style={styles.flipButton}
+                    onPress={toggleCameraFacing}
+                  >
+                    <MaterialIcons
+                      name="flip-camera-ios"
+                      size={24}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                </CameraView>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => setIsScanning(false)}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.scanContainer}>
+                {scannedData ? (
+                  <>
+                    <View style={styles.successContainer}>
+                      <MaterialIcons
+                        name="check-circle"
+                        size={24}
+                        color="#34C759"
+                      />
+                      <Text style={styles.successText}>
+                        QR code scanned successfully
+                      </Text>
+                    </View>
+                    <Text
+                      style={styles.scannedData}
+                      numberOfLines={1}
+                      ellipsizeMode="middle"
+                    >
+                      {scannedData}
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.rescanButton}
+                      onPress={startScanning}
+                    >
+                      <Text style={styles.rescanButtonText}>Scan Again</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.rescanButton}
+                      onPress={resetScan}
+                    >
+                      <Text style={styles.rescanButtonText}>Clear</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (isCompleted ? (
+                  <>
+                    <Text
+                      style={styles.scannedData}
+                      numberOfLines={1}
+                      ellipsizeMode="middle"
+                    >
+                      {question?.answers?.answer}
+                    </Text>
+                  </>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.scanButton}
                     onPress={startScanning}
                   >
-                    <Text style={styles.rescanButtonText}>Scan Again</Text>
+                    <MaterialIcons
+                      name="qr-code-scanner"
+                      size={24}
+                      color="white"
+                    />
+                    <Text style={styles.scanButtonText}>Scan QR Code</Text>
                   </TouchableOpacity>
-                </>
-              ) : (
-                <TouchableOpacity
-                  style={styles.scanButton}
-                  onPress={startScanning}
-                >
-                  <MaterialIcons
-                    name="qr-code-scanner"
-                    size={24}
-                    color="white"
-                  />
-                  <Text style={styles.scanButtonText}>Scan QR Code</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
+                )
+                )}
+              </View>
+            )}
 
-          {errors[name] && (
-            <Text style={styles.errorText}>{errors[name].message}</Text>
-          )}
-        </View>
-      )}
+            {errors[name] && (
+              <Text style={styles.errorText}>{errors[name].message}</Text>
+            )}
+          </View>
+        );
+      }}
     />
   );
 };

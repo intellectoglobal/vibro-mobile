@@ -17,6 +17,7 @@ interface DateQuestionProps {
   control: any;
   errors: any;
   name: string;
+  isCompleted? : boolean
 }
 
 const DateTimeField: React.FC<DateQuestionProps> = ({
@@ -24,11 +25,14 @@ const DateTimeField: React.FC<DateQuestionProps> = ({
   control,
   errors,
   name,
+  isCompleted
 }) => {
   const [showPicker, setShowPicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<"date" | "time">(
     question.question_type === "time" ? "time" : "date"
   );
+
+  console.log("answer : ", question?.answers?.answer)
 
   const getDisplayValue = (value: string) => {
     if (!value) return question.question_hint || "Select";
@@ -101,6 +105,7 @@ const DateTimeField: React.FC<DateQuestionProps> = ({
           <>
             <TouchableOpacity
               style={[styles.inputContainer, errors[name] && styles.inputError]}
+              disabled={isCompleted}
               onPress={() => {
                 setPickerMode(
                   question.question_type === "time" ? "time" : "date"
@@ -108,12 +113,13 @@ const DateTimeField: React.FC<DateQuestionProps> = ({
                 setShowPicker(true);
               }}
             >
-              <Text style={styles.inputText}>{getDisplayValue(value)}</Text>
+              <Text style={styles.inputText}>{getDisplayValue(isCompleted? question?.answers?.answer : value)}</Text>
               <MaterialIcons name={getIcon()} size={20} color="#666" />
             </TouchableOpacity>
 
             {showPicker && (
               <DateTimePicker
+                disabled={false}
                 value={value ? new Date(value) : new Date()}
                 mode={getPickerMode()}
                 display={Platform.OS === "ios" ? "spinner" : "default"}
