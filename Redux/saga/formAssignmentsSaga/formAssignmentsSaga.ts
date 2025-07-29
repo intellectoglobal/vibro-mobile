@@ -7,7 +7,6 @@ function* fetchFormAssignmentsSaga(action: any): Generator<any, void, any> {
   try {
     const rawData = action.payload;
 
-    console.log("rawData ::", rawData)
 
     const transformedData = rawData.map((item: any) => ({
       formId: item.form.id,

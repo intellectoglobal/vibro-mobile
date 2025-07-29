@@ -15,6 +15,7 @@ interface MultipleChoiceFieldProps {
   control: any;
   errors: any;
   name: string;
+  isCompleted?: boolean;
 }
 
 const MultipleChoiceField: React.FC<MultipleChoiceFieldProps> = ({
@@ -22,6 +23,7 @@ const MultipleChoiceField: React.FC<MultipleChoiceFieldProps> = ({
   control,
   errors,
   name,
+  isCompleted,
 }) => {
   const isCheckbox = question.question_type === "checkboxes";
   const hasOtherOption = question.is_other;
@@ -81,6 +83,9 @@ const MultipleChoiceField: React.FC<MultipleChoiceFieldProps> = ({
         };
 
         const isOptionSelected = (optionId: number | string) => {
+          if (isCompleted) {
+            return optionId === Number(question?.answers?.answer);
+          }
           return value?.some((item: any) =>
             item?.id ? item.id === optionId : item === optionId
           );
@@ -100,6 +105,7 @@ const MultipleChoiceField: React.FC<MultipleChoiceFieldProps> = ({
             <View style={styles.optionsContainer}>
               {question.options.map((option) => (
                 <TouchableOpacity
+                  disabled={isCompleted}
                   key={option.id}
                   style={[
                     styles.optionButton,

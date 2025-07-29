@@ -1,7 +1,11 @@
 import Accordion from "@/components/Accordion";
 import { ALL_FORMS, FOLDERS } from "@/constants/forms";
 import * as Api from "@/services";
-import { ASSIGNED_FOLDER_FORMS, FOLDER } from "@/services/constants";
+import {
+  FOLDER,
+  GETALLASSIGNEDSTAGESACCESSID,
+  GETALLASSIGNFORMS,
+} from "@/services/constants";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -15,7 +19,7 @@ import FileList from "../ListItems/FileList";
 import FolderList from "../ListItems/FolderList";
 import { RootState } from "@/store";
 import { useSelector } from "react-redux";
-import FORMS from "./utility"
+import FORMS from "./utility";
 import { FormListItem } from "@/components/form/types/formTypes";
 import { useDispatch } from "react-redux";
 import { fetchFormAssignments } from "@/Redux/actions/formAssignmentActions"; // 👈 action creator
@@ -47,10 +51,9 @@ export interface Form {
   title: string;
 }
 
-
 export default function NewForm() {
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [forms, setForms] = useState<FormListItem[]>();
+  const [forms, setForms] = useState<Form[]>(DATA_FILE);
   const [loading, setLoading] = useState(true);
   const [formRefreshing, setFormRefreshing] = useState(false);
   const [folderRefreshing, setFolderRefreshing] = useState(false);
@@ -75,7 +78,7 @@ export default function NewForm() {
   const getOrgFolder = async () => {
     try {
       const response = (await Api.get(FOLDER)) as any;
-      console.log("list of folders ::", response)
+      console.log("list of folders ::", response);
       setFolders(response || []);
     } catch (error: any) {
       // console.error("Error Occurred in the getOrgFolder ::", error);
@@ -84,10 +87,23 @@ export default function NewForm() {
 
   const getAllFormsForUser = async () => {
     try {
-      const response = (await Api.get(`${ASSIGNED_FOLDER_FORMS}${user.id}/`)) as any;
-      console.log("list of forms ::", response)
-      dispatch(fetchFormAssignments(response)); 
-      setForms(response || []);
+      const response = (await Api.get(`${GETALLASSIGNFORMS}`)) as any;
+      console.log("list of forms ::", response);
+      setForms(response);
+    } catch (error: any) {
+      console.error(
+        "Error Occurred in the getAllFormsForUser ::",
+        error.message
+      );
+    }
+  };
+
+  const getAllAssingedStageAccessId = async () => {
+    try {
+      const response = (await Api.get(
+        `${GETALLASSIGNEDSTAGESACCESSID}${user.id}/`
+      )) as any;
+      dispatch(fetchFormAssignments(response));
     } catch (error: any) {
       console.error(
         "Error Occurred in the getAllFormsForUser ::",
@@ -100,6 +116,7 @@ export default function NewForm() {
     try {
       await getOrgFolder();
       await getAllFormsForUser();
+      await getAllAssingedStageAccessId();
     } catch (error: any) {
       console.error("Error while fetching data:", error.message);
     } finally {
@@ -114,12 +131,14 @@ export default function NewForm() {
   const onFolderRefresh = useCallback(async () => {
     setFolderRefreshing(true);
     await getOrgFolder();
+    await getAllAssingedStageAccessId();
     setFolderRefreshing(false);
   }, []);
 
   const onFormRefresh = useCallback(async () => {
     setFormRefreshing(true);
     await getAllFormsForUser();
+    await getAllAssingedStageAccessId();
     setFormRefreshing(false);
   }, []);
 
@@ -170,13 +189,13 @@ export default function NewForm() {
           onPress={(expanded) => console.log("Accordion expanded:", expanded)}
         >
           <FlatList
-            data={FORMS}
-            keyExtractor={(item) => item.form.id}
+            data={forms}
+            keyExtractor={(item) => item.id}
             contentContainerStyle={{ paddingBottom: 50 }}
             refreshing={formRefreshing}
             onRefresh={onFormRefresh}
             renderItem={({ item }) => (
-              <FileList items={item.form} onClick={routeFormsFileList} />
+              <FileList items={item} onClick={routeFormsFileList} />
             )}
             ListEmptyComponent={
               <Text style={styles.emptyText}>

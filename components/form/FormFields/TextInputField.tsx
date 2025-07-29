@@ -8,6 +8,7 @@ interface TextInputFieldProps {
   control: any;
   errors: any;
   name: string;
+  isCompleted?: boolean;
 }
 
 const TextInputField: React.FC<TextInputFieldProps> = ({
@@ -15,7 +16,10 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   control,
   errors,
   name,
+  isCompleted,
 }) => {
+  console.log("sort answer :::", question?.answers?.answer, isCompleted);
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>
@@ -37,10 +41,11 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
             style={styles.input}
             onChangeText={onChange}
             onBlur={onBlur}
-            value={value}
+            value={question?.answers?.answer?? value}
             placeholder={question.question_hint || ""}
             multiline={question.question_type === "long_answer"}
             numberOfLines={question.question_type === "long_answer" ? 4 : 1}
+            editable={!isCompleted}
           />
         )}
       />

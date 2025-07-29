@@ -4,12 +4,11 @@ import { useForm } from "react-hook-form";
 import { Stage } from "../types/formTypes";
 import { generateValidationSchema } from "../utils/validationSchemas";
 import api from "@/services";
-import uuid from 'react-native-uuid';
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { router } from "expo-router";
 import { fetchFormAssignments } from "@/Redux/actions/formAssignmentActions";
-import { ASSIGNED_FOLDER_FORMS } from "@/services/constants";
+import { GETALLASSIGNEDSTAGESACCESSID } from "@/services/constants";
 import { useDispatch } from "react-redux";
 
 export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any, setFormSubmissionId: any) => {
@@ -65,8 +64,8 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     }
   };
 
-  const getStageAssingUuid = async () => {
-    const response = (await api.get(`${ASSIGNED_FOLDER_FORMS}${user.id}/`)) as any;
+  const getStageAssignUuid = async () => {
+    const response = (await api.get(`${GETALLASSIGNEDSTAGESACCESSID}${user.id}/`)) as any;
     console.log("stage access  ::", response.data)
     dispatch(fetchFormAssignments(response.data));
   }
@@ -74,7 +73,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
 
 
   const onSubmit = async (data: any) => {
-    // console.log("cuurent uuids ::", assignments)
+    // console.log("current uuids ::", assignments)
     const extractId = (val: any) =>
       typeof val === "object" && val !== null && "id" in val ? val.id : val;
 
@@ -203,12 +202,12 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
       if (res?.data?.next_stage_assigning_required) {
         setFormSubmissionId(res?.data?.form_submission_id)
         setShowSendButton(true); // show "Send to Next" button
-        getStageAssingUuid()
+        getStageAssignUuid()
       } else {
         router.replace("/(app)/(tabs)/forms"); // go back to form list
       }
     }).catch((error: any) => {
-      console.log("erorr Occured in the Onsubmit ::", error.message)
+      console.log("error Occured in the Onsubmit ::", error.message)
     })
 
   };

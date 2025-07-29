@@ -15,6 +15,7 @@ interface CheckboxesQuestionProps {
   control: any;
   errors: any;
   name: string;
+  isCompleted?: boolean
 }
 
 const CheckboxField: React.FC<CheckboxesQuestionProps> = ({
@@ -22,7 +23,16 @@ const CheckboxField: React.FC<CheckboxesQuestionProps> = ({
   control,
   errors,
   name,
+  isCompleted
 }) => {
+
+  const selectedIds = question?.answers?.answer
+  ? question.answers.answer.split("|").map((id: string) => Number(id))
+  : [];
+
+  console.log("selectedIds ::",selectedIds)
+
+  
   return (
     <View style={styles.container}>
       <Text style={styles.label}>
@@ -52,6 +62,7 @@ const CheckboxField: React.FC<CheckboxesQuestionProps> = ({
                 <TouchableOpacity
                   key={option.id}
                   style={styles.optionButton}
+                  disabled={isCompleted}
                   onPress={() => {
                     const newValue = value ? [...value] : [];
                     if (isSelected) {

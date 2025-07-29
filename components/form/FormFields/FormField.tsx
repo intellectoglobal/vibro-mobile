@@ -17,6 +17,7 @@ interface FormFieldProps {
   control: any;
   errors: any;
   name?: string;
+  isCompleted?: boolean
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -24,12 +25,14 @@ const FormField: React.FC<FormFieldProps> = ({
   control,
   errors,
   name = question.question_uuid,
+  isCompleted,
 }) => {
   const fieldProps = {
     question,
     control,
     errors,
     name,
+    isCompleted
   };
 
   switch (question.question_type) {
