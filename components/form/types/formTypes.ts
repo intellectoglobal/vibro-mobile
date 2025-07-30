@@ -6,6 +6,22 @@ export interface Option {
   order: number;
 }
 
+export interface Answers {
+  Form: number
+  answer: string
+  division: number | null
+  location: number | null
+  organization: number | null
+  question: number | null
+  question_type: string
+  stage: number
+  sub_division: number | null
+  submission: number | null
+  submitted_by: number | null
+  submitted_on: string
+  user: number
+}
+
 export interface Question {
   is_other: any;
   is_readonly: any;
@@ -23,6 +39,7 @@ export interface Question {
   options: Option[];
   sub_questions: Question[];
   logics: Logic[];
+  answers: Answers
   // ... other question properties
 }
 
@@ -38,6 +55,8 @@ export interface Logic {
 }
 
 export interface Stage {
+  completed_on: string;
+  completed_by: any;
   form: any;
   assigned_to_user_id: number;
   is_completed: boolean;
@@ -58,21 +77,21 @@ export interface FormOption {
 
 
 export interface FormType {
-    id: string;
-    title: string;
-    form_type: string;
-    created_at: string;
-    created_by: number;
-    organization: number;
+  id: string;
+  title: string;
+  form_type: string;
+  created_at: string;
+  created_by: number;
+  organization: number;
 }
 
 export interface FormListItem {
-    form: FormType;
-    stage_id: number;
-    stage_order: number;
-    stage_assignment_id: number;
-    stage_assignment_uuid: string;
-    form_submission_id: number;
-    is_stage_submission_pending: boolean;
-    is_form_submission_pending: boolean;
+  form: FormType;
+  stage_id: number;
+  stage_order: number;
+  stage_assignment_id: number;
+  stage_assignment_uuid: string;
+  form_submission_id: number;
+  is_stage_submission_pending: boolean;
+  is_form_submission_pending: boolean;
 }

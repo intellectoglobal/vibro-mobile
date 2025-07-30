@@ -8,6 +8,7 @@ interface TextareaFieldProps {
   control: any;
   errors: any;
   name: string;
+  isCompleted? : boolean
 }
 
 const TextareaField: React.FC<TextareaFieldProps> = ({
@@ -15,10 +16,11 @@ const TextareaField: React.FC<TextareaFieldProps> = ({
   control,
   errors,
   name,
+  isCompleted
 }) => {
   const characterLimit = question.max_value || (null as any);
   const [characterCount, setCharacterCount] = React.useState(0);
-
+  
   return (
     <Controller
       control={control}
@@ -47,20 +49,23 @@ const TextareaField: React.FC<TextareaFieldProps> = ({
             style={[
               styles.textarea,
               errors[name] && styles.inputError,
-              { height: question.question_type === "long_answer" ? 150 : 80 },
+              { height: question.question_type === "long_answer" ? 150 : 80, 
+                fontWeight: isCompleted ? "400": "normal"
+              },
             ]}
             onChangeText={(text) => {
               onChange(text);
               setCharacterCount(text.length);
             }}
             onBlur={onBlur}
-            value={value}
+            value={question?.answers?.answer ?? value}
             placeholder={question.question_hint || ""}
             placeholderTextColor="#999"
             multiline
             numberOfLines={question.question_type === "long_answer" ? 4 : 3}
             textAlignVertical="top"
             maxLength={characterLimit}
+            editable={!isCompleted}
           />
 
           <View style={styles.footer}>

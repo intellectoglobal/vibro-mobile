@@ -9,12 +9,14 @@ interface TableFieldProps {
   question: Question;
   control: any;
   errors: any;
+  isCompleted?: boolean
 }
 
 const TableField: React.FC<TableFieldProps> = ({
   question,
   control,
   errors,
+  isCompleted,
 }) => {
   const minRows = question.min_value || 1;
   const maxRows = question.max_value || 10;
@@ -72,6 +74,7 @@ const TableField: React.FC<TableFieldProps> = ({
               control={control}
               errors={errors}
               name={`${question.question_uuid}.${index}.${subQuestion.question_uuid}`}
+              isCompleted={isCompleted}
             />
           ))}
         </View>

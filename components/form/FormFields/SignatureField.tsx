@@ -6,44 +6,123 @@ import {
   Image,
   TouchableOpacity,
   Modal,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import SignatureCanvas from "react-native-signature-canvas";
-import { Control, FieldError, FieldValues } from "react-hook-form";
+import { Control, FieldError, FieldValues, Controller } from "react-hook-form";
+import { uploadToCloudinary } from "@/services/uploadToCloudinary";
+import { Question } from "../types/formTypes";
+
+// Helper to extract public_id from a Cloudinary URL
+const extractCloudinaryPublicId = (url: string) => {
+  const parts = url.split("/");
+  const lastPart = parts[parts.length - 1];
+  const filename = lastPart.split(".")[0];
+  const folderPath = parts.slice(6, parts.length - 1).join("/");
+  return `${folderPath}/${filename}`;
+};
+
+// Stub for Cloudinary delete (replace with actual API call in production)
+const deleteFromCloudinary = async (publicId: string, cloudName: string) => {
+  console.log("🔄 Deleting signature from Cloudinary:", publicId);
+  await new Promise((res) => setTimeout(res, 1000)); // Simulate delay
+  console.log("✅ Signature deleted from Cloudinary");
+};
 
 interface CustomSignatureProps {
-  control: Control<FieldValues>;
+  question: Question;
+  control: any;
+  errors: any;
   name: string;
-  label?: string;
-  rules?: any;
-  disabled?: boolean;
-  error?: FieldError;
-  style?: any;
-  isRequired?: boolean;
+  isCompleted?: boolean
 }
 
 const CustomSignature: React.FC<CustomSignatureProps> = ({
-  label,
-  error,
-  style,
-  isRequired = false,
+  control,
+  name,
+  question,
+  errors,
+  isCompleted
 }) => {
-  const [signature, setSignature] = useState<string | null>(null); // saved image
+  const [signatureUrl, setSignatureUrl] = useState<string | null>(question?.answers?.answer); // Cloudinary URL
+  const [uploading, setUploading] = useState(false); // Upload progress state
+  const [deleting, setDeleting] = useState(false); // Deletion progress state
   const [modalVisible, setModalVisible] = useState(false);
-  const [tempSignature, setTempSignature] = useState<string | null>(null);
+  const [tempSignature, setTempSignature] = useState<string | null>(null); // Temporary base64
   const sigRef = useRef<any>(null);
-
   const handleOK = (sig: string) => {
-    setTempSignature(sig);
+    setTempSignature(sig); // Store base64 temporarily
   };
 
   const handleEnd = () => {
     sigRef.current?.readSignature();
   };
 
-  const handleSave = () => {
-    if (tempSignature) {
-      setSignature(tempSignature);
+  const handleSave = async (onChange: (value: string) => void) => {
+    if (!tempSignature) {
+      Alert.alert("Error", "No signature to save.");
+      return;
+    }
+
+    try {
+      setUploading(true);
+      // Ensure base64 is clean (remove data URI prefix)
+      const cleanBase64 = tempSignature.replace(/^data:image\/png;base64,/, "");
+      const file = {
+        uri: tempSignature, // Keep original URI for compatibility
+        base64: cleanBase64, // Add clean base64 for Cloudinary
+        name: `signature_${Date.now()}.png`,
+        type: "image/png",
+      };
+
+      console.log("📤 Uploading signature:", {
+        name: file.name,
+        type: file.type,
+        uri: file.uri.substring(0, 50) + "...", // Log partial URI for brevity
+      });
+
+      // Upload to Cloudinary with retry logic
+      let cloudinaryUrl: string | null = null;
+      const maxRetries = 3;
+      let attempt = 0;
+
+      while (attempt < maxRetries && !cloudinaryUrl) {
+        try {
+          cloudinaryUrl = await uploadToCloudinary(
+            file,
+            "mobile_unsigned",
+            "dxppo6n3w"
+          );
+        } catch (retryErr: any) {
+          attempt++;
+          console.warn(`❌ Upload attempt ${attempt} failed:`, retryErr?.message || retryErr);
+          if (attempt === maxRetries) {
+            throw retryErr; // Rethrow after max retries
+          }
+          // Wait before retrying
+          await new Promise((res) => setTimeout(res, 1000));
+        }
+      }
+
+      if (!cloudinaryUrl) {
+        throw new Error("Failed to upload signature after retries.");
+      }
+
+      console.log("✅ Uploaded signature:", cloudinaryUrl);
+
+      setSignatureUrl(cloudinaryUrl); // Store Cloudinary URL
+      onChange(cloudinaryUrl); // Update form value
       setModalVisible(false);
+      setTempSignature(null); // Clear temp signature
+    } catch (err: any) {
+      console.error("❌ Upload failed:", err?.message || err);
+      Alert.alert(
+        "Upload Failed",
+        err?.message || "Could not upload signature. Please check your network and try again."
+      );
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -52,88 +131,139 @@ const CustomSignature: React.FC<CustomSignatureProps> = ({
     sigRef.current?.clearSignature();
   };
 
-  const handleReset = () => {
-    setSignature(null);
-    setTempSignature(null);
+  const handleReset = async (onChange: (value: string) => void) => {
+    if (!signatureUrl) return;
+
+    try {
+      setDeleting(true);
+      const publicId = extractCloudinaryPublicId(signatureUrl);
+      await deleteFromCloudinary(publicId, "dxppo6n3w");
+
+      setSignatureUrl(null);
+      setTempSignature(null);
+      onChange(""); // Clear form value
+    } catch (err: any) {
+      console.error("❌ Deletion failed:", err?.message || err);
+      Alert.alert("Deletion Failed", err?.message || "Could not delete signature.");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
-    <View style={[styles.questionContainer, style]}>
-      {label && (
+    <View style={[styles.questionContainer]}>
+      {question?.question && (
         <Text style={styles.questionText}>
-          {label}
-          {isRequired && <Text style={styles.required}> *</Text>}
+          {question?.question}
+          {question.is_required && <Text style={styles.required}> *</Text>}
         </Text>
       )}
 
-      {signature ? (
-        <View style={styles.previewWrapper}>
-          <Image
-            source={{ uri: signature }}
-            style={styles.signaturePreview}
-            resizeMode="contain"
-          />
-          <TouchableOpacity onPress={handleReset} style={styles.button}>
-            <Text style={styles.buttonText}>Reset</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <TouchableOpacity
-          onPress={() => setModalVisible(true)}
-          style={styles.addButton}
-        >
-          <Text style={{ color: "#007AFF" }}>Add Signature</Text>
-        </TouchableOpacity>
-      )}
-
-      {error && <Text style={styles.errorText}>{error.message}</Text>}
-
-      {/* Modal */}
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Sign Below</Text>
-          <View style={styles.signatureBox}>
-            <SignatureCanvas
-              ref={sigRef}
-              onOK={handleOK}
-              onEnd={handleEnd}
-              autoClear={false}
-              penColor="#000"
-              backgroundColor="#fff"
-              webviewProps={{
-                androidLayerType: "hardware",
-              }}
-              descriptionText=""
-              clearText=""
-              confirmText=""
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity onPress={handleSave} style={styles.button}>
-                <Text style={styles.buttonText}>Save</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleClear} style={styles.button}>
-                <Text style={styles.buttonText}>Clear</Text>
-              </TouchableOpacity>
+      <Controller
+        control={control}
+        name={name}
+        rules={{
+          validate: (value: string) =>
+            !question?.is_required || (value && value.length > 0) || "Signature is required",
+        }}
+        render={({ field: { onChange } }) => (
+          <>
+            {signatureUrl ? (
+              <View style={styles.previewWrapper}>
+                <Image
+                  source={{ uri: signatureUrl }}
+                  style={styles.signaturePreview}
+                  resizeMode="contain"
+                />
+                <TouchableOpacity
+                  onPress={() => handleReset(onChange)}
+                  style={[styles.button, (isCompleted || uploading || deleting) && styles.disabledButton]}
+                  disabled={ isCompleted || uploading || deleting}
+                >
+                  {deleting ? (
+                    <ActivityIndicator size="small" color="#FF3B30" />
+                  ) : (
+                    <Text style={styles.buttonText}>Reset</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            ) : (
               <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={[styles.button, styles.cancelButton]}
+                onPress={() => setModalVisible(true)}
+                style={[styles.addButton, (isCompleted || uploading || deleting) && styles.disabledButton]}
+                disabled={isCompleted || uploading || deleting}
               >
-                <Text style={styles.buttonText}>Cancel</Text>
+                <Text style={[styles.addButtonText, (isCompleted || uploading || deleting) && styles.disabledText]}>
+                  Add Signature
+                </Text>
               </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+            )}
+
+            {uploading && (
+              <View style={styles.progressContainer}>
+                <ActivityIndicator size="large" color="#007AFF" />
+                <Text style={styles.progressText}>Uploading...</Text>
+              </View>
+            )}
+
+            {errors && <Text style={styles.errorText}>{errors.message}</Text>}
+
+            {/* Modal */}
+            <Modal
+              animationType="slide"
+              transparent={false}
+              visible={modalVisible}
+              onRequestClose={() => setModalVisible(false)}
+            >
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Sign Below</Text>
+                <View style={styles.signatureBox}>
+                  <SignatureCanvas
+                    ref={sigRef}
+                    onOK={handleOK}
+                    onEnd={handleEnd}
+                    autoClear={false}
+                    penColor="#000"
+                    backgroundColor="#fff"
+                    webviewProps={{
+                      androidLayerType: "hardware",
+                    }}
+                    descriptionText=""
+                    clearText=""
+                    confirmText=""
+                  />
+                  <View style={styles.modalActions}>
+                    <TouchableOpacity
+                      onPress={() => handleSave(onChange)}
+                      style={[styles.button, uploading && styles.disabledButton]}
+                      disabled={uploading}
+                    >
+                      <Text style={styles.buttonText}>Save</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleClear}
+                      style={styles.button}
+                      disabled={uploading}
+                    >
+                      <Text style={styles.buttonText}>Clear</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => setModalVisible(false)}
+                      style={[styles.button, styles.cancelButton]}
+                      disabled={uploading}
+                    >
+                      <Text style={styles.buttonText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Modal>
+          </>
+        )}
+      />
     </View>
   );
 };
-
-export default CustomSignature;
 
 const styles = StyleSheet.create({
   questionContainer: {
@@ -173,6 +303,9 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginHorizontal: 8,
     marginTop: 12,
+    minWidth: 60,
+    alignItems: "center",
+    justifyContent: "center",
   },
   cancelButton: {
     backgroundColor: "#999",
@@ -188,13 +321,20 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: "center",
   },
+  addButtonText: {
+    color: "#007AFF",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  disabledText: {
+    color: "#999",
+  },
   modalContainer: {
-    // flex: 1,
-    height: 400,
+    flex: 1,
     padding: 16,
     backgroundColor: "#fff",
     justifyContent: "center",
-    // alignItems: "center"
   },
   modalTitle: {
     fontSize: 20,
@@ -203,7 +343,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   signatureBox: {
-    flex: 1,
+    width: "100%",
+    height: "40%",
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
@@ -214,4 +355,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 20,
   },
+  progressContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 10,
+  },
+  progressText: {
+    marginLeft: 8,
+    color: "#007AFF",
+    fontSize: 14,
+  },
 });
+
+export default CustomSignature;

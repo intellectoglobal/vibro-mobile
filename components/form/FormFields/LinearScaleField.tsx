@@ -22,6 +22,7 @@ interface LinearScaleFieldProps {
   control: any;
   errors: any;
   name: string;
+  isCompleted? : boolean
 }
 
 const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
@@ -29,9 +30,15 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
   control,
   errors,
   name,
+  isCompleted
 }) => {
   const minValue = question.min_value || 1;
   const maxValue = question.max_value || 10;
+
+  const submittedValue = isCompleted
+    ? Number(question.answers.answer)
+    : null;
+
   const [sliderLayout, setSliderLayout] = useState({
     x: 0,
     width: SLIDER_WIDTH,
@@ -70,26 +77,34 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
         control={control}
         name={name}
         render={({ field: { onChange, value } }) => {
-          // Initialize pan responder inside Controller render to access onChange
+          const currentValue = isCompleted
+            ? submittedValue || minValue
+            : value || minValue;
+
+          useEffect(() => {
+            updateThumbPosition(currentValue);
+          }, [currentValue]);
+
           const panResponder = PanResponder.create({
-            onStartShouldSetPanResponder: () => true,
-            onMoveShouldSetPanResponder: () => true,
+            onStartShouldSetPanResponder: () => !isCompleted,
+            onMoveShouldSetPanResponder: () => !isCompleted,
             onPanResponderGrant: (evt) => {
+              if (isCompleted) return;
               isDragging.current = true;
               const touchX = evt.nativeEvent.locationX;
               const newValue = calculateValue(touchX);
               thumbPosition.setValue(touchX);
-              onChange(newValue); // Use onChange instead of control.setValue
+              onChange(newValue);
             },
             onPanResponderMove: (evt, gestureState) => {
-              if (!isDragging.current) return;
+              if (!isDragging.current || isCompleted) return;
               const newPosition = Math.min(
                 Math.max(gestureState.moveX - sliderLayout.x, 0),
                 sliderLayout.width
               );
               const newValue = calculateValue(newPosition);
               thumbPosition.setValue(newPosition);
-              onChange(newValue); // Use onChange instead of control.setValue
+              onChange(newValue);
             },
             onPanResponderRelease: () => {
               isDragging.current = false;
@@ -99,16 +114,9 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
             },
           });
 
-          // Update thumb position when value changes
-          useEffect(() => {
-            if (!isDragging.current) {
-              updateThumbPosition(value || minValue);
-            }
-          }, [value]);
-
           return (
             <View style={styles.sliderContainer}>
-              {/* End labels if provided */}
+              {/* End labels */}
               {question.options?.length >= 2 && (
                 <View style={styles.labelsContainer}>
                   <Text style={styles.endLabel}>
@@ -120,21 +128,19 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
                 </View>
               )}
 
-              {/* Slider Track */}
+              {/* Slider */}
               <View
                 ref={sliderRef}
                 style={styles.sliderTrack}
                 onLayout={(event) => {
                   const { x, width } = event.nativeEvent.layout;
                   setSliderLayout({ x: x + SLIDER_MARGIN, width });
-                  updateThumbPosition(value || minValue);
+                  updateThumbPosition(currentValue);
                 }}
-                {...panResponder.panHandlers}
+                {...(!isCompleted ? panResponder.panHandlers : {})}
               >
-                {/* Track line */}
                 <View style={styles.trackLine} />
 
-                {/* Ticks */}
                 <View style={styles.ticksContainer}>
                   {Array.from({ length: maxValue - minValue + 1 }).map(
                     (_, i) => (
@@ -145,7 +151,7 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
                           {
                             left: `${(i / (maxValue - minValue)) * 100}%`,
                             backgroundColor:
-                              i === (value || minValue) - minValue
+                              i === currentValue - minValue
                                 ? "#007AFF"
                                 : "#999",
                           },
@@ -171,12 +177,12 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
                 />
               </View>
 
-              {/* Value indicators */}
+              {/* Value display */}
               <View style={styles.valueContainer}>
                 <Text style={styles.valueText}>{minValue}</Text>
                 <View style={styles.selectedValueContainer}>
                   <Text style={styles.selectedValueText}>
-                    {value || minValue}
+                    {currentValue}
                   </Text>
                 </View>
                 <Text style={styles.valueText}>{maxValue}</Text>
@@ -186,7 +192,7 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
         }}
       />
 
-      {errors[name] && (
+      {!isCompleted && errors[name] && (
         <Text style={styles.errorText}>{errors[name].message}</Text>
       )}
     </View>
@@ -264,12 +270,6 @@ const styles = StyleSheet.create({
     top: "50%",
     marginTop: -THUMB_SIZE / 2,
     zIndex: 2,
-  },
-  thumbInner: {
-    width: THUMB_SIZE - 8,
-    height: THUMB_SIZE - 8,
-    borderRadius: (THUMB_SIZE - 8) / 2,
-    backgroundColor: "white",
   },
   valueContainer: {
     flexDirection: "row",

@@ -1,7 +1,7 @@
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable react-hooks/exhaustive-deps */
 import api from "@/services";
-import { DIVISION, LOCATION, USERS_LIST } from "@/services/constants";
+import { DIVISION, LOCATION, SUBDIVISION, USERS_LIST } from "@/services/constants";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -22,12 +22,14 @@ interface DropdownFieldProps {
   control: any;
   errors: any;
   name: string;
+  isCompleted?: boolean
 }
 
 const URLS = {
   division: DIVISION,
   user: USERS_LIST,
   location: LOCATION,
+  sub_division: SUBDIVISION
 } as any;
 
 const DropdownField: React.FC<DropdownFieldProps> = ({
@@ -35,11 +37,18 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
   control,
   errors,
   name,
+  isCompleted
 }) => {
   const [options, setOption] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  // console.log("options:", options);
+  // console.log("userAnswer:", question.answers?.answer);
+
+  // const answer = options.find((opt) => opt.id === Number(question.answers?.answer));
+
+  // console.log("Matched answer:", answer);
 
   // const filteredOptions = question.options.filter((option) =>
   //   option.option.toLowerCase().includes(searchQuery.toLowerCase())
@@ -109,23 +118,26 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
         name={name}
         render={({ field: { onChange, value } }) => (
           <>
-            <TouchableOpacity
-              style={[
-                styles.dropdownButton,
-                errors[name] && styles.dropdownButtonError,
-              ]}
-              onPress={() => {
-                setSearchQuery(""); // Reset search when opening modal
-                setModalVisible(true);
-              }}
-            >
-              <Text style={styles.dropdownButtonText}>
-                {value
-                  ? filteredOptions.find((opt) => opt.id === value)?.option
-                  : question.question_hint || "Select an option"}
-              </Text>
-              <MaterialIcons name="arrow-drop-down" size={24} color="#666" />
-            </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.dropdownButton,
+            errors[name] && styles.dropdownButtonError,
+          ]}
+          disabled={isCompleted}
+          onPress={() => {
+            setSearchQuery(""); // Reset search when opening modal
+            setModalVisible(true);
+          }}
+        >
+          <Text style={styles.dropdownButtonText}>
+            {isCompleted
+              ? options.find((opt) => opt.id === Number(question?.answers?.answer))?.option || "—"
+              : value
+              ? filteredOptions.find((opt) => opt.id === value)?.option
+              : question.question_hint || "Select an option"}
+          </Text>
+          <MaterialIcons name="arrow-drop-down" size={24} color="#666" />
+        </TouchableOpacity>
 
             <Modal
               animationType="slide"
