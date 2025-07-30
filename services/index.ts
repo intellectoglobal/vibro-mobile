@@ -1,14 +1,13 @@
 /* eslint-disable import/no-named-as-default-member */
+import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
+import store from "@/store";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { SecureStoreKeys, SecureStoreService } from "./secureStore";
-import store from "@/store";
-import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
 
 // Configure your base API URL
-// const BASE_URL = "https://vibro.onrender.com/api";
-const BASE_URL = "http://192.168.1.47:8000/api";
+const BASE_URL = "https://vibro.onrender.com/api";
+// const BASE_URL = "http://192.168.1.47:8000/api";
 // const BASE_URL = "http://192.168.1.22:8000/api";
-
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
@@ -29,22 +28,9 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${authInfo.access}`;
     }
 
-    if (false) {
-      console.log("📤 [API REQUEST]", {
-        url: `${config.baseURL ?? ""}${config.url ?? ""}`,
-        method: config.method,
-        headers: config.headers,
-        data: config.data,
-        params: config.params,
-      });
-    }
-
     return config;
   },
   (error) => {
-    if (false) {
-      console.error("❌ [REQUEST ERROR]", error);
-    }
     return Promise.reject(error);
   }
 );
@@ -52,43 +38,27 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    if (false) {
-      console.log("📥 [API RESPONSE]", {
-        url: `${response.config.baseURL ?? ""}${response.config.url ?? ""}`,
-        status: response.status,
-        data: response.data,
-      });
-    }
     return response;
   },
   async (error) => {
-    const res = error.response
+    const res = error.response;
     if (axios.isAxiosError(error)) {
-      if (false) {
-        console.error("❌ [API ERROR]", {
-          url: `${error.config?.baseURL ?? ""}${error.config?.url ?? ""}`,
-          message: error.message,
-          status: error.response?.status,
-          data: error.response?.data,
+      // 🔒 Handle expired token
+      if (
+        res?.data?.code === "token_not_valid" &&
+        res?.data?.messages?.some(
+          (msg: any) => msg.message === "Token is invalid or expired"
+        )
+      ) {
+        store.dispatch(logoutRequest());
+
+        return Promise.reject({
+          message: "Session expired. Redirecting to login.",
+          status: 401,
+          data: res.data,
+          isAxiosError: true,
         });
       }
-       // 🔒 Handle expired token
-    if (
-      res?.data?.code === "token_not_valid" &&
-      res?.data?.messages?.some((msg: any) =>
-        msg.message === "Token is invalid or expired"
-      )
-    ) {
-
-      store.dispatch(logoutRequest());
-
-      return Promise.reject({
-        message: "Session expired. Redirecting to login.",
-        status: 401,
-        data: res.data,
-        isAxiosError: true,
-      });
-    }
 
       return Promise.reject({
         message: error.response?.data?.message || error.message,

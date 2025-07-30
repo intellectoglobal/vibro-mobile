@@ -1,3 +1,5 @@
+/* eslint-disable import/no-named-as-default-member */
+import { RootState } from "@/Redux/reducer/rootReducer";
 import api from "@/services";
 import React, { useEffect, useState } from "react";
 import {
@@ -8,15 +10,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSelector } from "react-redux";
 import Accordion from "../Accordion/Accordion";
 import StageIndicator from "../Accordion/StageIndicator";
 import FormField from "../FormFields/FormField";
 import TableField from "../FormFields/TableField";
 import { useMultiStageForm } from "../hooks/useMultiStageForm";
 import { Stage } from "../types/formTypes";
-import { RootState } from "@/Redux/reducer/rootReducer";
-import { useSelector } from "react-redux";
-import mockData from "../utils/mockData";
+import mockData2 from "../utils/mockData2";
 const MultiStageFormScreen = ({ formId }: any) => {
   const [stages, setStage] = useState<Stage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,9 +51,30 @@ const MultiStageFormScreen = ({ formId }: any) => {
     handleSubmit,
     onSubmit,
     goToPrevStage,
-    // goToNextStage,
+    goToNextStage,
     goToStage,
-  } = useMultiStageForm(mockData) as any;
+    visibleQuestions,
+  } = useMultiStageForm(mockData2) as any;
+
+  const renderQuestion = (question: any) => {
+    if (!visibleQuestions.has(question.question_uuid)) return null;
+
+    return question.question_type === "table" ? (
+      <TableField
+        key={question.question_uuid}
+        question={question}
+        control={control}
+        errors={errors}
+      />
+    ) : (
+      <FormField
+        key={question.question_uuid}
+        question={question}
+        control={control}
+        errors={errors}
+      />
+    );
+  };
 
   if (loading) {
     return (
@@ -70,7 +92,7 @@ const MultiStageFormScreen = ({ formId }: any) => {
       >
         <View style={styles.stageIndicator}>
           <StageIndicator
-            stages={mockData}
+            stages={mockData2}
             currentStageIndex={currentStageIndex}
             completedStages={completedStages}
             onStagePress={(index) => goToStage(index)}
@@ -82,6 +104,9 @@ const MultiStageFormScreen = ({ formId }: any) => {
           isCompleted={completedStages.includes(currentStageIndex)}
         >
           {currentStage.questions.map((question: any) => (
+            <View key={question.question_uuid}>{renderQuestion(question)}</View>
+          ))}
+          {/* {currentStage.questions.map((question: any) => (
             <View key={question.id}>
               {question.question_type === "table" ? (
                 <TableField
@@ -98,7 +123,7 @@ const MultiStageFormScreen = ({ formId }: any) => {
                 />
               )}
             </View>
-          ))}
+          ))} */}
         </Accordion>
 
         <View style={styles.buttonContainer}>
