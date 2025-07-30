@@ -1,7 +1,7 @@
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable react-hooks/exhaustive-deps */
 import api from "@/services";
-import { DIVISION, LOCATION, USERS_LIST } from "@/services/constants";
+import { DIVISION, LOCATION, SUBDIVISION, USERS_LIST } from "@/services/constants";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -29,6 +29,7 @@ const URLS = {
   division: DIVISION,
   user: USERS_LIST,
   location: LOCATION,
+  sub_division: SUBDIVISION
 } as any;
 
 const DropdownField: React.FC<DropdownFieldProps> = ({
