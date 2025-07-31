@@ -6,8 +6,8 @@ import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
 
 // Configure your base API URL
 // const BASE_URL = "https://vibro.onrender.com/api";
-const BASE_URL = "http://172.17.208.1:8000/api"
-// const BASE_URL = "http://192.168.1.22:8000/api";
+// const BASE_URL = "http://172.17.208.1:8000/api"
+const BASE_URL = "http://192.168.1.8:8000/api";
 
 
 // Create axios instance with base configuration

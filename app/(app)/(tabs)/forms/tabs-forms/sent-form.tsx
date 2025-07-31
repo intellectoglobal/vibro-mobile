@@ -2,16 +2,25 @@ import Accordion from "@/components/Accordion";
 import api from "@/services";
 import { GETALLASSIGNFORMS, GETSENTFORMS } from "@/services/constants";
 import { RootState } from "@/store";
-import { mockSentForms, SubmissionData } from "@/types/sent";
-import React, { useEffect, useState, useCallback } from "react";
-import { FlatList, StyleSheet, Text, View, RefreshControl } from "react-native";
+import { SubmissionData } from "@/types/sent";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+  RefreshControl,
+} from "react-native";
 import { useSelector } from "react-redux";
 import FileList from "../ListItems/SentListItems/FileList";
 import { router } from "expo-router";
 
+// ⏱️ Local memory cache (not persisted)
+let sentFormsCache: SubmissionData[] = [];
+
 export default function SentForm() {
   const user = useSelector((state: RootState) => state.user);
-  const [sentData, setSentData] = useState<SubmissionData[]>([]);
+  const [sentData, setSentData] = useState<SubmissionData[]>(sentFormsCache); // 👈 Initially load cached data
   const [refreshing, setRefreshing] = useState(false);
 
   const getSentForms = async () => {
@@ -19,8 +28,9 @@ export default function SentForm() {
       const response = await api.get(`${GETALLASSIGNFORMS}`);
       const forms = response.data.map((form: any) => form.id);
 
-      const submissions = await api.post(`${GETSENTFORMS}`, {forms});
-      setSentData(submissions.data);
+      const submissions = await api.post(`${GETSENTFORMS}`, { forms });
+      sentFormsCache = submissions.data; // 👈 Update cache
+      setSentData(submissions.data);     // 👈 Show new data
     } catch (error: any) {
       console.log("Error in getSentForms", error);
     }
@@ -33,7 +43,7 @@ export default function SentForm() {
   }, []);
 
   useEffect(() => {
-    getSentForms();
+    getSentForms(); // 👈 Fetch fresh data in background
   }, []);
 
   const routeFormsFileList = (formId: any, submissionId: any) => {

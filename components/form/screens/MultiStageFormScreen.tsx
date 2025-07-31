@@ -26,6 +26,8 @@ import {
 } from "@/services/constants";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import BackNavigationPrompt from "./popup";
+import { BackHandler } from "react-native"; // ✅ ensure this is imported
 
 interface MultiStageFormScreenProps {
   formId: string;
@@ -51,11 +53,11 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showSendButton, setShowSendButton] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showBackPopup, setShowBackPopup] = useState(false);
   const [activeTab, setActiveTab] = useState<"users" | "groups">("users");
   const [formSubmissionId, setFormSubmissionId] = useState<number>(0);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
-
   const [searchQuery, setSearchQuery] = useState("");
 
   const user = useSelector((state: RootState) => state.user);
@@ -74,7 +76,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
           : `${FORM}${formId}/`
       );
       const data = response.data;
-      console.log("stages ::", response.data.stages)
+      console.log("stages ::", response.data.stages);
       setStages(data.form_type === "audit" ? data.audit_group : data.stages);
     } catch (error: any) {
       setError("Failed to load form stages");
@@ -136,17 +138,46 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     );
   }, [users, searchQuery]);
 
+
+const saveDraft = useCallback(async () => {
+  try {
+    const values = await control.getValues(); // get form data
+    const payload = {
+      form: formId,
+      data: values,
+      form_submission_id: formSubmissionId,
+    };
+    console.log("Saving draft:", payload);
+    await api.post(`/forms/${formId}/draft/`, payload);
+  } catch (error: any) {
+    console.error("Error saving draft:", error.message);
+    throw error;
+  }
+}, [formId, control, formSubmissionId]);
+
+
   // Fetch data on mount
   useEffect(() => {
     getFormStages();
     getUsers();
   }, [getFormStages]);
 
-  // useEffect(() => {
-  //   if (showSendButton) {
-  //     getUsers();
-  //   }
-  // }, [showSendButton, getUsers]);
+useEffect(() => {
+  const backAction = () => {
+    if (!isFirstStage) {
+      setShowBackPopup(true);
+      return true; // prevent default
+    }
+    return false;
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove();
+}, [isFirstStage]);
 
   // Form hook
   const {
@@ -182,8 +213,6 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     const userId = stages[currentStageIndex]?.completed_by;
     return users.find((u) => u.id === userId);
   }, [stages, currentStageIndex, users]);
-
-  console.log("completedByUser ::", completedByUser);
 
   if (loading) {
     return (
@@ -297,7 +326,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
                   />
                   <Text style={styles.completedText}>
                     Completed on:{" "}
-                    {new Date (stages[currentStageIndex].completed_on ?? "").toLocaleString() || "N/A"}
+                    {new Date(stages[currentStageIndex].completed_on ?? "").toLocaleString() || "N/A"}
                   </Text>
                 </View>
               </View>
@@ -396,6 +425,16 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
           </View>
         </View>
       )}
+
+<BackNavigationPrompt
+  visible={showBackPopup}
+  setVisible={setShowBackPopup}
+  formId={formId}
+  submissionId={submissionId}
+  formSubmissionId={formSubmissionId}
+  saveDraft={saveDraft}
+/>
+
     </View>
   );
 };
@@ -403,7 +442,6 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //padding: 16,
   },
   formContainer: {
     flex: 1,
@@ -438,12 +476,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 10,
     margin: 0,
-    // Shadow for iOS
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
-    // Shadow for Android
     elevation: 5,
   },
   loadingContainer: {
@@ -582,19 +618,16 @@ const styles = StyleSheet.create({
     color: "#999",
   },
   completedInfo: {
-    // alignItems:"center",
     padding: 15,
     borderWidth: 1,
     borderColor: "#E0E0E0",
     borderRadius: 10,
     backgroundColor: "#F9FAFB",
     marginHorizontal: 5,
-    // Shadow for iOS
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    // Shadow for Android
     elevation: 3,
     width: "98%",
   },
@@ -610,7 +643,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: "#333",
-    // flex: 1, // Ensure text takes available space
   },
   errorContainer: {
     flex: 1,

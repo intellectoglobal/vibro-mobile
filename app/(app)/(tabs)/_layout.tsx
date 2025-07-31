@@ -1,8 +1,40 @@
-import { Tabs } from "expo-router";
-import React from "react";
+// _layout.tsx
+import { Tabs, usePathname, useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import BackNavigationPrompt from "@/components/form/screens/popup";
+import { useNavigationContainerRef } from "@react-navigation/native";
 
 const _layout = () => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const prevPathRef = useRef(pathname);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [isFormFilling, setIsFormFilling] = useState(false);
+  const [formData, setFormData] = useState<any>({});
+
+  // Called from the form screen when a user is filling
+  global.setFormFillingStatus = (status: boolean, data?: any) => {
+    setIsFormFilling(status);
+    if (data) setFormData(data);
+  };
+
+  useEffect(() => {
+    if (prevPathRef.current.startsWith("/(app)/(tabs)/forms") &&
+        !pathname.startsWith("/(app)/(tabs)/forms") &&
+        isFormFilling) {
+      // Trying to leave forms tab
+      setShowPrompt(true);
+    }
+    prevPathRef.current = pathname;
+  }, [pathname]);
+
+  const handleLeaveTab = () => {
+    setShowPrompt(false);
+    global.setFormFillingStatus(false);
+    router.push(pathname); // proceed to intended page
+  };
+
   return (
     <Tabs
       screenOptions={{
