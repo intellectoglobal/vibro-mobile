@@ -6,8 +6,6 @@ import { SecureStoreKeys, SecureStoreService } from "./secureStore";
 
 // Configure your base API URL
 const BASE_URL = "https://vibro.onrender.com/api";
-// const BASE_URL = "http://192.168.1.47:8000/api";
-// const BASE_URL = "https://c0539e62682d.ngrok-free.app/api";
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
