@@ -1,4 +1,14 @@
+/* eslint-disable import/no-named-as-default-member */
+import { RootState } from "@/Redux/reducer/rootReducer";
 import api from "@/services";
+import {
+  ASSIGN_API,
+  FORM,
+  GETFORMSUBMISSIONDETAILS,
+  USERS_LIST,
+} from "@/services/constants";
+import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -10,22 +20,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSelector } from "react-redux";
 import Accordion from "../Accordion/Accordion";
 import StageIndicator from "../Accordion/StageIndicator";
 import FormField from "../FormFields/FormField";
 import TableField from "../FormFields/TableField";
 import { useMultiStageForm } from "../hooks/useMultiStageForm";
 import { Stage } from "../types/formTypes";
-import { RootState } from "@/Redux/reducer/rootReducer";
-import { useSelector } from "react-redux";
-import {
-  ASSIGN_API,
-  FORM,
-  GETFORMSUBMISSIONDETAILS,
-  USERS_LIST,
-} from "@/services/constants";
-import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import mockData2 from "../utils/mockData2";
 
 interface MultiStageFormScreenProps {
   formId: string;
@@ -62,6 +64,12 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
   const assignments = useSelector(
     (state: RootState) => state.formAssignments.data
   );
+  const receivedAssignment = useSelector(
+    (state: RootState) => state.formReceived.data
+  );
+
+  console.log("assignments ::", assignments);
+  console.log("receivedAssignment ::", receivedAssignment);
 
   // Fetch form stages
   const getFormStages = useCallback(async () => {
@@ -74,7 +82,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
           : `${FORM}${formId}/`
       );
       const data = response.data;
-      console.log("stages ::", response.data.stages)
+      // console.log("stages ::", response.data);
       setStages(data.form_type === "audit" ? data.audit_group : data.stages);
     } catch (error: any) {
       setError("Failed to load form stages");
@@ -105,6 +113,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
 
   // Assign users or groups
   const assignUser = useCallback(async () => {
+    console.log("assign user payload ::");
     if (!stages[currentStageIndex + 1]?.id) return;
     const stageId = stages[currentStageIndex + 1].id;
     const stageAssignment = assignments.find(
@@ -118,12 +127,15 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
       form_submission_id: stageAssignment?.formSubmissionId,
       stage: stageId,
     };
-
+    console.log("assign user payload ::", payload);
     try {
-      await api.post(ASSIGN_API, payload);
-      setShowAssignModal(false);
-      setSelectedUserIds([]);
-      router.replace("/(app)/(tabs)/forms");
+      console.log("assign user payload ::", payload);
+      const res = await api.post(ASSIGN_API, payload);
+      console.log("assign user payload ::", payload);
+      console.log("response ::", res.data);
+      // setShowAssignModal(false);
+      // setSelectedUserIds([]);
+      // router.replace("/(app)/(tabs)/forms");
     } catch (error: any) {
       console.error("Error submitting assignment:", error.message);
     }
@@ -162,7 +174,29 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     onSubmit,
     goToPrevStage,
     goToStage,
+    visibleQuestions,
   } = useMultiStageForm(stages, setShowSendButton, setFormSubmissionId);
+  const renderQuestion = (question: any) => {
+    if (!visibleQuestions.has(question.question_uuid)) return null;
+
+    return question.question_type === "table" ? (
+      <TableField
+        key={question.question_uuid}
+        question={question}
+        control={control}
+        errors={errors}
+        isCompleted={currentStage?.is_completed}
+      />
+    ) : (
+      <FormField
+        key={question.question_uuid}
+        question={question}
+        control={control}
+        errors={errors}
+        isCompleted={currentStage?.is_completed}
+      />
+    );
+  };
 
   // Determine if submit button should be shown
   const shouldShowSubmitButton = useCallback(() => {
@@ -224,6 +258,9 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
           isCompleted={completedStages.includes(currentStageIndex)}
         >
           {currentStage.questions.map((question: any) => (
+            <View key={question.question_uuid}>{renderQuestion(question)}</View>
+          ))}
+          {/* {currentStage.questions.map((question: any) => (
             <View key={question.id}>
               {question.question_type === "table" ? (
                 <TableField
@@ -242,11 +279,11 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
                 />
               )}
             </View>
-          ))}
+          ))} */}
         </Accordion>
 
         <View style={styles.buttonContainer}>
-          {!isFirstStage && (
+          {!completedByUser && !isFirstStage && (
             <TouchableOpacity style={styles.button} onPress={goToPrevStage}>
               <Text style={styles.buttonText}>Previous</Text>
             </TouchableOpacity>
@@ -259,51 +296,54 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
             >
               <Text style={styles.buttonText}>Send to Next</Text>
             </TouchableOpacity>
-          ) : shouldShowSubmitButton() ? (
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.nextButton,
-                !isValid && styles.disabledButton,
-              ]}
-              onPress={handleSubmit(onSubmit)}
-              disabled={!isValid}
-            >
-              <Text style={styles.buttonText}>Submit</Text>
-            </TouchableOpacity>
           ) : (
-            completedByUser && (
-              <View style={styles.completedInfo}>
-                <View style={styles.completedInfoRow}>
-                  <MaterialIcons
-                    name="person"
-                    size={20}
-                    color="#007AFF"
-                    style={styles.completedInfoIcon}
-                  />
-                  <Text style={styles.completedText}>
-                    Completed by:{" "}
-                    {`${completedByUser.username}, ${
-                      completedByUser.department_details?.description || "N/A"
-                    }`}
-                  </Text>
-                </View>
-                <View style={styles.completedInfoRow}>
-                  <MaterialIcons
-                    name="event"
-                    size={20}
-                    color="#007AFF"
-                    style={styles.completedInfoIcon}
-                  />
-                  <Text style={styles.completedText}>
-                    Completed on:{" "}
-                    {new Date (stages[currentStageIndex].completed_on ?? "").toLocaleString() || "N/A"}
-                  </Text>
-                </View>
-              </View>
+            shouldShowSubmitButton() && (
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  styles.nextButton,
+                  !isValid && styles.disabledButton,
+                ]}
+                onPress={handleSubmit(onSubmit)}
+                disabled={!isValid}
+              >
+                <Text style={styles.buttonText}>Submit</Text>
+              </TouchableOpacity>
             )
           )}
         </View>
+        {completedByUser && (
+          <View style={styles.completedInfo}>
+            <View style={styles.completedInfoRow}>
+              <MaterialIcons
+                name="person"
+                size={20}
+                color="#007AFF"
+                style={styles.completedInfoIcon}
+              />
+              <Text style={styles.completedText}>
+                Completed by:{" "}
+                {`${completedByUser.username}, ${
+                  completedByUser.department_details?.description || "N/A"
+                }`}
+              </Text>
+            </View>
+            <View style={styles.completedInfoRow}>
+              <MaterialIcons
+                name="event"
+                size={20}
+                color="#007AFF"
+                style={styles.completedInfoIcon}
+              />
+              <Text style={styles.completedText}>
+                Completed on:{" "}
+                {new Date(
+                  stages[currentStageIndex].completed_on ?? ""
+                ).toLocaleString() || "N/A"}
+              </Text>
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       {showAssignModal && (

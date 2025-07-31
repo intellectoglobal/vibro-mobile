@@ -26,7 +26,7 @@ const StageIndicator: React.FC<StageIndicatorProps> = ({
     .filter((stage: any) => stage.is_completed === true)
     .map((stage: any) => stage.id);
 
-  console.log("completedStageIds ::", completedStageIds);
+  // console.log("completedStageIds ::", completedStageIds);
   return (
     <ScrollView
       horizontal
@@ -34,7 +34,7 @@ const StageIndicator: React.FC<StageIndicatorProps> = ({
       contentContainerStyle={styles.scrollContainer}
     >
       {stages.map((stage: any, index: number) => {
-        console.log("currentStageIndex ::",stage.id)
+        // console.log("currentStageIndex ::",stage.id)
         const isCompleted = completedStageIds.includes(stage.id); //stage.is_completed
         // console.log("isCompleted ::",isCompleted)
         const isCurrent = index === currentStageIndex;
