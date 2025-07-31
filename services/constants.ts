@@ -17,4 +17,6 @@ export const ASSIGN_API = "/form/stage/assignment/"
 
 export const GETSENTFORMS = "/form/submissions-grouped/"
 
+export const RECEIVED = "/form/user/received/"
+
 export const GETFORMSUBMISSIONDETAILS = "/form/response/"

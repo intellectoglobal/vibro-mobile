@@ -1,5 +1,4 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Stage } from "../types/formTypes";
 import { generateValidationSchema } from "../utils/validationSchemas";
@@ -8,17 +7,23 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { router } from "expo-router";
 import { fetchFormAssignments } from "@/Redux/actions/formAssignmentActions";
-import { GETALLASSIGNEDSTAGESACCESSID } from "@/services/constants";
+import { GETALLASSIGNEDSTAGESACCESSID, RECEIVED } from "@/services/constants";
 import { useDispatch } from "react-redux";
 import { Alert } from "react-native";
+import { fetchFormReceived } from "@/Redux/actions/formReceivedActions";
 
 export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any, setFormSubmissionId: any) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [completedStages, setCompletedStages] = useState<number[]>([]);
   const assignments = useSelector((state: RootState) => state.formAssignments.data);
+  const receivedAssignment = useSelector((state: RootState) => state.formReceived.data);
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
 
+  const [visibleQuestions, setVisibleQuestions] = useState<Set<string>>(
+    new Set()
+  );
+  const [activeModal, setActiveModal] = useState<any>(null);
 
   const currentStage = stages[currentStageIndex];
   const isFirstStage = currentStageIndex === 0;
@@ -32,9 +37,10 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     control,
     handleSubmit,
     formState: { errors, isValid },
-    // reset,
     watch,
     setValue,
+    getValues,
+    reset,
   } = useForm({
     // resolver: yupResolver(validationSchema),
     mode: "onChange",
@@ -47,6 +53,75 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
         setCompletedStages([...completedStages, currentStageIndex]);
       }
     }
+  };
+
+  // Initialize visible questions
+  useEffect(() => {
+    const initialVisible = new Set<string>();
+    currentStage?.questions?.forEach((question: any) => {
+      initialVisible.add(question.question_uuid);
+    });
+    setVisibleQuestions(initialVisible);
+  }, [currentStage]);
+
+  // Watch for changes to evaluate logic
+  useEffect(() => {
+    const subscription = watch((formValues) => {
+      const newVisible = new Set(visibleQuestions);
+      let hasChanges = false;
+
+      currentStage?.questions?.forEach((question: any) => {
+        // Evaluate logics for each question
+        question.logics?.forEach((logic: any) => {
+          const shouldTrigger = evaluateLogic(logic, formValues);
+
+          if (shouldTrigger) {
+            // Show follow-up questions
+            logic.logic_questions?.forEach((logicQuestion: any) => {
+              if (!newVisible.has(logicQuestion.question_uuid)) {
+                newVisible.add(logicQuestion.question_uuid);
+                hasChanges = true;
+              }
+            });
+          } else {
+            // Hide follow-up questions if logic no longer applies
+            logic.logic_questions?.forEach((logicQuestion: any) => {
+              if (newVisible.has(logicQuestion.question_uuid)) {
+                newVisible.delete(logicQuestion.question_uuid);
+                hasChanges = true;
+              }
+            });
+          }
+        });
+      });
+
+      if (hasChanges) {
+        setVisibleQuestions(newVisible);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, currentStage, visibleQuestions]);
+
+  const evaluateLogic = (logic: any, formValues: any): boolean => {
+    return logic.logic_questions.every((logicQuestion: any) => {
+      const answer = formValues[logicQuestion.question_uuid];
+      console.log("answeranswer", answer);
+      if (answer === undefined || answer === null) return false;
+
+      switch (logic.logic_type) {
+        case "is":
+          return String(answer) === String(logic.logic_value);
+        case "contains":
+          return String(answer).includes(String(logic.logic_value));
+        case "greater_than":
+          return Number(answer) > Number(logic.logic_value);
+        case "less_than":
+          return Number(answer) < Number(logic.logic_value);
+        default:
+          return false;
+      }
+    });
   };
 
   const goToPrevStage = () => {
@@ -70,6 +145,11 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     console.log("stage access  ::", response.data)
     dispatch(fetchFormAssignments(response.data));
   }
+  const getReceivedStageAssignUuid = async () => {
+    const response = (await api.get(`${RECEIVED}${user.id}/`)) as any;
+    console.log("stage access  ::", response.data)
+    dispatch(fetchFormReceived(response.data));
+  }
 
 
 
@@ -82,7 +162,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
         typeof val === "object" && val !== null && "id" in val ? val.id : val;
       console.log("assignments ::", assignments)
 
-      const stageAssignmentUuid = assignments.filter(
+      const stageAssignmentUuid = (currentStageIndex === 0 ? assignments : receivedAssignment).filter(
         (a) => a.stageId === currentStage?.id
       );
 
@@ -222,6 +302,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
         setFormSubmissionId(res?.data?.form_submission_id);
         setShowSendButton(true);
         getStageAssignUuid();
+        getReceivedStageAssignUuid()
       } else {
         console.log("✅ Form completed. Redirecting to form list...");
         router.replace("/(app)/(tabs)/forms");
@@ -250,8 +331,8 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     onSubmit,
     goToPrevStage,
     goToNextStage,
-    watch,
-    setValue,
     goToStage,
+    visibleQuestions,
+    activeModal,
   };
 };
