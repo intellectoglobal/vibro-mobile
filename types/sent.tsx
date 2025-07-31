@@ -76,3 +76,29 @@ export const mockSentForms: SubmissionData[] = [
 ];
 
 
+export interface Sent {
+  id: string; // form_submission_id
+  submission_initiated_on: string;
+  submission_initiated_stage: number;
+  submission_initiated_by: number;
+  is_completed: boolean;
+  completed_by: number | null;
+  completed_on: string | null;
+
+  is_form_submission_pending: boolean;
+  is_stage_submission_pending: boolean;
+  stage_assignment_id: number;
+  stage_assignment_uuid: string;
+  stage_id: number;
+  stage_order: number;
+}
+
+
+export interface SentData {
+  id: string; // form id
+  title: string;
+  form_type: string;
+  received: Sent[];
+}
+
+

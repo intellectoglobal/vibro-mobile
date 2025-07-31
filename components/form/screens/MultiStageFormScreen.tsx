@@ -53,7 +53,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showSendButton, setShowSendButton] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<"users" | "groups">("users");
+  const [activeTab, setActiveTab] = useState<"user" | "groups">("user");
   const [formSubmissionId, setFormSubmissionId] = useState<number>(0);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
@@ -133,9 +133,9 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
       const res = await api.post(ASSIGN_API, payload);
       console.log("assign user payload ::", payload);
       console.log("response ::", res.data);
-      // setShowAssignModal(false);
-      // setSelectedUserIds([]);
-      // router.replace("/(app)/(tabs)/forms");
+      setShowAssignModal(false);
+      setSelectedUserIds([]);
+      router.replace("/(app)/(tabs)/forms");
     } catch (error: any) {
       console.error("Error submitting assignment:", error.message);
     }
@@ -352,10 +352,10 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
             <View style={styles.headerContainer}>
               <View style={styles.tabContainer}>
                 <TouchableOpacity
-                  onPress={() => setActiveTab("users")}
+                  onPress={() => setActiveTab("user")}
                   style={[
                     styles.tabButton,
-                    activeTab === "users" && styles.activeTab,
+                    activeTab === "user" && styles.activeTab,
                   ]}
                 >
                   <Text style={styles.tabText}>Users</Text>
@@ -371,7 +371,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
                 </TouchableOpacity>
               </View>
 
-              {activeTab === "users" && (
+              {activeTab === "user" && (
                 <TextInput
                   style={styles.searchInput}
                   placeholder="Search..."
@@ -381,7 +381,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
               )}
             </View>
 
-            {activeTab === "users" ? (
+            {activeTab === "user" ? (
               <FlatList
                 data={filteredOptions}
                 keyExtractor={(item) => item.id.toString()}

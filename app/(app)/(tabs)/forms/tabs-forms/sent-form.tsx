@@ -4,26 +4,29 @@ import { GETALLASSIGNFORMS, GETSENTFORMS } from "@/services/constants";
 import { RootState } from "@/store";
 import { mockSentForms, SubmissionData } from "@/types/sent";
 import React, { useEffect, useState, useCallback } from "react";
-import { FlatList, StyleSheet, Text, View, RefreshControl } from "react-native";
+import { FlatList, StyleSheet, Text, View, RefreshControl, ActivityIndicator } from "react-native";
 import { useSelector } from "react-redux";
 import FileList from "../ListItems/SentListItems/FileList";
 import { router } from "expo-router";
 
 export default function SentForm() {
   const user = useSelector((state: RootState) => state.user);
+  const [loading, setLoading] = useState<boolean>(false);
   const [sentData, setSentData] = useState<SubmissionData[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const getSentForms = async () => {
     try {
+      setLoading(true);
       const response = await api.get(`${GETALLASSIGNFORMS}`);
       const forms = response.data.map((form: any) => form.id);
 
-      const submissions = await api.post(`${GETSENTFORMS}`, {forms});
+      const submissions = await api.post(`${GETSENTFORMS}`, { forms });
       setSentData(submissions.data);
+      setLoading(false)
     } catch (error: any) {
       console.log("Error in getSentForms", error);
-    }
+    } 
   };
 
   const handleRefresh = useCallback(async () => {
@@ -65,17 +68,21 @@ export default function SentForm() {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={sentData}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No sent forms available.</Text>
-        }
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#6200ee" />
+      ) : (
+        <FlatList
+          data={sentData}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>No sent forms available.</Text>
+          }
+        />
+      )}
     </View>
   );
 }
