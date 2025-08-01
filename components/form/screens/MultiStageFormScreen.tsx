@@ -10,6 +10,7 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   FlatList,
@@ -27,7 +28,6 @@ import FormField from "../FormFields/FormField";
 import TableField from "../FormFields/TableField";
 import { useMultiStageForm } from "../hooks/useMultiStageForm";
 import { Stage } from "../types/formTypes";
-import mockData2 from "../utils/mockData2";
 
 interface MultiStageFormScreenProps {
   formId: string;
@@ -57,6 +57,10 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
   const [formSubmissionId, setFormSubmissionId] = useState<number>(0);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+
+  const { watch } = useForm({
+    mode: "onChange",
+  });
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -176,6 +180,12 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     goToStage,
     visibleQuestions,
   } = useMultiStageForm(stages, setShowSendButton, setFormSubmissionId);
+
+  const allValues = watch();
+  const allQuestions = (stages || []).flatMap(
+    (stage: any) => stage?.questions || []
+  );
+
   const renderQuestion = (question: any) => {
     if (!visibleQuestions.has(question.question_uuid)) return null;
 
@@ -194,6 +204,8 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
         control={control}
         errors={errors}
         isCompleted={currentStage?.is_completed}
+        allValues={allValues}
+        allQuestions={allQuestions}
       />
     );
   };

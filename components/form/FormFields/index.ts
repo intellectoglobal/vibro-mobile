@@ -2,6 +2,7 @@ import CheckboxField from "./CheckboxField";
 import DateTimeField from "./DateTimeField";
 import DropdownField from "./DropdownField";
 import FileUploadField from "./FileUploadField";
+import FormulaField from "./FormulaField";
 import LinearScaleField from "./LinearScaleField";
 import MultipleChoiceField from "./MultipleChoiceField";
 import QRScannerField from "./QRScannerField";
@@ -15,6 +16,7 @@ export {
   DateTimeField,
   DropdownField,
   FileUploadField,
+  FormulaField,
   LinearScaleField,
   MultipleChoiceField,
   QRScannerField,

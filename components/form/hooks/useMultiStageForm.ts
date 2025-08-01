@@ -1,24 +1,35 @@
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Stage } from "../types/formTypes";
-import { generateValidationSchema } from "../utils/validationSchemas";
+import { fetchFormAssignments } from "@/Redux/actions/formAssignmentActions";
+import { fetchFormReceived } from "@/Redux/actions/formReceivedActions";
 import api from "@/services";
-import { useSelector } from "react-redux";
+import { GETALLASSIGNEDSTAGESACCESSID, RECEIVED } from "@/services/constants";
 import { RootState } from "@/store";
 import { router } from "expo-router";
-import { fetchFormAssignments } from "@/Redux/actions/formAssignmentActions";
-import { GETALLASSIGNEDSTAGESACCESSID, RECEIVED } from "@/services/constants";
-import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
-import { fetchFormReceived } from "@/Redux/actions/formReceivedActions";
+import { useDispatch, useSelector } from "react-redux";
+import { Stage } from "../types/formTypes";
+import { generateValidationSchema } from "../utils/validationSchemas";
 
-export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any, setFormSubmissionId: any) => {
+export const useMultiStageForm = (
+  stages: Stage[] | any,
+  setShowSendButton: any,
+  setFormSubmissionId: any
+) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [completedStages, setCompletedStages] = useState<number[]>([]);
-  const assignments = useSelector((state: RootState) => state.formAssignments.data);
-  const receivedAssignment = useSelector((state: RootState) => state.formReceived.data);
+  const assignments = useSelector(
+    (state: RootState) => state.formAssignments.data
+  );
+  const receivedAssignment = useSelector(
+    (state: RootState) => state.formReceived.data
+  );
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
+
+  const allQuestions = (stages || []).flatMap(
+    (stage: any) => stage?.questions || []
+  );
 
   const [visibleQuestions, setVisibleQuestions] = useState<Set<string>>(
     new Set()
@@ -131,7 +142,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
   };
 
   const goToStage = (index: number) => {
-    console.log("stage index ::", index)
+    console.log("stage index ::", index);
     if (index >= 0 && index < stages.length) {
       setCurrentStageIndex(index);
       // if (!completedStages.includes(index)) {
@@ -141,17 +152,17 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
   };
 
   const getStageAssignUuid = async () => {
-    const response = (await api.get(`${GETALLASSIGNEDSTAGESACCESSID}${user.id}/`)) as any;
-    console.log("stage access  ::", response.data)
+    const response = (await api.get(
+      `${GETALLASSIGNEDSTAGESACCESSID}${user.id}/`
+    )) as any;
+    console.log("stage access  ::", response.data);
     dispatch(fetchFormAssignments(response.data));
-  }
+  };
   const getReceivedStageAssignUuid = async () => {
     const response = (await api.get(`${RECEIVED}${user.id}/`)) as any;
-    console.log("stage access  ::", response.data)
+    console.log("stage access  ::", response.data);
     dispatch(fetchFormReceived(response.data));
-  }
-
-
+  };
 
   const onSubmit = async (data: any) => {
     console.log("📤 Submitting form stage...");
@@ -160,11 +171,11 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     try {
       const extractId = (val: any) =>
         typeof val === "object" && val !== null && "id" in val ? val.id : val;
-      console.log("assignments ::", assignments)
+      console.log("assignments ::", assignments);
 
-      const stageAssignmentUuid = (currentStageIndex === 0 ? assignments : receivedAssignment).filter(
-        (a) => a.stageId === currentStage?.id
-      );
+      const stageAssignmentUuid = (
+        currentStageIndex === 0 ? assignments : receivedAssignment
+      ).filter((a) => a.stageId === currentStage?.id);
 
       console.log("🔗 Matching assignment:", stageAssignmentUuid);
 
@@ -203,9 +214,9 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
 
               const answerValue =
                 Array.isArray(subValue) &&
-                  ["dropdown", "checkboxes", "multiple_choice"].includes(
-                    subMeta.question_type
-                  )
+                ["dropdown", "checkboxes", "multiple_choice"].includes(
+                  subMeta.question_type
+                )
                   ? subValue.map(extractId).join("|")
                   : String(extractId(subValue));
 
@@ -246,9 +257,9 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
 
           const answerValue =
             Array.isArray(value) &&
-              ["dropdown", "checkboxes", "multiple_choice"].includes(
-                questionMeta.question_type
-              )
+            ["dropdown", "checkboxes", "multiple_choice"].includes(
+              questionMeta.question_type
+            )
               ? value.map(extractId).join("|")
               : String(extractId(value));
 
@@ -302,21 +313,51 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
         setFormSubmissionId(res?.data?.form_submission_id);
         setShowSendButton(true);
         getStageAssignUuid();
-        getReceivedStageAssignUuid()
+        getReceivedStageAssignUuid();
       } else {
         console.log("✅ Form completed. Redirecting to form list...");
         router.replace("/(app)/(tabs)/forms");
       }
     } catch (error: any) {
       console.error("❌ Error in onSubmit:", error.message || error);
-      Alert.alert("Submission Failed", error?.message || "An error occurred. Please try again.");
+      Alert.alert(
+        "Submission Failed",
+        error?.message || "An error occurred. Please try again."
+      );
     } finally {
       console.log("🔚 Form submit process finished.");
     }
   };
 
+  const evaluateFormula = (formula: string, values: any): string => {
+    try {
+      // Replace variable references with their actual values
+      const replacedFormula = formula.replace(/#(\w+)/g, (match, varName) => {
+        const question = allQuestions.find((q: any) => q?.question === varName);
+        if (question && values[question.question_uuid]) {
+          return values[question.question_uuid].toString();
+        }
+        return "0";
+      });
 
+      // Simple evaluation (in production, use a proper formula parser)
+      if (replacedFormula.includes("SUM")) {
+        const sumParts = replacedFormula.match(/SUM\(([^)]+)\)/);
+        if (sumParts) {
+          const numbers = sumParts[1].split(",").map(Number);
+          const sum = numbers.reduce((a, b) => a + b, 0);
+          const multiplierMatch = replacedFormula.match(/\*(\d+)/);
+          const multiplier = multiplierMatch ? Number(multiplierMatch[1]) : 1;
+          return (sum * multiplier).toString();
+        }
+      }
 
+      return eval(replacedFormula).toString();
+    } catch (error) {
+      console.error("Error evaluating formula:", error);
+      return "";
+    }
+  };
 
   return {
     currentStage,
@@ -332,6 +373,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     goToPrevStage,
     goToNextStage,
     goToStage,
+    evaluateFormula,
     visibleQuestions,
     activeModal,
   };
