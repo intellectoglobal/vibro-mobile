@@ -9,6 +9,9 @@ import {
   View,
 } from "react-native";
 import { Option, Question } from "../types/formTypes";
+import { matchLogicCondition } from "@/services/matchLogicCondition";
+import TableField from "./TableField";
+import FormField from "./FormField";
 
 interface MultipleChoiceFieldProps {
   question: Question;
@@ -28,6 +31,33 @@ const MultipleChoiceField: React.FC<MultipleChoiceFieldProps> = ({
   const isCheckbox = question.question_type === "checkboxes";
   const hasOtherOption = question.is_other;
 
+  const getVisibleLogicIndexes = (selectedValues: any[]): number[] => {
+    // Return empty array if no logics or options are defined
+    if (!question?.logics?.length || !question?.options?.length) return [];
+
+    const visibleLogicIndexes: number[] = [];
+
+    // Get all selected option values
+    const selectedOptionValues = selectedValues
+      .filter((item) => item?.id) // Filter out invalid items
+      .map((item) =>
+        question.options.find((opt) => opt.id === item.id)?.option
+      )
+      .filter((value) => value !== undefined); // Filter out undefined values
+
+    // Check each logic condition
+    question.logics.forEach((logic, index) => {
+      const passes = selectedOptionValues.some((selectedValue) =>
+        matchLogicCondition(selectedValue, logic.logic_value, logic.logic_type)
+      );
+      if (passes) {
+        visibleLogicIndexes.push(index);
+      }
+    });
+
+    return visibleLogicIndexes;
+  };
+
   return (
     <Controller
       control={control}
@@ -35,59 +65,71 @@ const MultipleChoiceField: React.FC<MultipleChoiceFieldProps> = ({
       rules={{
         validate: (value) =>
           !question.is_required ||
-          (value && (isCheckbox ? value.length > 0 : true)) ||
+          (value && (isCheckbox ? value.length > 0 : !!value)) ||
           "Please select at least one option",
       }}
       render={({ field: { onChange, value } }) => {
-        // Handle "Other" option separately
+        // Initialize value as array if undefined
+        const currentValue = Array.isArray(value) ? value : [];
+
+        // Calculate visible logic indexes based on selected values
+        let visibleLogicIndexes: number[] = isCompleted
+          ? getVisibleLogicIndexes(
+              question?.answers?.answer
+                ? [{ id: Number(question.answers.answer) }]
+                : []
+            )
+          : getVisibleLogicIndexes(currentValue);
+
+        // Handle "Other" option value
         const otherValue =
-          value?.find((item: any) => item?.isOther)?.text || "";
+          currentValue.find((item: any) => item?.isOther)?.text || "";
 
         const handleOptionPress = (option: Option) => {
+          if (isCompleted) return; // Prevent changes if completed
+
           if (isCheckbox) {
-            // For checkboxes, toggle selection
-            const currentValue = Array.isArray(value) ? [...value] : [];
-            const optionIndex = currentValue.findIndex((item: any) =>
-              item?.id ? item.id === option.id : item === option.id
+            const newValue = [...currentValue];
+            const optionIndex = newValue.findIndex(
+              (item: any) => item?.id === option.id
             );
 
             if (optionIndex >= 0) {
-              currentValue.splice(optionIndex, 1);
+              newValue.splice(optionIndex, 1); // Deselect
             } else {
-              currentValue.push({ id: option.id });
+              newValue.push({ id: option.id }); // Select
             }
-            onChange(currentValue);
+            onChange(newValue);
           } else {
-            // For radio buttons, select only one
-            onChange([{ id: option.id }]);
+            onChange([{ id: option.id }]); // Select single option
           }
         };
 
         const handleOtherTextChange = (text: string) => {
-          const currentValue = Array.isArray(value) ? [...value] : [];
-          const otherIndex = currentValue.findIndex(
-            (item: any) => item?.isOther
-          );
+          if (isCompleted) return; // Prevent changes if completed
 
-          if (text) {
-            const otherItem = { isOther: true, text };
+          const newValue = [...currentValue];
+          const otherIndex = newValue.findIndex((item: any) => item?.isOther);
+
+          if (text.trim()) {
+            const otherItem = { isOther: true, text: text.trim() };
             if (otherIndex >= 0) {
-              currentValue[otherIndex] = otherItem;
+              newValue[otherIndex] = otherItem;
             } else {
-              currentValue.push(otherItem);
+              newValue.push(otherItem);
             }
           } else if (otherIndex >= 0) {
-            currentValue.splice(otherIndex, 1);
+            newValue.splice(otherIndex, 1); // Remove empty "Other" value
           }
-          onChange(currentValue);
+          onChange(newValue);
         };
 
         const isOptionSelected = (optionId: number | string) => {
-          if (isCompleted) {
-            return optionId === Number(question?.answers?.answer);
+          if (isCompleted && question?.answers?.answer) {
+            return optionId === Number(question.answers.answer);
           }
-          return value?.some((item: any) =>
-            item?.id ? item.id === optionId : item === optionId
+          return currentValue.some(
+            (item: any) => item?.id === optionId || item === optionId
           );
         };
 
@@ -103,7 +145,7 @@ const MultipleChoiceField: React.FC<MultipleChoiceFieldProps> = ({
             )}
 
             <View style={styles.optionsContainer}>
-              {question.options.map((option) => (
+              {question.options?.map((option) => (
                 <TouchableOpacity
                   disabled={isCompleted}
                   key={option.id}
@@ -143,6 +185,7 @@ const MultipleChoiceField: React.FC<MultipleChoiceFieldProps> = ({
               {hasOtherOption && (
                 <View style={styles.otherOptionContainer}>
                   <TouchableOpacity
+                    disabled={isCompleted}
                     style={[
                       styles.optionButton,
                       otherValue && styles.optionSelected,
@@ -176,7 +219,7 @@ const MultipleChoiceField: React.FC<MultipleChoiceFieldProps> = ({
                     </View>
                   </TouchableOpacity>
 
-                  {otherValue !== undefined && (
+                  {otherValue && (
                     <TextInput
                       style={[
                         styles.otherInput,
@@ -185,14 +228,40 @@ const MultipleChoiceField: React.FC<MultipleChoiceFieldProps> = ({
                       placeholder="Please specify..."
                       value={otherValue}
                       onChangeText={handleOtherTextChange}
-                      onFocus={() => {
-                        if (!otherValue) handleOtherTextChange(" ");
-                      }}
+                      editable={!isCompleted}
                     />
                   )}
                 </View>
               )}
             </View>
+
+            {visibleLogicIndexes.length > 0 && (
+              <View>
+                {question.logics?.map(
+                  (logic, logicIndex) =>
+                    visibleLogicIndexes.includes(logicIndex) &&
+                    logic?.logic_questions?.map((logicQuestion) =>
+                      logicQuestion.question_type === "table" ? (
+                        <TableField
+                          key={logicQuestion.question_uuid}
+                          question={logicQuestion}
+                          control={control}
+                          errors={errors}
+                          isCompleted={isCompleted}
+                        />
+                      ) : (
+                        <FormField
+                          key={logicQuestion.question_uuid}
+                          question={logicQuestion}
+                          control={control}
+                          errors={errors}
+                          isCompleted={isCompleted}
+                        />
+                      )
+                    )
+                )}
+              </View>
+            )}
 
             {errors[name] && (
               <Text style={styles.errorText}>{errors[name].message}</Text>

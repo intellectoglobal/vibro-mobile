@@ -68,8 +68,8 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     (state: RootState) => state.formReceived.data
   );
 
-  console.log("assignments ::", assignments);
-  console.log("receivedAssignment ::", receivedAssignment);
+  // console.log("assignments ::", assignments);
+  // console.log("receivedAssignment ::", receivedAssignment);
 
   // Fetch form stages
   const getFormStages = useCallback(async () => {
@@ -217,7 +217,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     return users.find((u) => u.id === userId);
   }, [stages, currentStageIndex, users]);
 
-  console.log("completedByUser ::", completedByUser);
+  // console.log("completedByUser ::", completedByUser);
 
   if (loading) {
     return (

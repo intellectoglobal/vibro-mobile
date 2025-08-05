@@ -11,6 +11,7 @@ import { GETALLASSIGNEDSTAGESACCESSID, RECEIVED } from "@/services/constants";
 import { useDispatch } from "react-redux";
 import { Alert } from "react-native";
 import { fetchFormReceived } from "@/Redux/actions/formReceivedActions";
+import { matchLogicCondition } from "@/services/matchLogicCondition";
 
 export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any, setFormSubmissionId: any) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
@@ -106,7 +107,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
   const evaluateLogic = (logic: any, formValues: any): boolean => {
     return logic.logic_questions.every((logicQuestion: any) => {
       const answer = formValues[logicQuestion.question_uuid];
-      console.log("answeranswer", answer);
+      // console.log("answeranswer", answer);
       if (answer === undefined || answer === null) return false;
 
       switch (logic.logic_type) {
@@ -131,7 +132,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
   };
 
   const goToStage = (index: number) => {
-    console.log("stage index ::", index)
+    // console.log("stage index ::", index)
     if (index >= 0 && index < stages.length) {
       setCurrentStageIndex(index);
       // if (!completedStages.includes(index)) {
@@ -160,13 +161,10 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     try {
       const extractId = (val: any) =>
         typeof val === "object" && val !== null && "id" in val ? val.id : val;
-      console.log("assignments ::", assignments)
 
       const stageAssignmentUuid = (currentStageIndex === 0 ? assignments : receivedAssignment).filter(
         (a) => a.stageId === currentStage?.id
       );
-
-      console.log("🔗 Matching assignment:", stageAssignmentUuid);
 
       const form = currentStage.form;
       const stageId = currentStage.id;
@@ -180,15 +178,71 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
         answers: [] as any[],
       };
 
+      const handleAnswer = (meta: any, val: any) => {
+        const answerValue =
+          Array.isArray(val) &&
+            ["dropdown", "checkboxes", "multiple_choice"].includes(meta.question_type)
+            ? val.map(extractId).join("|")
+            : String(extractId(val));
+
+        const answer: any = {
+          question_uuid: meta.question_uuid,
+          question: meta.id,
+          question_type: meta.question_type,
+          answer: answerValue,
+          stage: stageId,
+          group: null,
+          division: null,
+          sub_division: null,
+          location: null,
+          user: null,
+        };
+
+        switch (meta.question_type) {
+          case "division":
+            answer.division = extractId(val);
+            break;
+          case "sub_division":
+            answer.sub_division = extractId(val);
+            break;
+          case "location":
+            answer.location = extractId(val);
+            break;
+          case "user":
+            answer.user = extractId(val);
+            break;
+        }
+
+        if (!payload.answers.some((ans: any) => ans.question_uuid === meta.question_uuid)) {
+          payload.answers.push(answer);
+          console.log("✅ Answer added:", answer);
+        } else {
+          console.log(`ℹ️ Skipping duplicate answer for question_uuid: ${meta.question_uuid}`);
+        }
+      };
+
       for (const [question_uuid, value] of Object.entries(data)) {
-        const questionMeta = questions.find(
-          (q: any) => q.question_uuid === question_uuid
-        );
+        let questionMeta = questions.find((q: any) => q.question_uuid === question_uuid);
+
+        // Not a direct question? Could be a logic question inside some parent
+        if (!questionMeta) {
+          for (const q of questions) {
+            const logicQuestion = q?.logics?.flatMap((logic: any) => logic.logic_questions)?.find(
+              (lq: any) => lq.question_uuid === question_uuid
+            );
+            if (logicQuestion) {
+              questionMeta = logicQuestion;
+              break;
+            }
+          }
+        }
+
         if (!questionMeta) {
           console.warn(`⚠️ Skipping unknown question_uuid: ${question_uuid}`);
           continue;
         }
 
+        // Table questions
         if (questionMeta.question_type === "table" && Array.isArray(value)) {
           console.log(`📋 Processing table question: ${questionMeta.question}`);
           for (const row of value) {
@@ -200,88 +254,12 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
                 console.warn(`⚠️ Skipping unknown sub-question: ${subQUuid}`);
                 continue;
               }
-
-              const answerValue =
-                Array.isArray(subValue) &&
-                  ["dropdown", "checkboxes", "multiple_choice"].includes(
-                    subMeta.question_type
-                  )
-                  ? subValue.map(extractId).join("|")
-                  : String(extractId(subValue));
-
-              const subAnswer: any = {
-                question: subMeta.id,
-                question_uuid: subQUuid,
-                question_type: subMeta.question_type,
-                answer: answerValue,
-                stage: stageId,
-                group: null,
-                division: null,
-                sub_division: null,
-                location: null,
-                user: null,
-              };
-
-              switch (subMeta.question_type) {
-                case "division":
-                  subAnswer.division = extractId(subValue);
-                  break;
-                case "sub_division":
-                  subAnswer.sub_division = extractId(subValue);
-                  break;
-                case "location":
-                  subAnswer.location = extractId(subValue);
-                  break;
-                case "user":
-                  subAnswer.user = extractId(subValue);
-                  break;
-              }
-
-              payload.answers.push(subAnswer);
-              console.log("✅ Sub-answer added:", subAnswer);
+              handleAnswer(subMeta, subValue);
             }
           }
         } else {
           console.log(`📝 Processing question: ${questionMeta.question}`);
-
-          const answerValue =
-            Array.isArray(value) &&
-              ["dropdown", "checkboxes", "multiple_choice"].includes(
-                questionMeta.question_type
-              )
-              ? value.map(extractId).join("|")
-              : String(extractId(value));
-
-          const item: any = {
-            question_uuid,
-            question: questionMeta.id,
-            question_type: questionMeta.question_type,
-            answer: answerValue,
-            stage: stageId,
-            group: null,
-            division: null,
-            sub_division: null,
-            location: null,
-            user: null,
-          };
-
-          switch (questionMeta.question_type) {
-            case "division":
-              item.division = extractId(value);
-              break;
-            case "sub_division":
-              item.sub_division = extractId(value);
-              break;
-            case "location":
-              item.location = extractId(value);
-              break;
-            case "user":
-              item.user = extractId(value);
-              break;
-          }
-
-          payload.answers.push(item);
-          console.log("✅ Answer added:", item);
+          handleAnswer(questionMeta, value);
         }
       }
 
@@ -294,7 +272,6 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
 
       console.log("🚀 Sending POST request to /form/submit-answer/...");
       const res = await api.post("/form/submit-answer/", payload);
-
       console.log("✅ API Response:", res.data);
 
       if (res?.data?.next_stage_assigning_required) {
@@ -302,7 +279,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
         setFormSubmissionId(res?.data?.form_submission_id);
         setShowSendButton(true);
         getStageAssignUuid();
-        getReceivedStageAssignUuid()
+        getReceivedStageAssignUuid();
       } else {
         console.log("✅ Form completed. Redirecting to form list...");
         router.replace("/(app)/(tabs)/forms");
@@ -310,12 +287,11 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     } catch (error: any) {
       console.error("❌ Error in onSubmit:", error.message || error);
       Alert.alert("Submission Failed", error?.message || "An error occurred. Please try again.");
+      throw error;
     } finally {
       console.log("🔚 Form submit process finished.");
     }
   };
-
-
 
 
   return {

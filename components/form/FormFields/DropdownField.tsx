@@ -1,7 +1,12 @@
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable react-hooks/exhaustive-deps */
 import api from "@/services";
-import { DIVISION, LOCATION, SUBDIVISION, USERS_LIST } from "@/services/constants";
+import {
+  DIVISION,
+  LOCATION,
+  SUBDIVISION,
+  USERS_LIST,
+} from "@/services/constants";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -16,20 +21,23 @@ import {
   View,
 } from "react-native";
 import { Question } from "../types/formTypes";
+import { matchLogicCondition } from "@/services/matchLogicCondition";
+import TableField from "./TableField";
+import FormField from "./FormField";
 
 interface DropdownFieldProps {
   question: Question;
   control: any;
   errors: any;
   name: string;
-  isCompleted?: boolean
+  isCompleted?: boolean;
 }
 
 const URLS = {
   division: DIVISION,
   user: USERS_LIST,
   location: LOCATION,
-  sub_division: SUBDIVISION
+  sub_division: SUBDIVISION,
 } as any;
 
 const DropdownField: React.FC<DropdownFieldProps> = ({
@@ -37,7 +45,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
   control,
   errors,
   name,
-  isCompleted
+  isCompleted,
 }) => {
   const [options, setOption] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -53,6 +61,31 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
   // const filteredOptions = question.options.filter((option) =>
   //   option.option.toLowerCase().includes(searchQuery.toLowerCase())
   // );
+
+  const getVisibleLogicIndexes = (selectedValues: any[]): number[] => {
+    // Return empty array if no logics or options are defined
+    if (!question?.logics?.length || !question?.options?.length) return [];
+
+    const visibleLogicIndexes: number[] = [];
+
+    // Get all selected option values
+    const selectedOptionValues = selectedValues
+      .filter((item) => item?.id) // Filter out invalid items
+      .map((item) => question.options.find((opt) => opt.id === item.id)?.option)
+      .filter((value) => value !== undefined); // Filter out undefined values
+
+    // Check each logic condition
+    question.logics.forEach((logic, index) => {
+      const passes = selectedOptionValues.some((selectedValue) =>
+        matchLogicCondition(selectedValue, logic.logic_value, logic.logic_type)
+      );
+      if (passes) {
+        visibleLogicIndexes.push(index);
+      }
+    });
+
+    return visibleLogicIndexes;
+  };
 
   const filteredOptions = useMemo(() => {
     return options.filter((option) =>
@@ -116,110 +149,153 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
       <Controller
         control={control}
         name={name}
-        render={({ field: { onChange, value } }) => (
-          <>
-        <TouchableOpacity
-          style={[
-            styles.dropdownButton,
-            errors[name] && styles.dropdownButtonError,
-          ]}
-          disabled={isCompleted}
-          onPress={() => {
-            setSearchQuery(""); // Reset search when opening modal
-            setModalVisible(true);
-          }}
-        >
-          <Text style={styles.dropdownButtonText}>
-            {isCompleted
-              ? options.find((opt) => opt.id === Number(question?.answers?.answer))?.option || "—"
-              : value
-              ? filteredOptions.find((opt) => opt.id === value)?.option
-              : question.question_hint || "Select an option"}
-          </Text>
-          <MaterialIcons name="arrow-drop-down" size={24} color="#666" />
-        </TouchableOpacity>
+        render={({ field: { onChange, value } }) => {
+          const currentValue = value;
+          let visibleLogicIndexes: number[] = isCompleted
+            ? getVisibleLogicIndexes(
+                question?.answers?.answer
+                  ? [{ id: Number(question.answers.answer) }]
+                  : []
+              )
+            : getVisibleLogicIndexes([{ id: currentValue }]);
 
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => setModalVisible(false)}
-            >
-              <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                  <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>{question.question}</Text>
-                    <TouchableOpacity onPress={() => setModalVisible(false)}>
-                      <MaterialIcons name="close" size={24} color="#666" />
-                    </TouchableOpacity>
-                  </View>
+          console.log("visibleLogicIndexes ::", visibleLogicIndexes);
 
-                  {/* Search Input */}
-                  <View style={styles.searchContainer}>
-                    <MaterialIcons
-                      name="search"
-                      size={20}
-                      color="#999"
-                      style={styles.searchIcon}
-                    />
-                    <TextInput
-                      style={styles.searchInput}
-                      placeholder="Search options..."
-                      placeholderTextColor="#999"
-                      value={searchQuery}
-                      onChangeText={setSearchQuery}
-                      autoFocus={true}
-                    />
-                    {searchQuery.length > 0 && (
-                      <TouchableOpacity onPress={() => setSearchQuery("")}>
-                        <MaterialIcons
-                          name="cancel"
-                          size={20}
-                          color="#999"
-                          style={styles.clearIcon}
-                        />
+          return (
+            <>
+              <TouchableOpacity
+                style={[
+                  styles.dropdownButton,
+                  errors[name] && styles.dropdownButtonError,
+                ]}
+                disabled={isCompleted}
+                onPress={() => {
+                  setSearchQuery(""); // Reset search when opening modal
+                  setModalVisible(true);
+                }}
+              >
+                <Text style={styles.dropdownButtonText}>
+                  {isCompleted
+                    ? options.find(
+                        (opt) => opt.id === Number(question?.answers?.answer)
+                      )?.option || "—"
+                    : value
+                    ? filteredOptions.find((opt) => opt.id === value)?.option
+                    : question.question_hint || "Select an option"}
+                </Text>
+                <MaterialIcons name="arrow-drop-down" size={24} color="#666" />
+              </TouchableOpacity>
+
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>{question.question}</Text>
+                      <TouchableOpacity onPress={() => setModalVisible(false)}>
+                        <MaterialIcons name="close" size={24} color="#666" />
                       </TouchableOpacity>
-                    )}
-                  </View>
+                    </View>
 
-                  <FlatList
-                    data={filteredOptions}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity
-                        style={[
-                          styles.optionItem,
-                          value === item.id && styles.selectedOptionItem,
-                        ]}
-                        onPress={() => {
-                          onChange(item.id);
-                          setModalVisible(false);
-                        }}
-                      >
-                        <Text style={styles.optionText}>{item.option}</Text>
-                        {value === item.id && (
+                    {/* Search Input */}
+                    <View style={styles.searchContainer}>
+                      <MaterialIcons
+                        name="search"
+                        size={20}
+                        color="#999"
+                        style={styles.searchIcon}
+                      />
+                      <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search options..."
+                        placeholderTextColor="#999"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        autoFocus={true}
+                      />
+                      {searchQuery.length > 0 && (
+                        <TouchableOpacity onPress={() => setSearchQuery("")}>
                           <MaterialIcons
-                            name="check"
+                            name="cancel"
                             size={20}
-                            color="#007AFF"
+                            color="#999"
+                            style={styles.clearIcon}
                           />
-                        )}
-                      </TouchableOpacity>
-                    )}
-                    ItemSeparatorComponent={() => (
-                      <View style={styles.separator} />
-                    )}
-                    ListEmptyComponent={
-                      <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>No options found</Text>
-                      </View>
-                    }
-                  />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+
+                    <FlatList
+                      data={filteredOptions}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={[
+                            styles.optionItem,
+                            value === item.id && styles.selectedOptionItem,
+                          ]}
+                          onPress={() => {
+                            onChange(item.id);
+                            setModalVisible(false);
+                          }}
+                        >
+                          <Text style={styles.optionText}>{item.option}</Text>
+                          {value === item.id && (
+                            <MaterialIcons
+                              name="check"
+                              size={20}
+                              color="#007AFF"
+                            />
+                          )}
+                        </TouchableOpacity>
+                      )}
+                      ItemSeparatorComponent={() => (
+                        <View style={styles.separator} />
+                      )}
+                      ListEmptyComponent={
+                        <View style={styles.emptyContainer}>
+                          <Text style={styles.emptyText}>No options found</Text>
+                        </View>
+                      }
+                    />
+                  </View>
                 </View>
-              </View>
-            </Modal>
-          </>
-        )}
+              </Modal>
+
+              {visibleLogicIndexes.length > 0 && (
+                <View>
+                  {question.logics?.map(
+                    (logic, logicIndex) =>
+                      visibleLogicIndexes.includes(logicIndex) &&
+                      logic?.logic_questions?.map((logicQuestion) =>
+                        logicQuestion.question_type === "table" ? (
+                          <TableField
+                            key={logicQuestion.question_uuid}
+                            question={logicQuestion}
+                            control={control}
+                            errors={errors}
+                            isCompleted={isCompleted}
+                          />
+                        ) : (
+                          <FormField
+                            key={logicQuestion.question_uuid}
+                            question={logicQuestion}
+                            control={control}
+                            errors={errors}
+                            isCompleted={isCompleted}
+                          />
+                        )
+                      )
+                  )}
+                </View>
+              )}
+            </>
+          );
+        }}
       />
 
       {errors[name] && (

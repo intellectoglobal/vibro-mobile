@@ -2,7 +2,7 @@ import Accordion from "@/components/Accordion";
 import api from "@/services";
 import { GETALLASSIGNFORMS, GETSENTFORMS } from "@/services/constants";
 import { RootState } from "@/store";
-import { mockSentForms, SubmissionData } from "@/types/sent";
+import {SubmissionData } from "@/types/sent";
 import React, { useEffect, useState, useCallback } from "react";
 import { FlatList, StyleSheet, Text, View, RefreshControl, ActivityIndicator } from "react-native";
 import { useSelector } from "react-redux";
@@ -21,7 +21,7 @@ export default function SentForm() {
       const response = await api.get(`${GETALLASSIGNFORMS}`);
       const forms = response.data.map((form: any) => form.id);
 
-      const submissions = await api.post(`${GETSENTFORMS}`, { forms });
+      const submissions = await api.get(`${GETSENTFORMS}${user.id}/submission-history/`);
       setSentData(submissions.data);
       setLoading(false)
     } catch (error: any) {
@@ -48,7 +48,7 @@ export default function SentForm() {
 
   const renderItem = ({ item }: { item: SubmissionData }) => (
     <Accordion
-      title={item.title}
+      title={item.form.title}
       containerStyle={styles.accordionContainer}
       headerStyle={styles.accordionHeader}
       iconColor="#6200ee"
@@ -57,9 +57,9 @@ export default function SentForm() {
     >
       {item.submissions.map((submission) => (
         <FileList
-          key={submission.id}
+          key={submission.form_submission_id}
           items={submission}
-          formId={item.id}
+          formId={item.form.id}
           onClick={routeFormsFileList}
         />
       ))}
@@ -73,7 +73,7 @@ export default function SentForm() {
       ) : (
         <FlatList
           data={sentData}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.form.id}
           renderItem={renderItem}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />

@@ -15,7 +15,7 @@ export const LOCATION = "/location/";
 
 export const ASSIGN_API = "/form/stage/assignment/"
 
-export const GETSENTFORMS = "/form/submissions-grouped/"
+export const GETSENTFORMS = "/form/users/"
 
 export const RECEIVED = "/form/user/received/"
 

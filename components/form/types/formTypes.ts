@@ -1,3 +1,5 @@
+import { ComparisonOperator, LogicType } from "@/services/matchLogicCondition";
+
 export interface Option {
   id: number;
   option: string;
@@ -45,8 +47,9 @@ export interface Question {
 
 export interface Logic {
   id: number;
-  logic_type: string;
+  logic_type: LogicType;
   logic_value: string;
+  comparison: ComparisonOperator;
   logic_questions: Question[];
   follow_up: {
     task_close_questions: Question[];

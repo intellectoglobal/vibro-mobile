@@ -78,7 +78,7 @@ export default function NewForm() {
   const getOrgFolder = async () => {
     try {
       const response = (await Api.get(FOLDER)) as any;
-      console.log("list of folders ::", response);
+      // console.log("list of folders ::", response);
       setFolders(response || []);
     } catch (error: any) {
       // console.error("Error Occurred in the getOrgFolder ::", error);
@@ -88,7 +88,7 @@ export default function NewForm() {
   const getAllFormsForUser = async () => {
     try {
       const response = (await Api.get(`${GETALLASSIGNFORMS}`)) as any;
-      console.log("list of forms ::", response);
+      // console.log("list of forms ::", response);
       setForms(response);
     } catch (error: any) {
       console.error(
@@ -100,11 +100,11 @@ export default function NewForm() {
 
   const getAllAssingedStageAccessId = async () => {
     try {
-      console.log("userId ::", user.id)
+      // console.log("userId ::", user.id)
       const response = (await Api.get(
         `${GETALLASSIGNEDSTAGESACCESSID}${user.id}/`
       )) as any;
-      console.log("assinment uuidd ::", response)
+      // console.log("assinment uuidd ::", response)
       dispatch(fetchFormAssignments(response));
     } catch (error: any) {
       console.error(

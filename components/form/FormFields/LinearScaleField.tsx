@@ -10,6 +10,9 @@ import {
   View,
 } from "react-native";
 import { Question } from "../types/formTypes";
+import { matchLogicCondition } from "@/services/matchLogicCondition";
+import TableField from "./TableField";
+import FormField from "./FormField";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SLIDER_MARGIN = 30;
@@ -22,7 +25,7 @@ interface LinearScaleFieldProps {
   control: any;
   errors: any;
   name: string;
-  isCompleted? : boolean
+  isCompleted?: boolean;
 }
 
 const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
@@ -30,14 +33,12 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
   control,
   errors,
   name,
-  isCompleted
+  isCompleted,
 }) => {
   const minValue = question.min_value || 1;
   const maxValue = question.max_value || 10;
 
-  const submittedValue = isCompleted
-    ? Number(question.answers.answer)
-    : null;
+  const submittedValue = isCompleted ? Number(question.answers.answer) : null;
 
   const [sliderLayout, setSliderLayout] = useState({
     x: 0,
@@ -62,6 +63,30 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
     thumbPosition.setValue(position);
   };
 
+  const getVisibleLogicIndexes = (selectedValues: any[]): number[] => {
+    if (!question?.logics?.length) return [];
+
+    const visibleLogicIndexes: number[] = [];
+
+    question.logics.forEach((logic, index) => {
+      const passes = selectedValues.some((selectedValue) =>
+        matchLogicCondition(
+          selectedValue,
+          logic.logic_value,
+          logic.logic_type,
+          logic.comparison // optional
+        )
+      );
+        console.log("passes ::", passes)
+      if (passes) {
+        console.log("passes ::", passes)
+        visibleLogicIndexes.push(index);
+      }
+    });
+
+    return visibleLogicIndexes;
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>
@@ -80,6 +105,14 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
           const currentValue = isCompleted
             ? submittedValue || minValue
             : value || minValue;
+
+          let visibleLogicIndexes: number[] = isCompleted
+            ? getVisibleLogicIndexes(
+                question?.answers?.answer
+                  ? [Number(question.answers.answer)]
+                  : []
+              )
+            : getVisibleLogicIndexes([currentValue]);
 
           useEffect(() => {
             updateThumbPosition(currentValue);
@@ -115,79 +148,106 @@ const LinearScaleField: React.FC<LinearScaleFieldProps> = ({
           });
 
           return (
-            <View style={styles.sliderContainer}>
-              {/* End labels */}
-              {question.options?.length >= 2 && (
-                <View style={styles.labelsContainer}>
-                  <Text style={styles.endLabel}>
-                    {question.options[0].option}
-                  </Text>
-                  <Text style={styles.endLabel}>
-                    {question.options[1].option}
-                  </Text>
+            <>
+              <View style={styles.sliderContainer}>
+                {/* End labels */}
+                {question.options?.length >= 2 && (
+                  <View style={styles.labelsContainer}>
+                    <Text style={styles.endLabel}>
+                      {question.options[0].option}
+                    </Text>
+                    <Text style={styles.endLabel}>
+                      {question.options[1].option}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Slider */}
+                <View
+                  ref={sliderRef}
+                  style={styles.sliderTrack}
+                  onLayout={(event) => {
+                    const { x, width } = event.nativeEvent.layout;
+                    setSliderLayout({ x: x + SLIDER_MARGIN, width });
+                    updateThumbPosition(currentValue);
+                  }}
+                  {...(!isCompleted ? panResponder.panHandlers : {})}
+                >
+                  <View style={styles.trackLine} />
+
+                  <View style={styles.ticksContainer}>
+                    {Array.from({ length: maxValue - minValue + 1 }).map(
+                      (_, i) => (
+                        <View
+                          key={i}
+                          style={[
+                            styles.tick,
+                            {
+                              left: `${(i / (maxValue - minValue)) * 100}%`,
+                              backgroundColor:
+                                i === currentValue - minValue
+                                  ? "#007AFF"
+                                  : "#999",
+                            },
+                          ]}
+                        />
+                      )
+                    )}
+                  </View>
+
+                  {/* Thumb */}
+                  <Animated.View
+                    style={[
+                      styles.thumb,
+                      {
+                        transform: [{ translateX: thumbPosition }],
+                        shadowColor: "#007AFF",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 4,
+                        elevation: 3,
+                      },
+                    ]}
+                  />
                 </View>
-              )}
 
-              {/* Slider */}
-              <View
-                ref={sliderRef}
-                style={styles.sliderTrack}
-                onLayout={(event) => {
-                  const { x, width } = event.nativeEvent.layout;
-                  setSliderLayout({ x: x + SLIDER_MARGIN, width });
-                  updateThumbPosition(currentValue);
-                }}
-                {...(!isCompleted ? panResponder.panHandlers : {})}
-              >
-                <View style={styles.trackLine} />
-
-                <View style={styles.ticksContainer}>
-                  {Array.from({ length: maxValue - minValue + 1 }).map(
-                    (_, i) => (
-                      <View
-                        key={i}
-                        style={[
-                          styles.tick,
-                          {
-                            left: `${(i / (maxValue - minValue)) * 100}%`,
-                            backgroundColor:
-                              i === currentValue - minValue
-                                ? "#007AFF"
-                                : "#999",
-                          },
-                        ]}
-                      />
-                    )
+                {/* Value display */}
+                <View style={styles.valueContainer}>
+                  <Text style={styles.valueText}>{minValue}</Text>
+                  <View style={styles.selectedValueContainer}>
+                    <Text style={styles.selectedValueText}>{currentValue}</Text>
+                  </View>
+                  <Text style={styles.valueText}>{maxValue}</Text>
+                </View>
+              </View>
+              {visibleLogicIndexes.length > 0 && (
+                <View>
+                  {question.logics?.map(
+                    (logic, logicIndex) =>
+                      visibleLogicIndexes.includes(logicIndex) &&
+                      logic?.logic_questions?.map((logicQuestion) =>
+                        logicQuestion.question_type === "table" ? (
+                          <TableField
+                            key={logicQuestion.question_uuid}
+                            question={logicQuestion}
+                            control={control}
+                            errors={errors}
+                            isCompleted={isCompleted}
+                          />
+                        ) : (
+                          <FormField
+                            key={logicQuestion.question_uuid}
+                            question={logicQuestion}
+                            control={control}
+                            errors={errors}
+                            isCompleted={isCompleted}
+                          />
+                        )
+                      )
                   )}
                 </View>
-
-                {/* Thumb */}
-                <Animated.View
-                  style={[
-                    styles.thumb,
-                    {
-                      transform: [{ translateX: thumbPosition }],
-                      shadowColor: "#007AFF",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.2,
-                      shadowRadius: 4,
-                      elevation: 3,
-                    },
-                  ]}
-                />
-              </View>
-
-              {/* Value display */}
-              <View style={styles.valueContainer}>
-                <Text style={styles.valueText}>{minValue}</Text>
-                <View style={styles.selectedValueContainer}>
-                  <Text style={styles.selectedValueText}>
-                    {currentValue}
-                  </Text>
-                </View>
-                <Text style={styles.valueText}>{maxValue}</Text>
-              </View>
-            </View>
+              )}
+            </>
           );
         }}
       />
