@@ -9,22 +9,23 @@ export interface Option {
 }
 
 export interface Answers {
-  Form: number
-  answer: string
-  division: number | null
-  location: number | null
-  organization: number | null
-  question: number | null
-  question_type: string
-  stage: number
-  sub_division: number | null
-  submission: number | null
-  submitted_by: number | null
-  submitted_on: string
-  user: number
+  Form: number;
+  answer: string;
+  division: number | null;
+  location: number | null;
+  organization: number | null;
+  question: number | null;
+  question_type: string;
+  stage: number;
+  sub_division: number | null;
+  submission: number | null;
+  submitted_by: number | null;
+  submitted_on: string;
+  user: number;
 }
 
 export interface Question {
+  formula: any;
   is_other: any;
   is_readonly: any;
   question_hint: any;
@@ -41,7 +42,7 @@ export interface Question {
   options: Option[];
   sub_questions: Question[];
   logics: Logic[];
-  answers: Answers
+  answers: Answers;
   // ... other question properties
 }
 
@@ -77,7 +78,6 @@ export interface FormOption {
   option: string;
   order: number;
 }
-
 
 export interface FormType {
   id: string;

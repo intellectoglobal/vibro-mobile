@@ -11,15 +11,22 @@ import { GETALLASSIGNEDSTAGESACCESSID, RECEIVED } from "@/services/constants";
 import { useDispatch } from "react-redux";
 import { Alert } from "react-native";
 import { fetchFormReceived } from "@/Redux/actions/formReceivedActions";
-import { matchLogicCondition } from "@/services/matchLogicCondition";
 
 export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any, setFormSubmissionId: any) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [completedStages, setCompletedStages] = useState<number[]>([]);
-  const assignments = useSelector((state: RootState) => state.formAssignments.data);
-  const receivedAssignment = useSelector((state: RootState) => state.formReceived.data);
+  const assignments = useSelector(
+    (state: RootState) => state.formAssignments.data
+  );
+  const receivedAssignment = useSelector(
+    (state: RootState) => state.formReceived.data
+  );
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
+
+  const allQuestions = (stages || []).flatMap(
+    (stage: any) => stage?.questions || []
+  );
 
   const [visibleQuestions, setVisibleQuestions] = useState<Set<string>>(
     new Set()
@@ -142,17 +149,17 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
   };
 
   const getStageAssignUuid = async () => {
-    const response = (await api.get(`${GETALLASSIGNEDSTAGESACCESSID}${user.id}/`)) as any;
-    console.log("stage access  ::", response.data)
+    const response = (await api.get(
+      `${GETALLASSIGNEDSTAGESACCESSID}${user.id}/`
+    )) as any;
+    console.log("stage access  ::", response.data);
     dispatch(fetchFormAssignments(response.data));
-  }
+  };
   const getReceivedStageAssignUuid = async () => {
     const response = (await api.get(`${RECEIVED}${user.id}/`)) as any;
-    console.log("stage access  ::", response.data)
+    console.log("stage access  ::", response.data);
     dispatch(fetchFormReceived(response.data));
-  }
-
-
+  };
 
   const onSubmit = async (data: any) => {
     console.log("📤 Submitting form stage...");
@@ -293,6 +300,35 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     }
   };
 
+  const evaluateFormula = (formula: string, values: any): string => {
+    try {
+      // Replace variable references with their actual values
+      const replacedFormula = formula.replace(/#(\w+)/g, (match, varName) => {
+        const question = allQuestions.find((q: any) => q?.question === varName);
+        if (question && values[question.question_uuid]) {
+          return values[question.question_uuid].toString();
+        }
+        return "0";
+      });
+
+      // Simple evaluation (in production, use a proper formula parser)
+      if (replacedFormula.includes("SUM")) {
+        const sumParts = replacedFormula.match(/SUM\(([^)]+)\)/);
+        if (sumParts) {
+          const numbers = sumParts[1].split(",").map(Number);
+          const sum = numbers.reduce((a, b) => a + b, 0);
+          const multiplierMatch = replacedFormula.match(/\*(\d+)/);
+          const multiplier = multiplierMatch ? Number(multiplierMatch[1]) : 1;
+          return (sum * multiplier).toString();
+        }
+      }
+
+      return eval(replacedFormula).toString();
+    } catch (error) {
+      console.error("Error evaluating formula:", error);
+      return "";
+    }
+  };
 
   return {
     currentStage,
@@ -308,6 +344,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     goToPrevStage,
     goToNextStage,
     goToStage,
+    evaluateFormula,
     visibleQuestions,
     activeModal,
   };

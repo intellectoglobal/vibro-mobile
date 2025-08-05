@@ -1,10 +1,12 @@
 import React from "react";
+import { useFormulaCalculation } from "../hooks/useMultiStageFormula";
 import { Question } from "../types/formTypes";
 import {
   CheckboxField,
   DateTimeField,
   DropdownField,
   FileUploadField,
+  FormulaField,
   LinearScaleField,
   MultipleChoiceField,
   QRScannerField,
@@ -17,7 +19,9 @@ interface FormFieldProps {
   control: any;
   errors: any;
   name?: string;
-  isCompleted?: boolean
+  isCompleted?: boolean;
+  allValues?: any;
+  allQuestions?: Question[];
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -26,13 +30,21 @@ const FormField: React.FC<FormFieldProps> = ({
   errors,
   name = question.question_uuid,
   isCompleted,
+  allValues = {},
+  allQuestions = [],
 }) => {
+  const { evaluateFormula } = useFormulaCalculation(control, [
+    { questions: allQuestions || [] },
+  ]);
+
   const fieldProps = {
     question,
     control,
     errors,
     name,
-    isCompleted
+    isCompleted,
+    allValues,
+    evaluateFormula,
   };
 
   switch (question.question_type) {
@@ -64,6 +76,8 @@ const FormField: React.FC<FormFieldProps> = ({
       return <SignatureField {...fieldProps} />;
     case "qr_code":
       return <QRScannerField {...fieldProps} />;
+    case "formula":
+      return <FormulaField {...fieldProps} />;
     default:
       return <TextInputField {...fieldProps} />;
   }
