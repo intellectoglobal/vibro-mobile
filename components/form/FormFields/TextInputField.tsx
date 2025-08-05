@@ -18,7 +18,6 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   name,
   isCompleted,
 }) => {
-  console.log("sort answer :::", question?.answers?.answer, isCompleted);
 
   return (
     <View style={styles.container}>
@@ -41,6 +40,7 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
             style={styles.input}
             onChangeText={onChange}
             onBlur={onBlur}
+            inputMode={question?.question_sub_type === "number" ? "numeric": "text" }
             value={question?.answers?.answer?? value}
             placeholder={question.question_hint || ""}
             multiline={question.question_type === "long_answer"}

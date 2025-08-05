@@ -1,18 +1,21 @@
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Stage } from "../types/formTypes";
-import { generateValidationSchema } from "../utils/validationSchemas";
+import { fetchFormAssignments } from "@/Redux/actions/formAssignmentActions";
+import { fetchFormReceived } from "@/Redux/actions/formReceivedActions";
 import api from "@/services";
-import { useSelector } from "react-redux";
+import { GETALLASSIGNEDSTAGESACCESSID, RECEIVED } from "@/services/constants";
 import { RootState } from "@/store";
 import { router } from "expo-router";
-import { fetchFormAssignments } from "@/Redux/actions/formAssignmentActions";
-import { GETALLASSIGNEDSTAGESACCESSID, RECEIVED } from "@/services/constants";
-import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
-import { fetchFormReceived } from "@/Redux/actions/formReceivedActions";
+import { useDispatch, useSelector } from "react-redux";
+import { Stage } from "../types/formTypes";
+import { generateValidationSchema } from "../utils/validationSchemas";
 
-export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any, setFormSubmissionId: any) => {
+export const useMultiStageForm = (
+  stages: Stage[] | any,
+  setShowSendButton: any,
+  setFormSubmissionId: any
+) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [completedStages, setCompletedStages] = useState<number[]>([]);
   const assignments = useSelector(
@@ -23,7 +26,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
   );
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
-
+ 
   const allQuestions = (stages || []).flatMap(
     (stage: any) => stage?.questions || []
   );
@@ -347,5 +350,7 @@ export const useMultiStageForm = (stages: Stage[] | any, setShowSendButton: any,
     evaluateFormula,
     visibleQuestions,
     activeModal,
+    watch,
+    setValue
   };
 };

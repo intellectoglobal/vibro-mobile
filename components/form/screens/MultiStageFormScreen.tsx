@@ -58,9 +58,6 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
 
-  const { watch } = useForm({
-    mode: "onChange",
-  });
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -179,6 +176,8 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     goToPrevStage,
     goToStage,
     visibleQuestions,
+    watch,
+    setValue
   } = useMultiStageForm(stages, setShowSendButton, setFormSubmissionId);
 
   const allValues = watch();
@@ -206,6 +205,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
         isCompleted={currentStage?.is_completed}
         allValues={allValues}
         allQuestions={allQuestions}
+        setValue={setValue}
       />
     );
   };

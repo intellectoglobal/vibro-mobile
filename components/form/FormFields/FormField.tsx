@@ -22,6 +22,7 @@ interface FormFieldProps {
   isCompleted?: boolean;
   allValues?: any;
   allQuestions?: Question[];
+  setValue?:any;
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -32,6 +33,7 @@ const FormField: React.FC<FormFieldProps> = ({
   isCompleted,
   allValues = {},
   allQuestions = [],
+  setValue,
 }) => {
   const { evaluateFormula } = useFormulaCalculation(control, [
     { questions: allQuestions || [] },
@@ -45,6 +47,7 @@ const FormField: React.FC<FormFieldProps> = ({
     isCompleted,
     allValues,
     evaluateFormula,
+    setValue
   };
 
   switch (question.question_type) {
