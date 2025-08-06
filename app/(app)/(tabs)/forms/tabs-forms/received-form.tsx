@@ -13,7 +13,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from "react-native";
-import FileList from "../ListItems/SentListItems/FileList";
+import FileList from "../ListItems/ReceivedListItems/FileList";
 import { router } from "expo-router";
 import { useDispatch } from "react-redux";
 import { fetchFormReceived } from "@/Redux/actions/formReceivedActions";

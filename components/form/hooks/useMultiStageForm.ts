@@ -10,6 +10,7 @@ import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Stage } from "../types/formTypes";
 import { generateValidationSchema } from "../utils/validationSchemas";
+import { onShowTostMessage } from "@/utility";
 
 export const useMultiStageForm = (
   stages: Stage[] | any,
@@ -18,6 +19,7 @@ export const useMultiStageForm = (
 ) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [completedStages, setCompletedStages] = useState<number[]>([]);
+  const [submitting, setSubmitting] = useState(false)
   const assignments = useSelector(
     (state: RootState) => state.formAssignments.data
   );
@@ -165,6 +167,7 @@ export const useMultiStageForm = (
   };
 
   const onSubmit = async (data: any) => {
+    setSubmitting(true)
     console.log("📤 Submitting form stage...");
     console.log("🔎 Form data:", data);
 
@@ -297,9 +300,11 @@ export const useMultiStageForm = (
     } catch (error: any) {
       console.error("❌ Error in onSubmit:", error.message || error);
       Alert.alert("Submission Failed", error?.message || "An error occurred. Please try again.");
+      setSubmitting(false)
       throw error;
     } finally {
       console.log("🔚 Form submit process finished.");
+      setSubmitting(false)
     }
   };
 
@@ -351,6 +356,7 @@ export const useMultiStageForm = (
     visibleQuestions,
     activeModal,
     watch,
-    setValue
+    setValue,
+    submitting
   };
 };

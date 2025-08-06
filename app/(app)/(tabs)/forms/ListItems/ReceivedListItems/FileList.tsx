@@ -3,15 +3,16 @@ import FeatherIcon from "react-native-vector-icons/Feather";
 import SimpleLineIconsIcon from "react-native-vector-icons/SimpleLineIcons";
 import React from "react";
 import { Submission } from "@/types/sent";
+import { Received } from "@/types/received";
 
 interface FileListProps {
-  items: Submission;
+  items: Received;
   formId: any;
   onClick?: (formId: any, submissionId: any) => void;
 }
 
 const FileList = ({ items, formId, onClick }: FileListProps) => {
-  const title = `Submission # ${items.form_submission_id}`;
+  const title = `Submission # ${items.id}`;
   const isCompleted = items.is_completed;
   const statusText = isCompleted ? `Completed` : "Pending";
   const date = isCompleted
@@ -24,7 +25,7 @@ const FileList = ({ items, formId, onClick }: FileListProps) => {
     <TouchableOpacity
       style={styles.item}
       onPress={() => {
-        onClick?.(formId, items.form_submission_id);
+        onClick?.(formId, items.id);
       }}
     >
       <View style={styles.left}>

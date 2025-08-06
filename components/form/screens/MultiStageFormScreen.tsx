@@ -28,7 +28,6 @@ import FormField from "../FormFields/FormField";
 import TableField from "../FormFields/TableField";
 import { useMultiStageForm } from "../hooks/useMultiStageForm";
 import { Stage } from "../types/formTypes";
-
 interface MultiStageFormScreenProps {
   formId: string;
   submissionId?: string;
@@ -57,7 +56,6 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
   const [formSubmissionId, setFormSubmissionId] = useState<number>(0);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
-
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -177,7 +175,8 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     goToStage,
     visibleQuestions,
     watch,
-    setValue
+    setValue,
+    submitting,
   } = useMultiStageForm(stages, setShowSendButton, setFormSubmissionId);
 
   const allValues = watch();
@@ -269,9 +268,17 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
           title={currentStage.name}
           isCompleted={completedStages.includes(currentStageIndex)}
         >
-          {currentStage.questions.map((question: any) => (
-            <View key={question.question_uuid}>{renderQuestion(question)}</View>
-          ))}
+          {!submitting ? (
+            currentStage.questions.map((question: any) => (
+              <View key={question.question_uuid}>
+                {renderQuestion(question)}
+              </View>
+            ))
+          ) : (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#2196f3" />
+            </View>
+          )}
           {/* {currentStage.questions.map((question: any) => (
             <View key={question.id}>
               {question.question_type === "table" ? (
