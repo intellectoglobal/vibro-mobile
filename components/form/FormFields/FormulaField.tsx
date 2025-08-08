@@ -12,7 +12,7 @@ interface FormulaFieldProps {
   allValues: any;
   evaluateFormula: (formula: string, values: any) => string;
   setValue: any;
-  isCompleted?: boolean
+  isCompleted?: boolean;
 }
 
 const FormulaField: React.FC<FormulaFieldProps> = ({
@@ -23,7 +23,7 @@ const FormulaField: React.FC<FormulaFieldProps> = ({
   allValues,
   evaluateFormula,
   setValue,
-  isCompleted
+  isCompleted,
 }) => {
   useEffect(() => {
     if (question.formula) {
@@ -37,12 +37,16 @@ const FormulaField: React.FC<FormulaFieldProps> = ({
 
   return (
     <View style={styles.container}>
+      <Text style={styles.label}>
+        {question.question}
+        {question.is_required && <Text style={styles.required}> *</Text>}
+      </Text>
       <Controller
         control={control}
         render={({ field: { value } }) => (
           <TextInput
             style={[styles.input, styles.formulaInput]}
-            value={isCompleted? question?.answers?.answer : value}
+            value={isCompleted ? question?.answers?.answer : value}
             editable={false}
             placeholder="Calculated automatically"
           />
@@ -60,6 +64,15 @@ const FormulaField: React.FC<FormulaFieldProps> = ({
 const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
+    color: "#333",
+  },
+  required: {
+    color: "red",
   },
   input: {
     borderWidth: 1,

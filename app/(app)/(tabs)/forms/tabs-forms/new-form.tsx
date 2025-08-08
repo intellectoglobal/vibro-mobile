@@ -49,6 +49,7 @@ export interface Folder {
 export interface Form {
   id: string;
   title: string;
+  type?: string
 }
 
 export default function NewForm() {
@@ -71,7 +72,7 @@ export default function NewForm() {
   const routeFormsFileList = (form: any) => {
     router.push({
       pathname: "/(app)/(tabs)/forms/multi-stage-form",
-      params: { formTitle: form.title, formId: form.id },
+      params: { formTitle: form.title, formId: form.id, formType: form.type },
     });
   };
 

@@ -1,3 +1,5 @@
+import AuditFormWrapper from "@/components/audit/screen/AuditFormWrapper";
+import AuditFormScreen from "@/components/form/screens/AudiFormScreen";
 import MultiStageFormScreen from "@/components/form/screens/MultiStageFormScreen";
 import { Header } from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
@@ -6,7 +8,9 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 
 export default function MultiStageForm() {
-  const { formTitle, formId, submissionId } = useLocalSearchParams() as any;
+  const { formTitle, formId, submissionId, formType } =
+    useLocalSearchParams() as any;
+  console.log("formType ::", formType);
   return (
     <>
       {/* <Header
@@ -17,10 +21,18 @@ export default function MultiStageForm() {
         }}
       /> */}
       <View style={styles.container}>
-        <View style={{ marginBottom: 16 }}>
-          <SearchBar placeholder="Search..." />
-        </View>
-        <MultiStageFormScreen formId={formId} submissionId={submissionId}/>
+        {formType == "audit" ? (
+          <>
+            <AuditFormScreen formId={formId} submissionId={submissionId} />
+          </>
+        ) : (
+          <>
+            <View style={{ marginBottom: 16 }}>
+              <SearchBar placeholder="Search..." />
+            </View>
+            <MultiStageFormScreen formId={formId} submissionId={submissionId} />
+          </>
+        )}
       </View>
     </>
   );

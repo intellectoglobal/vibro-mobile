@@ -14,7 +14,7 @@ const AuditFormScreen = ({ route }: any) => {
 
   return (
     <ScrollView style={styles.container}>
-      <FormProgress currentStep={1} totalSteps={4} />
+      {/* <FormProgress currentStep={1} totalSteps={4} /> */}
 
       <AuditInfoSection auditInfo={formData.audit_info} control={control} />
 
@@ -28,7 +28,7 @@ const AuditFormScreen = ({ route }: any) => {
       ))}
 
       <CriticalItemsSection
-        hasCriticalItems={formData.audit_group.some((g) =>
+        hasCriticalItems={formData.audit_group.some((g: { questions: any[]; }) =>
           g.questions.some((q: any) => q.critical)
         )}
         control={control}
