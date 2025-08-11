@@ -10,7 +10,7 @@ import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Stage } from "../types/formTypes";
 import { generateValidationSchema } from "../utils/validationSchemas";
-import { onShowTostMessage } from "@/utility";
+import Toast from "react-native-toast-message";
 
 export const useMultiStageForm = (
   stages: Stage[] | any,
@@ -28,7 +28,7 @@ export const useMultiStageForm = (
   );
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
- 
+
   const allQuestions = (stages || []).flatMap(
     (stage: any) => stage?.questions || []
   );
@@ -278,6 +278,8 @@ export const useMultiStageForm = (
 
       console.log("📦 Final Payload:", payload);
 
+
+
       if (!completedStages.includes(currentStageIndex)) {
         setCompletedStages([...completedStages, currentStageIndex]);
         console.log(`🟢 Marked stage ${currentStageIndex} as completed.`);
@@ -285,8 +287,16 @@ export const useMultiStageForm = (
 
       console.log("🚀 Sending POST request to /form/submit-answer/...");
       const res = await api.post("/form/submit-answer/", payload);
-      console.log("✅ API Response:", res.data);
+      console.log("✅ API Response:", res.data?.message);
 
+      setTimeout(() => {
+        Toast.show({
+          type: "success",
+          text1: "Form submitted successfully",
+          position: "top",
+        });
+
+      }, 2)
       if (res?.data?.next_stage_assigning_required) {
         console.log("🧭 Next stage assignment required.");
         setFormSubmissionId(res?.data?.form_submission_id);
@@ -294,6 +304,7 @@ export const useMultiStageForm = (
         getStageAssignUuid();
         getReceivedStageAssignUuid();
       } else {
+
         console.log("✅ Form completed. Redirecting to form list...");
         router.replace("/(app)/(tabs)/forms");
       }

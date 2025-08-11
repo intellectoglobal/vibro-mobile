@@ -28,6 +28,7 @@ import FormField from "../FormFields/FormField";
 import TableField from "../FormFields/TableField";
 import { useMultiStageForm } from "../hooks/useMultiStageForm";
 import { Stage } from "../types/formTypes";
+import Toast from "react-native-toast-message";
 interface MultiStageFormScreenProps {
   formId: string;
   submissionId?: string;
@@ -342,9 +343,8 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
               />
               <Text style={styles.completedText}>
                 Completed by:{" "}
-                {`${completedByUser.username}, ${
-                  completedByUser.department_details?.description || "N/A"
-                }`}
+                {`${completedByUser.username}, ${completedByUser.department_details?.description || "N/A"
+                  }`}
               </Text>
             </View>
             <View style={styles.completedInfoRow}>
@@ -411,7 +411,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
                     style={[
                       styles.optionItem,
                       selectedUserIds.includes(item.id) &&
-                        styles.selectedOptionItem,
+                      styles.selectedOptionItem,
                     ]}
                     onPress={() => toggleSelection(item.id)}
                   >
@@ -455,6 +455,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
           </View>
         </View>
       )}
+      <Toast />
     </View>
   );
 };

@@ -1,4 +1,5 @@
 export interface Submission {
+  is_form_submission_pending: any;
   id: string;
   submission_initiated_on: string; // or number if preferred
   submission_initiated_stage: number;

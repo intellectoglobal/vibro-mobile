@@ -54,7 +54,7 @@ export interface Form {
 
 export default function NewForm() {
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [forms, setForms] = useState<Form[]>(DATA_FILE);
+  const [forms, setForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(true);
   const [formRefreshing, setFormRefreshing] = useState(false);
   const [folderRefreshing, setFolderRefreshing] = useState(false);
