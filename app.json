@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "igs.vibro.com",
+      "associatedDomains": [
+        "applinks:vibro.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +21,26 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "igs.vibro.com"
+      "package": "igs.vibro.com",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "vibro.com",
+              "pathPrefix": "/"
+            },
+            {
+              "scheme": "vibro"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
