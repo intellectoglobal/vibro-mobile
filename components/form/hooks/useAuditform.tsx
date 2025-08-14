@@ -4,19 +4,101 @@ import api from "@/services";
 import { GETALLASSIGNEDSTAGESACCESSID, RECEIVED } from "@/services/constants";
 import { RootState } from "@/store";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Stage, SubmissionsDetail } from "../types/formTypes";
+import { Question, Stage, SubmissionsDetail } from "../types/formTypes";
 import { generateValidationSchema } from "../utils/validationSchemas";
 import Toast from "react-native-toast-message";
 
-export const useMultiStageForm = (
-  stages: Stage[] | any, setShowSendButton: any, setFormSubmissionId: any, submissionsDetail?: SubmissionsDetail) => {
+interface AuditScoreInfo {
+  groupId: string;
+  groupTitle?: string;
+  maxScore: number;
+  userScore: number;
+  percentage: number;
+  questions: Question[];
+}
+
+export const useAuditForm = (
+  stages: Stage[] | any,
+  setShowSendButton: any,
+  setFormSubmissionId: any,
+  submissionsDetail?: SubmissionsDetail,
+  questions?: Question[]
+) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [completedStages, setCompletedStages] = useState<number[]>([]);
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, setSubmitting] = useState(false);
+
+  const [selectedScores, setSelectedScores] = useState<Record<string, number>>(
+    {}
+  );
+
+  // 1. Helper: Get max score for a single question
+  const getMaxScoreForQuestion = (question: Question) => {
+    if (!question.options || question.options.length === 0) return 0;
+    return Math.max(...question.options.map((opt) => opt.score || 0));
+  };
+
+  // 2. Group questions and calculate scores
+  const groupScores: AuditScoreInfo[] = useMemo(() => {
+    const groupsMap: Record<string, AuditScoreInfo> = {};
+
+    questions?.forEach((q) => {
+      if (!q.audit_group) return; // ignore if no group
+
+      const maxScore = getMaxScoreForQuestion(q);
+      const userScore = selectedScores[q.id] || 0;
+
+      if (!groupsMap[q.audit_group]) {
+        groupsMap[q.audit_group] = {
+          groupId: q.audit_group,
+          // groupTitle: q.groupTitle || "Untitled Group",
+          maxScore: 0,
+          userScore: 0,
+          percentage: 0,
+          questions: [],
+        };
+      }
+
+      groupsMap[q.audit_group].maxScore += maxScore;
+      groupsMap[q.audit_group].userScore += userScore;
+      groupsMap[q.audit_group].questions.push(q);
+    });
+
+    // Calculate percentages
+    Object.values(groupsMap).forEach((group) => {
+      group.percentage =
+        group.maxScore > 0
+          ? Math.round((group.userScore / group.maxScore) * 100)
+          : 0;
+    });
+
+    return Object.values(groupsMap);
+  }, [questions, selectedScores]);
+
+  // 3. Form totals
+  const formMaxScore = useMemo(
+    () => groupScores.reduce((sum, g) => sum + g.maxScore, 0),
+    [groupScores]
+  );
+
+  const formUserScore = useMemo(
+    () => groupScores.reduce((sum, g) => sum + g.userScore, 0),
+    [groupScores]
+  );
+
+  const formPercentage = formMaxScore
+    ? Math.round((formUserScore / formMaxScore) * 100)
+    : 0;
+
+  // 4. Update user score when selecting an option
+  const updateScore = (questionId: string, score: number) => {
+    setSelectedScores((prev) => ({ ...prev, [questionId]: score }));
+  };
+
   const assignments = useSelector(
     (state: RootState) => state.formAssignments.data
   );
@@ -65,75 +147,6 @@ export const useMultiStageForm = (
     }
   };
 
-  // Initialize visible questions
-  useEffect(() => {
-    const initialVisible = new Set<string>();
-    currentStage?.questions?.forEach((question: any) => {
-      initialVisible.add(question.question_uuid);
-    });
-    setVisibleQuestions(initialVisible);
-  }, [currentStage]);
-
-  // Watch for changes to evaluate logic
-  useEffect(() => {
-    const subscription = watch((formValues) => {
-      const newVisible = new Set(visibleQuestions);
-      let hasChanges = false;
-
-      currentStage?.questions?.forEach((question: any) => {
-        // Evaluate logics for each question
-        question.logics?.forEach((logic: any) => {
-          const shouldTrigger = evaluateLogic(logic, formValues);
-
-          if (shouldTrigger) {
-            // Show follow-up questions
-            logic.logic_questions?.forEach((logicQuestion: any) => {
-              if (!newVisible.has(logicQuestion.question_uuid)) {
-                newVisible.add(logicQuestion.question_uuid);
-                hasChanges = true;
-              }
-            });
-          } else {
-            // Hide follow-up questions if logic no longer applies
-            logic.logic_questions?.forEach((logicQuestion: any) => {
-              if (newVisible.has(logicQuestion.question_uuid)) {
-                newVisible.delete(logicQuestion.question_uuid);
-                hasChanges = true;
-              }
-            });
-          }
-        });
-      });
-
-      if (hasChanges) {
-        setVisibleQuestions(newVisible);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [watch, currentStage, visibleQuestions]);
-
-  const evaluateLogic = (logic: any, formValues: any): boolean => {
-    return logic.logic_questions.every((logicQuestion: any) => {
-      const answer = formValues[logicQuestion.question_uuid];
-      // console.log("answeranswer", answer);
-      if (answer === undefined || answer === null) return false;
-
-      switch (logic.logic_type) {
-        case "is":
-          return String(answer) === String(logic.logic_value);
-        case "contains":
-          return String(answer).includes(String(logic.logic_value));
-        case "greater_than":
-          return Number(answer) > Number(logic.logic_value);
-        case "less_than":
-          return Number(answer) < Number(logic.logic_value);
-        default:
-          return false;
-      }
-    });
-  };
-
   const goToPrevStage = () => {
     if (currentStageIndex > 0) {
       setCurrentStageIndex(currentStageIndex - 1);
@@ -164,20 +177,21 @@ export const useMultiStageForm = (
   };
 
   const onSubmit = async (data: any) => {
-    setSubmitting(true)
+    setSubmitting(true);
     console.log("📤 Submitting form stage...");
     console.log("🔎 Form data:", data);
 
     try {
       const extractId = (val: any) =>
         typeof val === "object" && val !== null && "id" in val ? val.id : val;
-      const sourceArray = currentStageIndex === 0 ? assignments : receivedAssignment;
+      const sourceArray =
+        currentStageIndex === 0 ? assignments : receivedAssignment;
 
       const stageAssignmentUuid = sourceArray?.find((a) =>
         currentStageIndex === 0
           ? a.stageId === currentStage?.id
           : a.stageId === currentStage?.id &&
-          a.formSubmissionId === Number(submissionsDetail?.id)
+            a.formSubmissionId === Number(submissionsDetail?.id)
       );
 
       const form = currentStage.form;
@@ -195,7 +209,9 @@ export const useMultiStageForm = (
       const handleAnswer = (meta: any, val: any) => {
         const answerValue =
           Array.isArray(val) &&
-            ["dropdown", "checkboxes", "multiple_choice"].includes(meta.question_type)
+          ["dropdown", "checkboxes", "multiple_choice"].includes(
+            meta.question_type
+          )
             ? val.map(extractId).join("|")
             : String(extractId(val));
 
@@ -227,23 +243,31 @@ export const useMultiStageForm = (
             break;
         }
 
-        if (!payload.answers.some((ans: any) => ans.question_uuid === meta.question_uuid)) {
+        if (
+          !payload.answers.some(
+            (ans: any) => ans.question_uuid === meta.question_uuid
+          )
+        ) {
           payload.answers.push(answer);
           console.log("✅ Answer added:", answer);
         } else {
-          console.log(`ℹ️ Skipping duplicate answer for question_uuid: ${meta.question_uuid}`);
+          console.log(
+            `ℹ️ Skipping duplicate answer for question_uuid: ${meta.question_uuid}`
+          );
         }
       };
 
       for (const [question_uuid, value] of Object.entries(data)) {
-        let questionMeta = questions.find((q: any) => q.question_uuid === question_uuid);
+        let questionMeta = questions.find(
+          (q: any) => q.question_uuid === question_uuid
+        );
 
         // Not a direct question? Could be a logic question inside some parent
         if (!questionMeta) {
           for (const q of questions) {
-            const logicQuestion = q?.logics?.flatMap((logic: any) => logic.logic_questions)?.find(
-              (lq: any) => lq.question_uuid === question_uuid
-            );
+            const logicQuestion = q?.logics
+              ?.flatMap((logic: any) => logic.logic_questions)
+              ?.find((lq: any) => lq.question_uuid === question_uuid);
             if (logicQuestion) {
               questionMeta = logicQuestion;
               break;
@@ -279,8 +303,6 @@ export const useMultiStageForm = (
 
       console.log("📦 Final Payload:", payload);
 
-
-
       if (!completedStages.includes(currentStageIndex)) {
         setCompletedStages([...completedStages, currentStageIndex]);
         console.log(`🟢 Marked stage ${currentStageIndex} as completed.`);
@@ -296,8 +318,7 @@ export const useMultiStageForm = (
           text1: "Form submitted successfully",
           position: "top",
         });
-
-      }, 2)
+      }, 2);
       if (res?.data?.next_stage_assigning_required) {
         console.log("🧭 Next stage assignment required.");
         setFormSubmissionId(res?.data?.form_submission_id);
@@ -305,48 +326,20 @@ export const useMultiStageForm = (
         getStageAssignUuid();
         getReceivedStageAssignUuid();
       } else {
-
         console.log("✅ Form completed. Redirecting to form list...");
         router.replace("/(app)/(tabs)/forms");
       }
     } catch (error: any) {
       console.error("❌ Error in onSubmit:", error.message || error);
-      Alert.alert("Submission Failed", error?.error || "An error occurred. Please try again.");
-      setSubmitting(false)
+      Alert.alert(
+        "Submission Failed",
+        error?.error || "An error occurred. Please try again."
+      );
+      setSubmitting(false);
       throw error;
     } finally {
       console.log("🔚 Form submit process finished.");
-      setSubmitting(false)
-    }
-  };
-
-  const evaluateFormula = (formula: string, values: any): string => {
-    try {
-      // Replace variable references with their actual values
-      const replacedFormula = formula.replace(/#(\w+)/g, (match, varName) => {
-        const question = allQuestions.find((q: any) => q?.question === varName);
-        if (question && values[question.question_uuid]) {
-          return values[question.question_uuid].toString();
-        }
-        return "0";
-      });
-
-      // Simple evaluation (in production, use a proper formula parser)
-      if (replacedFormula.includes("SUM")) {
-        const sumParts = replacedFormula.match(/SUM\(([^)]+)\)/);
-        if (sumParts) {
-          const numbers = sumParts[1].split(",").map(Number);
-          const sum = numbers.reduce((a, b) => a + b, 0);
-          const multiplierMatch = replacedFormula.match(/\*(\d+)/);
-          const multiplier = multiplierMatch ? Number(multiplierMatch[1]) : 1;
-          return (sum * multiplier).toString();
-        }
-      }
-
-      return eval(replacedFormula).toString();
-    } catch (error) {
-      console.error("Error evaluating formula:", error);
-      return "";
+      setSubmitting(false);
     }
   };
 
@@ -364,12 +357,16 @@ export const useMultiStageForm = (
     goToPrevStage,
     goToNextStage,
     goToStage,
-    evaluateFormula,
     visibleQuestions,
     activeModal,
     watch,
     setValue,
     submitting,
-    setCurrentStageIndex
+    groupScores, // [{ groupId, groupTitle, maxScore, userScore, percentage, questions }]
+    formMaxScore,
+    formUserScore,
+    formPercentage,
+    updateScore,
+    selectedScores,
   };
 };

@@ -8,7 +8,7 @@ import { Received } from "@/types/received";
 interface FileListProps {
   items: Received;
   formId: any;
-  onClick?: (formId: any, submissionId: any) => void;
+  onClick?: (formId: any, submissionId: any, stageId: any) => void;
 }
 
 const FileList = ({ items, formId, onClick }: FileListProps) => {
@@ -25,7 +25,7 @@ const FileList = ({ items, formId, onClick }: FileListProps) => {
     <TouchableOpacity
       style={styles.item}
       onPress={() => {
-        onClick?.(formId, items.id);
+        onClick?.(formId, items.id, items.stage_id);
       }}
     >
       <View style={styles.left}>

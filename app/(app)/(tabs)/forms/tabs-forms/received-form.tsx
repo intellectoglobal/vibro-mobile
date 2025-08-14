@@ -92,10 +92,10 @@ export default function ReceivedForm() {
     getReceivedForms();
   }, []);
 
-  const routeFormsFileList = (formId: string, submissionId: string) => {
+  const routeFormsFileList = (formId: string, submissionId: string, stageId: string, ) => {
     router.push({
       pathname: "/(app)/(tabs)/forms/multi-stage-form",
-      params: { formId, submissionId },
+      params: { formId, submissionId, stageId },
     });
   };
 

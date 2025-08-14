@@ -19,7 +19,8 @@ interface MultipleChoiceFieldProps {
   errors: any;
   name: string;
   isCompleted?: boolean;
-  allValues? : any
+  allValues?: any;
+  updateScore?: (questionId: string | number, score: number) => void; // Added
 }
 
 const AuditField: React.FC<MultipleChoiceFieldProps> = ({
@@ -28,24 +29,21 @@ const AuditField: React.FC<MultipleChoiceFieldProps> = ({
   errors,
   name,
   isCompleted,
-  allValues
+  allValues,
+  updateScore, // Added
 }) => {
   const isCheckbox = question.question_type === "checkboxes";
   const hasOtherOption = question.is_other;
 
   const getVisibleLogicIndexes = (selectedValues: any[]): number[] => {
-    // Return empty array if no logics or options are defined
     if (!question?.logics?.length || !question?.options?.length) return [];
 
     const visibleLogicIndexes: number[] = [];
-
-    // Get all selected option values
     const selectedOptionValues = selectedValues
-      .filter((item) => item?.id) // Filter out invalid items
+      .filter((item) => item?.id)
       .map((item) => question.options.find((opt) => opt.id === item.id)?.option)
-      .filter((value) => value !== undefined); // Filter out undefined values
+      .filter((value) => value !== undefined);
 
-    // Check each logic condition
     question.logics.forEach((logic, index) => {
       const passes = selectedOptionValues.some((selectedValue) =>
         matchLogicCondition(selectedValue, logic.logic_value, logic.logic_type)
@@ -58,8 +56,6 @@ const AuditField: React.FC<MultipleChoiceFieldProps> = ({
     return visibleLogicIndexes;
   };
 
-  console.log("subQues ::", allValues)
-
   return (
     <Controller
       control={control}
@@ -71,10 +67,7 @@ const AuditField: React.FC<MultipleChoiceFieldProps> = ({
           "Please select at least one option",
       }}
       render={({ field: { onChange, value } }) => {
-        // Initialize value as array if undefined
         const currentValue = Array.isArray(value) ? value : [];
-
-        // Calculate visible logic indexes based on selected values
         let visibleLogicIndexes: number[] = isCompleted
           ? getVisibleLogicIndexes(
               question?.answers?.answer
@@ -83,32 +76,38 @@ const AuditField: React.FC<MultipleChoiceFieldProps> = ({
             )
           : getVisibleLogicIndexes(currentValue);
 
-        // Handle "Other" option value
         const otherValue =
           currentValue.find((item: any) => item?.isOther)?.text || "";
 
         const handleOptionPress = (option: Option) => {
-          if (isCompleted) return; // Prevent changes if completed
+          if (isCompleted) return;
 
+          // Single or multiple selection logic
+          let newValue;
           if (isCheckbox) {
-            const newValue = [...currentValue];
+            newValue = [...currentValue];
             const optionIndex = newValue.findIndex(
               (item: any) => item?.id === option.id
             );
-
             if (optionIndex >= 0) {
-              newValue.splice(optionIndex, 1); // Deselect
+              newValue.splice(optionIndex, 1);
             } else {
-              newValue.push({ id: option.id }); // Select
+              newValue.push({ id: option.id });
             }
-            onChange(newValue);
           } else {
-            onChange([{ id: option.id }]); // Select single option
+            newValue = [{ id: option.id }];
+          }
+
+          onChange(newValue);
+
+          // ✅ Update score whenever user selects an option
+          if (updateScore) {
+            updateScore(question.id, option.score || 0);
           }
         };
 
         const handleOtherTextChange = (text: string) => {
-          if (isCompleted) return; // Prevent changes if completed
+          if (isCompleted) return;
 
           const newValue = [...currentValue];
           const otherIndex = newValue.findIndex((item: any) => item?.isOther);
@@ -121,7 +120,7 @@ const AuditField: React.FC<MultipleChoiceFieldProps> = ({
               newValue.push(otherItem);
             }
           } else if (otherIndex >= 0) {
-            newValue.splice(otherIndex, 1); // Remove empty "Other" value
+            newValue.splice(otherIndex, 1);
           }
           onChange(newValue);
         };
@@ -179,7 +178,9 @@ const AuditField: React.FC<MultipleChoiceFieldProps> = ({
                         color={isOptionSelected(option.id) ? "#007AFF" : "#666"}
                       />
                     )}
-                    <Text style={styles.optionText}>{option.option}</Text>
+                    <Text style={styles.optionText}>
+                      {option.option} ({option.score || 0} pts)
+                    </Text>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -286,26 +287,11 @@ const AuditField: React.FC<MultipleChoiceFieldProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
-    color: "#333",
-  },
-  required: {
-    color: "red",
-  },
-  description: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 16,
-  },
-  optionsContainer: {
-    marginTop: 8,
-  },
+  container: { marginBottom: 24 },
+  label: { fontSize: 16, fontWeight: "600", marginBottom: 8, color: "#333" },
+  required: { color: "red" },
+  description: { fontSize: 14, color: "#666", marginBottom: 16 },
+  optionsContainer: { marginTop: 8 },
   optionButton: {
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -315,22 +301,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     backgroundColor: "#fff",
   },
-  optionSelected: {
-    borderColor: "#007AFF",
-    backgroundColor: "#F0F7FF",
-  },
-  optionContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  optionText: {
-    fontSize: 16,
-    marginLeft: 12,
-    flex: 1,
-  },
-  otherOptionContainer: {
-    marginTop: 8,
-  },
+  optionSelected: { borderColor: "#007AFF", backgroundColor: "#F0F7FF" },
+  optionContent: { flexDirection: "row", alignItems: "center" },
+  optionText: { fontSize: 16, marginLeft: 12, flex: 1 },
+  otherOptionContainer: { marginTop: 8 },
   otherOptionButton: {
     marginBottom: 0,
     borderBottomLeftRadius: 0,
@@ -346,15 +320,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#fff",
   },
-  inputError: {
-    borderColor: "red",
-    backgroundColor: "#FFF0F0",
-  },
-  errorText: {
-    color: "red",
-    marginTop: 8,
-    fontSize: 14,
-  },
+  inputError: { borderColor: "red", backgroundColor: "#FFF0F0" },
+  errorText: { color: "red", marginTop: 8, fontSize: 14 },
 });
 
 export default AuditField;

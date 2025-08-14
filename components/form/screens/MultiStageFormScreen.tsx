@@ -32,6 +32,7 @@ import Toast from "react-native-toast-message";
 interface MultiStageFormScreenProps {
   formId: string;
   submissionId?: string;
+  stageId?: string;
 }
 
 interface User {
@@ -47,6 +48,7 @@ interface User {
 const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
   formId,
   submissionId,
+  stageId,
 }) => {
   const [stages, setStages] = useState<Stage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +59,8 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
   const [formSubmissionId, setFormSubmissionId] = useState<number>(0);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
-  const [submissionsDetail, setSubmissionsDetail] = useState<SubmissionsDetail>()
+  const [submissionsDetail, setSubmissionsDetail] =
+    useState<SubmissionsDetail>();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -85,7 +88,14 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
       const data = response.data;
       // console.log("stages ::", response.data);
       setStages(data.form_type === "audit" ? data.audit_group : data.stages);
-      setSubmissionsDetail(data?.submissionsDetail)
+      setSubmissionsDetail(data?.submissionsDetail);
+      if (stageId) {
+        const userStageIndex = data.stages.findIndex(
+          (stage: Stage) => Number(stage?.id) === Number(stageId)
+        );
+
+          setCurrentStageIndex(userStageIndex);
+      }
     } catch (error: any) {
       setError("Failed to load form stages");
       console.error("Error in getFormStages:", error.message);
@@ -126,7 +136,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
       form_submission_id: submissionsDetail?.id,
       stage: stageId,
     };
-    
+
     try {
       // console.log("assign user payload ::", payload);
       const res = await api.post(ASSIGN_API, payload);
@@ -177,7 +187,13 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     watch,
     setValue,
     submitting,
-  } = useMultiStageForm(stages, setShowSendButton, setFormSubmissionId, submissionsDetail);
+    setCurrentStageIndex,
+  } = useMultiStageForm(
+    stages,
+    setShowSendButton,
+    setFormSubmissionId,
+    submissionsDetail,
+  );
 
   const allValues = watch();
   const allQuestions = (stages || []).flatMap(
@@ -248,7 +264,6 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
       </View>
     );
   }
-
   return (
     <View style={styles.container}>
       <ScrollView
@@ -342,8 +357,9 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
               />
               <Text style={styles.completedText}>
                 Completed by:{" "}
-                {`${completedByUser.username}, ${completedByUser.department_details?.description || "N/A"
-                  }`}
+                {`${completedByUser.username}, ${
+                  completedByUser.department_details?.description || "N/A"
+                }`}
               </Text>
             </View>
             <View style={styles.completedInfoRow}>
@@ -410,7 +426,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
                     style={[
                       styles.optionItem,
                       selectedUserIds.includes(item.id) &&
-                      styles.selectedOptionItem,
+                        styles.selectedOptionItem,
                     ]}
                     onPress={() => toggleSelection(item.id)}
                   >

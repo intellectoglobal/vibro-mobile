@@ -38,6 +38,11 @@ const Accordion: React.FC<AccordionProps> = ({
           {/* <Text style={[styles.tabTitle, styles.activeTabTitle]}>{`Stage ${
             index + 1
           } Of ${stageLen}`}</Text> */}
+          <MaterialIcons
+            name={expanded ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+            size={24}
+            color="#fff"
+          />
         </TouchableOpacity>
       </View>
       <View style={styles.container}>

@@ -43,6 +43,11 @@ export interface Question {
   sub_questions: Question[];
   logics: Logic[];
   answers: Answers;
+  critical: false,
+  order: 0,
+  require_live: false,
+  max_score: 0,
+  audit_group: string
   // ... other question properties
 }
 

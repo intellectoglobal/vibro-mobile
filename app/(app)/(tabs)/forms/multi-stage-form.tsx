@@ -8,9 +8,8 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 
 export default function MultiStageForm() {
-  const { formTitle, formId, submissionId, formType } =
+  const { formId, submissionId, formType, stageId } =
     useLocalSearchParams() as any;
-  console.log("formType ::", formType);
   return (
     <>
       {/* <Header
@@ -30,7 +29,7 @@ export default function MultiStageForm() {
             <View style={{ marginBottom: 16 }}>
               <SearchBar placeholder="Search..." />
             </View>
-            <MultiStageFormScreen formId={formId} submissionId={submissionId} />
+            <MultiStageFormScreen formId={formId} submissionId={submissionId} stageId={stageId}/>
           </>
         )}
       </View>

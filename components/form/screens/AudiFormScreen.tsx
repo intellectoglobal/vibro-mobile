@@ -28,6 +28,8 @@ import FormField from "../FormFields/FormField";
 import TableField from "../FormFields/TableField";
 import { useMultiStageForm } from "../hooks/useMultiStageForm";
 import { Stage } from "../types/formTypes";
+import { useAuditForm } from "../hooks/useAuditform";
+import AuditAccordion from "../Accordion/AuditAccordion";
 interface AuditFormScreenProps {
   formId: string;
   submissionId?: string;
@@ -133,7 +135,7 @@ const AuditFormScreen: React.FC<AuditFormScreenProps> = ({
     watch,
     setValue,
     submitting,
-  } = useMultiStageForm(stages, setShowSendButton, setFormSubmissionId);
+  } = useAuditForm(stages, setShowSendButton, setFormSubmissionId);
 
   const allValues = watch();
   const allQuestions = (stages || []).flatMap(
@@ -141,7 +143,7 @@ const AuditFormScreen: React.FC<AuditFormScreenProps> = ({
   );
 
   const renderQuestion = (question: any) => {
-    console.log("question.question_type ::", auditInfo)
+    // console.log("question.question_type ::", auditInfo)
 
     return question.question_type === "table" ? (
       <TableField
@@ -203,8 +205,9 @@ const AuditFormScreen: React.FC<AuditFormScreenProps> = ({
         style={styles.formContainer}
         showsVerticalScrollIndicator={false}
       >
-        <Accordion
+        <AuditAccordion
           title={auditInfo?.name ?? ""}
+          questions={auditInfo?.questions}
           // isCompleted={completedStages.includes(currentStageIndex)}
         >
           {!submitting ? (
@@ -218,10 +221,11 @@ const AuditFormScreen: React.FC<AuditFormScreenProps> = ({
               <ActivityIndicator size="large" color="#2196f3" />
             </View>
           )}
-        </Accordion>
+        </AuditAccordion>
         {stages.map((stage) => (
-          <Accordion
+          <AuditAccordion
             title={stage.name}
+            questions={stage?.questions}
             // isCompleted={completedStages.includes(currentStageIndex)}
           >
             {!submitting ? (
@@ -235,7 +239,7 @@ const AuditFormScreen: React.FC<AuditFormScreenProps> = ({
                 <ActivityIndicator size="large" color="#2196f3" />
               </View>
             )}
-          </Accordion>
+          </AuditAccordion>
         ))}
 
         <View style={styles.buttonContainer}>
