@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
 import { Textbox } from "@/components/FormFields";
-import { router } from "expo-router";
 import { onShowTostMessage } from "@/utility";
+import { router } from "expo-router";
 
 import { Api } from "@/services/authApi";
 
@@ -50,8 +50,8 @@ export default function LoginScreen() {
           <View style={styles.viewContainer}>
             <View style={styles.circularContainer}>
               <Text style={styles.largeBoldText}>V</Text>
-              <View style={styles.circleBadgeOne} />
-              <View style={styles.circleBadgeTwo} />
+              {/* <View style={styles.circleBadgeOne} />
+              <View style={styles.circleBadgeTwo} /> */}
             </View>
             <Text style={styles.headingText}>Welcome to Vibro</Text>
             <Text style={styles.headingSmallText}>Login with your email</Text>
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#94a3b8",
     //color: "white",
-    fontSize: 18,
+    fontSize: 14,
     padding: 15,
     marginTop: 5,
     marginBottom: 5,

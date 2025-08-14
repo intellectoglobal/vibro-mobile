@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+package-lock.json
 
 # Expo
 .expo/
@@ -41,4 +42,5 @@ app-example
 
 expo-env.d.ts
 android
+.idea/
 # @end expo-cli

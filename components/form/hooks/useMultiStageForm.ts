@@ -1,0 +1,374 @@
+import { fetchFormAssignments } from "@/Redux/actions/formAssignmentActions";
+import { fetchFormReceived } from "@/Redux/actions/formReceivedActions";
+import api from "@/services";
+import { GETALLASSIGNEDSTAGESACCESSID, RECEIVED } from "@/services/constants";
+import { RootState } from "@/store";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Alert } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { Stage, SubmissionsDetail } from "../types/formTypes";
+import { generateValidationSchema } from "../utils/validationSchemas";
+import Toast from "react-native-toast-message";
+
+export const useMultiStageForm = (
+  stages: Stage[] | any, setShowSendButton: any, setFormSubmissionId: any, submissionsDetail?: SubmissionsDetail) => {
+  const [currentStageIndex, setCurrentStageIndex] = useState(0);
+  const [completedStages, setCompletedStages] = useState<number[]>([]);
+  const [submitting, setSubmitting] = useState(false)
+  const assignments = useSelector(
+    (state: RootState) => state.formAssignments.data
+  );
+  const receivedAssignment = useSelector(
+    (state: RootState) => state.formReceived.data
+  );
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.user);
+
+  const allQuestions = (stages || []).flatMap(
+    (stage: any) => stage?.questions || []
+  );
+
+  const [visibleQuestions, setVisibleQuestions] = useState<Set<string>>(
+    new Set()
+  );
+  const [activeModal, setActiveModal] = useState<any>(null);
+
+  const currentStage = stages[currentStageIndex];
+  const isFirstStage = currentStageIndex === 0;
+  const isLastStage = currentStageIndex === stages.length - 1;
+
+  const validationSchema = generateValidationSchema(
+    currentStage?.questions || []
+  );
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+    watch,
+    setValue,
+    getValues,
+    reset,
+  } = useForm({
+    // resolver: yupResolver(validationSchema),
+    mode: "onChange",
+  });
+
+  const goToNextStage = () => {
+    if (currentStageIndex < stages.length - 1) {
+      setCurrentStageIndex(currentStageIndex + 1);
+      if (!completedStages.includes(currentStageIndex)) {
+        setCompletedStages([...completedStages, currentStageIndex]);
+      }
+    }
+  };
+
+  // Initialize visible questions
+  useEffect(() => {
+    const initialVisible = new Set<string>();
+    currentStage?.questions?.forEach((question: any) => {
+      initialVisible.add(question.question_uuid);
+    });
+    setVisibleQuestions(initialVisible);
+  }, [currentStage]);
+
+  // Watch for changes to evaluate logic
+  useEffect(() => {
+    const subscription = watch((formValues) => {
+      const newVisible = new Set(visibleQuestions);
+      let hasChanges = false;
+
+      currentStage?.questions?.forEach((question: any) => {
+        // Evaluate logics for each question
+        question.logics?.forEach((logic: any) => {
+          const shouldTrigger = evaluateLogic(logic, formValues);
+
+          if (shouldTrigger) {
+            // Show follow-up questions
+            logic.logic_questions?.forEach((logicQuestion: any) => {
+              if (!newVisible.has(logicQuestion.question_uuid)) {
+                newVisible.add(logicQuestion.question_uuid);
+                hasChanges = true;
+              }
+            });
+          } else {
+            // Hide follow-up questions if logic no longer applies
+            logic.logic_questions?.forEach((logicQuestion: any) => {
+              if (newVisible.has(logicQuestion.question_uuid)) {
+                newVisible.delete(logicQuestion.question_uuid);
+                hasChanges = true;
+              }
+            });
+          }
+        });
+      });
+
+      if (hasChanges) {
+        setVisibleQuestions(newVisible);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, currentStage, visibleQuestions]);
+
+  const evaluateLogic = (logic: any, formValues: any): boolean => {
+    return logic.logic_questions.every((logicQuestion: any) => {
+      const answer = formValues[logicQuestion.question_uuid];
+      // console.log("answeranswer", answer);
+      if (answer === undefined || answer === null) return false;
+
+      switch (logic.logic_type) {
+        case "is":
+          return String(answer) === String(logic.logic_value);
+        case "contains":
+          return String(answer).includes(String(logic.logic_value));
+        case "greater_than":
+          return Number(answer) > Number(logic.logic_value);
+        case "less_than":
+          return Number(answer) < Number(logic.logic_value);
+        default:
+          return false;
+      }
+    });
+  };
+
+  const goToPrevStage = () => {
+    if (currentStageIndex > 0) {
+      setCurrentStageIndex(currentStageIndex - 1);
+    }
+  };
+
+  const goToStage = (index: number) => {
+    // console.log("stage index ::", index)
+    if (index >= 0 && index < stages.length) {
+      setCurrentStageIndex(index);
+      // if (!completedStages.includes(index)) {
+      //   setCompletedStages([...completedStages, index]);
+      // }
+    }
+  };
+
+  const getStageAssignUuid = async () => {
+    const response = (await api.get(
+      `${GETALLASSIGNEDSTAGESACCESSID}${user.id}/`
+    )) as any;
+    console.log("stage access  ::", response.data);
+    dispatch(fetchFormAssignments(response.data));
+  };
+  const getReceivedStageAssignUuid = async () => {
+    const response = (await api.get(`${RECEIVED}${user.id}/`)) as any;
+    console.log("stage access  ::", response.data);
+    dispatch(fetchFormReceived(response.data));
+  };
+
+  const onSubmit = async (data: any) => {
+    setSubmitting(true)
+    console.log("📤 Submitting form stage...");
+    console.log("🔎 Form data:", data);
+
+    try {
+      const extractId = (val: any) =>
+        typeof val === "object" && val !== null && "id" in val ? val.id : val;
+      const sourceArray = currentStageIndex === 0 ? assignments : receivedAssignment;
+
+      const stageAssignmentUuid = sourceArray?.find((a) =>
+        currentStageIndex === 0
+          ? a.stageId === currentStage?.id
+          : a.stageId === currentStage?.id &&
+          a.formSubmissionId === Number(submissionsDetail?.id)
+      );
+
+      const form = currentStage.form;
+      const stageId = currentStage.id;
+      const questions = currentStage.questions;
+
+      const payload = {
+        form,
+        stage: stageId,
+        stage_assignment_uuid: stageAssignmentUuid?.stageAssignmentUUID,
+        form_submission_id: stageAssignmentUuid?.formSubmissionId,
+        answers: [] as any[],
+      };
+
+      const handleAnswer = (meta: any, val: any) => {
+        const answerValue =
+          Array.isArray(val) &&
+            ["dropdown", "checkboxes", "multiple_choice"].includes(meta.question_type)
+            ? val.map(extractId).join("|")
+            : String(extractId(val));
+
+        const answer: any = {
+          question_uuid: meta.question_uuid,
+          question: meta.id,
+          question_type: meta.question_type,
+          answer: answerValue,
+          stage: stageId,
+          group: null,
+          division: null,
+          sub_division: null,
+          location: null,
+          user: null,
+        };
+
+        switch (meta.question_type) {
+          case "division":
+            answer.division = extractId(val);
+            break;
+          case "sub_division":
+            answer.sub_division = extractId(val);
+            break;
+          case "location":
+            answer.location = extractId(val);
+            break;
+          case "user":
+            answer.user = extractId(val);
+            break;
+        }
+
+        if (!payload.answers.some((ans: any) => ans.question_uuid === meta.question_uuid)) {
+          payload.answers.push(answer);
+          console.log("✅ Answer added:", answer);
+        } else {
+          console.log(`ℹ️ Skipping duplicate answer for question_uuid: ${meta.question_uuid}`);
+        }
+      };
+
+      for (const [question_uuid, value] of Object.entries(data)) {
+        let questionMeta = questions.find((q: any) => q.question_uuid === question_uuid);
+
+        // Not a direct question? Could be a logic question inside some parent
+        if (!questionMeta) {
+          for (const q of questions) {
+            const logicQuestion = q?.logics?.flatMap((logic: any) => logic.logic_questions)?.find(
+              (lq: any) => lq.question_uuid === question_uuid
+            );
+            if (logicQuestion) {
+              questionMeta = logicQuestion;
+              break;
+            }
+          }
+        }
+
+        if (!questionMeta) {
+          console.warn(`⚠️ Skipping unknown question_uuid: ${question_uuid}`);
+          continue;
+        }
+
+        // Table questions
+        if (questionMeta.question_type === "table" && Array.isArray(value)) {
+          console.log(`📋 Processing table question: ${questionMeta.question}`);
+          for (const row of value) {
+            for (const [subQUuid, subValue] of Object.entries(row)) {
+              const subMeta = questionMeta.sub_questions.find(
+                (sq: any) => sq.question_uuid === subQUuid
+              );
+              if (!subMeta) {
+                console.warn(`⚠️ Skipping unknown sub-question: ${subQUuid}`);
+                continue;
+              }
+              handleAnswer(subMeta, subValue);
+            }
+          }
+        } else {
+          console.log(`📝 Processing question: ${questionMeta.question}`);
+          handleAnswer(questionMeta, value);
+        }
+      }
+
+      console.log("📦 Final Payload:", payload);
+
+
+
+      if (!completedStages.includes(currentStageIndex)) {
+        setCompletedStages([...completedStages, currentStageIndex]);
+        console.log(`🟢 Marked stage ${currentStageIndex} as completed.`);
+      }
+
+      console.log("🚀 Sending POST request to /form/submit-answer/...");
+      const res = await api.post("/form/stage/submit-answer/", payload);
+      console.log("✅ API Response:", res.data?.message);
+
+      setTimeout(() => {
+        Toast.show({
+          type: "success",
+          text1: "Form submitted successfully",
+          position: "top",
+        });
+
+      }, 2)
+      if (res?.data?.next_stage_assigning_required) {
+        console.log("🧭 Next stage assignment required.");
+        setFormSubmissionId(res?.data?.form_submission_id);
+        setShowSendButton(true);
+        getStageAssignUuid();
+        getReceivedStageAssignUuid();
+      } else {
+
+        console.log("✅ Form completed. Redirecting to form list...");
+        router.replace("/(app)/(tabs)/forms");
+      }
+    } catch (error: any) {
+      console.error("❌ Error in onSubmit:", error.message || error);
+      Alert.alert("Submission Failed", error?.error || "An error occurred. Please try again.");
+      setSubmitting(false)
+      throw error;
+    } finally {
+      console.log("🔚 Form submit process finished.");
+      setSubmitting(false)
+    }
+  };
+
+  const evaluateFormula = (formula: string, values: any): string => {
+    try {
+      // Replace variable references with their actual values
+      const replacedFormula = formula.replace(/#(\w+)/g, (match, varName) => {
+        const question = allQuestions.find((q: any) => q?.question === varName);
+        if (question && values[question.question_uuid]) {
+          return values[question.question_uuid].toString();
+        }
+        return "0";
+      });
+
+      // Simple evaluation (in production, use a proper formula parser)
+      if (replacedFormula.includes("SUM")) {
+        const sumParts = replacedFormula.match(/SUM\(([^)]+)\)/);
+        if (sumParts) {
+          const numbers = sumParts[1].split(",").map(Number);
+          const sum = numbers.reduce((a, b) => a + b, 0);
+          const multiplierMatch = replacedFormula.match(/\*(\d+)/);
+          const multiplier = multiplierMatch ? Number(multiplierMatch[1]) : 1;
+          return (sum * multiplier).toString();
+        }
+      }
+
+      return eval(replacedFormula).toString();
+    } catch (error) {
+      console.error("Error evaluating formula:", error);
+      return "";
+    }
+  };
+
+  return {
+    currentStage,
+    currentStageIndex,
+    isFirstStage,
+    isLastStage,
+    completedStages,
+    control,
+    errors,
+    isValid,
+    handleSubmit,
+    onSubmit,
+    goToPrevStage,
+    goToNextStage,
+    goToStage,
+    evaluateFormula,
+    visibleQuestions,
+    activeModal,
+    watch,
+    setValue,
+    submitting
+  };
+};

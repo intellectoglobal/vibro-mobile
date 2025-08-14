@@ -62,6 +62,7 @@ const Textbox: React.FC<TextboxProps> = ({
 const styles = StyleSheet.create({
   container: {
     marginVertical: 8,
+    gap:10
   },
   label: {
     marginBottom: 4,

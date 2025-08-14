@@ -16,6 +16,8 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import ReactIcon from "../assets/images/react-logo.png";
 import { useDispatch } from "react-redux";
 import { logoutRequest } from "@/Redux/reducer/auth/authSlice";
+import { RootState } from "@/Redux/reducer/rootReducer";
+import { useSelector } from "react-redux";
 
 // Define types for better type safety
 interface DrawerItemConfig {
@@ -34,10 +36,11 @@ interface UserProfile {
 const CustomDrawer: React.FC<DrawerContentComponentProps> = memo((props) => {
   const dispatch = useDispatch();
   // User profile data - could come from props or context
+  const user = useSelector((state: RootState) => state.user);
   const userProfile: UserProfile = {
-    name: "Test Test",
-    company: "Vibro",
-    phone: "+918248694043",
+    name: user.first_name,
+    company: "vibro",
+    phone: user.phone,
     avatar: ReactIcon,
   };
 

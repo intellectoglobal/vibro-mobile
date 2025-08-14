@@ -16,31 +16,36 @@ const StageForm: React.FC<MultiStageFormProps> = ({
 
   const methods = useForm();
 
+//for prod 
   useEffect(() => {
-    const initiallyEnabled = stages
-      .filter((stage) => stage.isStateEnable)
-      .map((stage) => stage.order - 1);
-    setEnabledStages(initiallyEnabled);
+    const initiallyEnabled = stages.map((stage) => stage.id); // Enable all stages initially or change logic if needed
+    setEnabledStages(initiallyEnabled.length > 0 ? [initiallyEnabled[0]] : []);
   }, [stages]);
+//for testing
+  // useEffect(() => {
+  //   const initiallyEnabled = stages.map((stage) => stage.id);
+  //   setEnabledStages(initiallyEnabled); // Enables all stages for testing
+  // }, [stages]);
 
-  const updateEnabledStages = (completedStageOrder: number) => {
-    const nextStageIndex = stages.findIndex(
-      (stage) => stage.order === completedStageOrder + 1
-    );
-    if (nextStageIndex !== -1) {
-      setEnabledStages((prev) => [...prev, nextStageIndex]);
+
+
+  const updateEnabledStages = (completedStageId: number) => {
+    const currentIndex = stages.findIndex((stage) => stage.id === completedStageId);
+    const nextStage = stages[currentIndex + 1];
+    if (nextStage) {
+      setEnabledStages((prev) => [...new Set([...prev, nextStage.id])]);
     }
   };
 
-  const toggleSection = (index: number) => {
+  const toggleSection = (stageId: number) => {
     setActiveSections((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+      prev.includes(stageId) ? prev.filter((id) => id !== stageId) : [...prev, stageId]
     );
   };
 
-  const handleStageComplete = async (stageOrder: number) => {
-    setCompletedStages((prev) => [...prev, stageOrder - 1]);
-    updateEnabledStages(stageOrder);
+  const handleStageComplete = async (stageId: number) => {
+    setCompletedStages((prev) => [...new Set([...prev, stageId])]);
+    updateEnabledStages(stageId);
     setActiveSections([]);
   };
 
@@ -48,7 +53,7 @@ const StageForm: React.FC<MultiStageFormProps> = ({
     onSubmit(data);
     methods.reset();
     setCompletedStages([]);
-    setEnabledStages([0]);
+    setEnabledStages(stages.length > 0 ? [stages[0].id] : []);
   };
 
   return (
@@ -56,15 +61,16 @@ const StageForm: React.FC<MultiStageFormProps> = ({
       <ScrollView style={styles.container}>
         {stages.map((stage, index) => (
           <StageAccordion
-            key={`stage-${index}`}
+            key={`stage-${stage.id}`} 
             stage={stage}
             index={index}
-            isActive={activeSections.includes(index)}
-            isEnabled={enabledStages.includes(index)}
-            isCompleted={completedStages.includes(index)}
+            isActive={activeSections.includes(stage.id)}
+            // isActive={true}
+            isEnabled={enabledStages.includes(stage.id)}
+            isCompleted={completedStages.includes(stage.id)}
             isLastStage={index === stages.length - 1}
-            onToggle={toggleSection}
-            onCompleteStage={async () => handleStageComplete(stage.order)}
+            onToggle={() => toggleSection(stage.id)}
+            onCompleteStage={async () => handleStageComplete(stage.id)}
             stageLen={stageLen}
           />
         ))}

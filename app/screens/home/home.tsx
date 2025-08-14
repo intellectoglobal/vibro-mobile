@@ -34,7 +34,7 @@ const Home = () => {
 
   return (
     <>
-      <Header title={"Vibro"} />
+      {/* <Header title={"Vibro"} /> */}
 
       {/* Search Bar */}
       <View className="bg-white mx-4 mt-4 px-3 py-2.5 rounded-lg flex-row items-center shadow-sm">

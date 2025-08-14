@@ -1,12 +1,28 @@
 import Accordion from "@/components/Accordion";
 import { ALL_FORMS, FOLDERS } from "@/constants/forms";
+import * as Api from "@/services";
+import {
+  FOLDER,
+  GETALLASSIGNEDSTAGESACCESSID,
+  GETALLASSIGNFORMS,
+} from "@/services/constants";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import FileList from "../ListItems/FileList";
 import FolderList from "../ListItems/FolderList";
-import * as Api from "@/services";
-import { FOLDER, FORMS } from "@/services/constants";
+import { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import FORMS from "./utility";
+import { FormListItem } from "@/components/form/types/formTypes";
+import { useDispatch } from "react-redux";
+import { fetchFormAssignments } from "@/Redux/actions/formAssignmentActions"; // 👈 action creator
 
 export const DATA = [
   { id: "1", name: "Documents" },
@@ -33,52 +49,141 @@ export interface Folder {
 export interface Form {
   id: string;
   title: string;
+  type?: string
 }
 
 export default function NewForm() {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [forms, setForms] = useState<Form[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formRefreshing, setFormRefreshing] = useState(false);
+  const [folderRefreshing, setFolderRefreshing] = useState(false);
+  const user = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
+  // console.log("user ::", user.id);
 
   const routeFormsFolder = (folder: any) => {
     router.push({
       pathname: "/(app)/(tabs)/forms/folder-list",
-      params: { folderName: folder.name, folderId: folder.id }, // Example parameter
+      params: { folderName: folder.name, folderId: folder.id },
     });
   };
-  const routeFormsFileList = () => {
-    router.push("/(app)/(tabs)/forms/multi-stage-form");
+
+  const routeFormsFileList = (form: any) => {
+    router.push({
+      pathname: "/(app)/(tabs)/forms/multi-stage-form",
+      params: { formTitle: form.title, formId: form.id, formType: form.type },
+    });
   };
 
   const getOrgFolder = async () => {
     try {
       const response = (await Api.get(FOLDER)) as any;
-      console.log("response", response)
+      // console.log("list of folders ::", response);
       setFolders(response || []);
     } catch (error: any) {
-      console.error("Error Occurred in the getOrgFolder ::", error);
+      // console.error("Error Occurred in the getOrgFolder ::", error);
     }
   };
 
-  const getFolderLessFormsForUser = async () => {
+  const getAllFormsForUser = async () => {
     try {
-      const response = (await Api.get(FORMS)) as any;
-      console.log("response", response)
-      setForms(response || []);
+      const response = (await Api.get(`${GETALLASSIGNFORMS}`)) as any;
+      // console.log("list of forms ::", response);
+      setForms(response);
     } catch (error: any) {
-      console.error("Error Occurred in the getOrgFolder ::", error.message);
+      console.error(
+        "Error Occurred in the getAllFormsForUser ::",
+        error.message
+      );
+    }
+  };
+
+  const getAllAssingedStageAccessId = async () => {
+    try {
+      // console.log("userId ::", user.id)
+      const response = (await Api.get(
+        `${GETALLASSIGNEDSTAGESACCESSID}${user.id}/`
+      )) as any;
+      // console.log("assinment uuidd ::", response)
+      dispatch(fetchFormAssignments(response));
+    } catch (error: any) {
+      console.error(
+        "Error Occurred in the getAllFormsForUser ::",
+        error.message
+      );
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      await getOrgFolder();
+      await getAllFormsForUser();
+      await getAllAssingedStageAccessId();
+    } catch (error: any) {
+      console.error("Error while fetching data:", error.message);
+    } finally {
+      setLoading(false); // ✅ Important fix
     }
   };
 
   useEffect(() => {
-    getOrgFolder();
-    getFolderLessFormsForUser();
+    fetchData();
   }, []);
 
+  const onFolderRefresh = useCallback(async () => {
+    setFolderRefreshing(true);
+    await getOrgFolder();
+    await getAllAssingedStageAccessId();
+    setFolderRefreshing(false);
+  }, []);
+
+  const onFormRefresh = useCallback(async () => {
+    setFormRefreshing(true);
+    await getAllFormsForUser();
+    await getAllAssingedStageAccessId();
+    setFormRefreshing(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2196f3" />
+      </View>
+    );
+  }
+
   return (
-    <>
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <Accordion
+        title={FOLDERS}
+        containerStyle={styles.accordionContainer}
+        headerStyle={styles.accordionHeader}
+        titleStyle={styles.accordionTitle}
+        iconColor="#6200ee"
+        expanded={true}
+        onPress={(expanded) => console.log("Accordion expanded:", expanded)}
+      >
+        <FlatList
+          style={{ maxHeight: 125 }}
+          data={folders}
+          keyExtractor={(item) => item.id}
+          refreshing={folderRefreshing}
+          onRefresh={onFolderRefresh}
+          renderItem={({ item }) => (
+            <FolderList items={item} onClick={routeFormsFolder} />
+          )}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              You don’t have any assigned folders.
+            </Text>
+          }
+        />
+      </Accordion>
+
+      <View style={{ flex: 3, marginBottom: 35 }}>
         <Accordion
-          title={FOLDERS}
+          title={ALL_FORMS}
           containerStyle={styles.accordionContainer}
           headerStyle={styles.accordionHeader}
           titleStyle={styles.accordionTitle}
@@ -87,38 +192,23 @@ export default function NewForm() {
           onPress={(expanded) => console.log("Accordion expanded:", expanded)}
         >
           <FlatList
-            style={{ maxHeight: 125 }}
-            data={folders}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
+            data={forms}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingBottom: 50 }}
+            refreshing={formRefreshing}
+            onRefresh={onFormRefresh}
             renderItem={({ item }) => (
-              <FolderList items={item} onClick={routeFormsFolder} />
+              <FileList items={item} onClick={routeFormsFileList} />
             )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>
+                You don’t have any assigned forms.
+              </Text>
+            }
           />
         </Accordion>
-        <View style={{ flex: 3, marginBottom: 35 }}>
-          <Accordion
-            title={ALL_FORMS}
-            containerStyle={styles.accordionContainer}
-            headerStyle={styles.accordionHeader}
-            titleStyle={styles.accordionTitle}
-            iconColor="#6200ee"
-            expanded={true}
-            onPress={(expanded) => console.log("Accordion expanded:", expanded)}
-          >
-            <FlatList
-              data={forms}
-              contentContainerStyle={{ paddingBottom: 50 }}
-              showsVerticalScrollIndicator={false}
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <FileList items={item} onClick={routeFormsFileList} />
-              )}
-            />
-          </Accordion>
-        </View>
       </View>
-    </>
+    </View>
   );
 }
 
@@ -126,7 +216,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 5,
-    //backgroundColor: "#f5f5f5",
   },
   accordionContainer: {
     marginBottom: 10,
@@ -138,9 +227,15 @@ const styles = StyleSheet.create({
     color: "#6200ee",
     fontWeight: "bold",
   },
-  contentText: {
-    fontSize: 14,
-    marginBottom: 8,
-    color: "#333",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    padding: 15,
+    textAlign: "center",
+    color: "gray",
+    fontStyle: "italic",
   },
 });
