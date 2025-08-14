@@ -98,3 +98,14 @@ export interface FormListItem {
   is_stage_submission_pending: boolean;
   is_form_submission_pending: boolean;
 }
+
+export interface SubmissionsDetail {
+  id: string,
+  form: string,
+  submission_initiated_stage: string,
+  submission_initiated_on: string;
+  submission_initiated_by: string
+  is_completed: boolean;
+  completed_by: string;
+  completed_on: string
+}

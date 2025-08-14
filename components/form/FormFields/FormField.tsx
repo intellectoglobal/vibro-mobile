@@ -14,6 +14,7 @@ import {
   TextareaField,
   TextInputField,
 } from "./index";
+import AuditField from "./AuditField";
 interface FormFieldProps {
   question: Question;
   control: any;
@@ -81,6 +82,8 @@ const FormField: React.FC<FormFieldProps> = ({
       return <QRScannerField {...fieldProps} />;
     case "formula":
       return <FormulaField {...fieldProps} />;
+    case "audit":
+      return <AuditField {...fieldProps}/>
     default:
       return <TextInputField {...fieldProps} />;
   }

@@ -1,4 +1,5 @@
 export interface Received {
+  form_submission_id: string | null | undefined;
   id: string; // form_submission_id
   submission_initiated_on: string;
   submission_initiated_stage: number;
@@ -12,6 +13,7 @@ export interface Received {
   stage_assignment_id: number;
   stage_assignment_uuid: string;
   stage_id: number;
+  stage_name: string;
   stage_order: number;
 }
 

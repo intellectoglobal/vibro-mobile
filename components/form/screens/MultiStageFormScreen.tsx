@@ -27,7 +27,7 @@ import StageIndicator from "../Accordion/StageIndicator";
 import FormField from "../FormFields/FormField";
 import TableField from "../FormFields/TableField";
 import { useMultiStageForm } from "../hooks/useMultiStageForm";
-import { Stage } from "../types/formTypes";
+import { Stage, SubmissionsDetail } from "../types/formTypes";
 import Toast from "react-native-toast-message";
 interface MultiStageFormScreenProps {
   formId: string;
@@ -57,6 +57,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
   const [formSubmissionId, setFormSubmissionId] = useState<number>(0);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const [submissionsDetail, setSubmissionsDetail] = useState<SubmissionsDetail>()
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -84,6 +85,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
       const data = response.data;
       // console.log("stages ::", response.data);
       setStages(data.form_type === "audit" ? data.audit_group : data.stages);
+      setSubmissionsDetail(data?.submissionsDetail)
     } catch (error: any) {
       setError("Failed to load form stages");
       console.error("Error in getFormStages:", error.message);
@@ -116,23 +118,20 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     console.log("assign user payload ::");
     if (!stages[currentStageIndex + 1]?.id) return;
     const stageId = stages[currentStageIndex + 1].id;
-    const stageAssignment = assignments.find(
-      (a) => a.stageId === currentStage?.id
-    );
 
     const payload = {
       assign_type: activeTab,
       form: formId,
       ids: selectedUserIds,
-      form_submission_id: stageAssignment?.formSubmissionId,
+      form_submission_id: submissionsDetail?.id,
       stage: stageId,
     };
-    console.log("assign user payload ::", payload);
+    
     try {
-      console.log("assign user payload ::", payload);
+      // console.log("assign user payload ::", payload);
       const res = await api.post(ASSIGN_API, payload);
-      console.log("assign user payload ::", payload);
-      console.log("response ::", res.data);
+      // console.log("assign user payload ::", payload);
+      // console.log("response ::", res.data);
       setShowAssignModal(false);
       setSelectedUserIds([]);
       router.replace("/(app)/(tabs)/forms");
@@ -178,7 +177,7 @@ const MultiStageFormScreen: React.FC<MultiStageFormScreenProps> = ({
     watch,
     setValue,
     submitting,
-  } = useMultiStageForm(stages, setShowSendButton, setFormSubmissionId);
+  } = useMultiStageForm(stages, setShowSendButton, setFormSubmissionId, submissionsDetail);
 
   const allValues = watch();
   const allQuestions = (stages || []).flatMap(

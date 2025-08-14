@@ -8,7 +8,9 @@ import { useSegments, router } from "expo-router";
 
 export default function AppLayout() {
   const segments = useSegments();
-  const hideHeader = segments[segments.length - 1] === "multi-stage-form";
+
+  const lastSegment = segments[segments.length - 1];
+  const hideHeader = ["multi-stage-form", "folder-list"].includes(lastSegment);
 
   return (
     <AuthWrapper>

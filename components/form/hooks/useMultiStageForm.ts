@@ -8,15 +8,12 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Stage } from "../types/formTypes";
+import { Stage, SubmissionsDetail } from "../types/formTypes";
 import { generateValidationSchema } from "../utils/validationSchemas";
 import Toast from "react-native-toast-message";
 
 export const useMultiStageForm = (
-  stages: Stage[] | any,
-  setShowSendButton: any,
-  setFormSubmissionId: any
-) => {
+  stages: Stage[] | any, setShowSendButton: any, setFormSubmissionId: any, submissionsDetail?: SubmissionsDetail) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [completedStages, setCompletedStages] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false)
@@ -174,9 +171,13 @@ export const useMultiStageForm = (
     try {
       const extractId = (val: any) =>
         typeof val === "object" && val !== null && "id" in val ? val.id : val;
+      const sourceArray = currentStageIndex === 0 ? assignments : receivedAssignment;
 
-      const stageAssignmentUuid = (currentStageIndex === 0 ? assignments : receivedAssignment).filter(
-        (a) => a.stageId === currentStage?.id
+      const stageAssignmentUuid = sourceArray?.find((a) =>
+        currentStageIndex === 0
+          ? a.stageId === currentStage?.id
+          : a.stageId === currentStage?.id &&
+          a.formSubmissionId === Number(submissionsDetail?.id)
       );
 
       const form = currentStage.form;
@@ -186,8 +187,8 @@ export const useMultiStageForm = (
       const payload = {
         form,
         stage: stageId,
-        stage_assignment_uuid: stageAssignmentUuid[0].stageAssignmentUUID,
-        form_submission_id: stageAssignmentUuid[0].formSubmissionId,
+        stage_assignment_uuid: stageAssignmentUuid?.stageAssignmentUUID,
+        form_submission_id: stageAssignmentUuid?.formSubmissionId,
         answers: [] as any[],
       };
 
@@ -286,7 +287,7 @@ export const useMultiStageForm = (
       }
 
       console.log("🚀 Sending POST request to /form/submit-answer/...");
-      const res = await api.post("/form/submit-answer/", payload);
+      const res = await api.post("/form/stage/submit-answer/", payload);
       console.log("✅ API Response:", res.data?.message);
 
       setTimeout(() => {
@@ -310,7 +311,7 @@ export const useMultiStageForm = (
       }
     } catch (error: any) {
       console.error("❌ Error in onSubmit:", error.message || error);
-      Alert.alert("Submission Failed", error?.message || "An error occurred. Please try again.");
+      Alert.alert("Submission Failed", error?.error || "An error occurred. Please try again.");
       setSubmitting(false)
       throw error;
     } finally {

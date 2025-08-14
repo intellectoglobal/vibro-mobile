@@ -12,7 +12,7 @@ interface FileListProps {
 
 const FileList = ({ items, formId, onClick }: FileListProps) => {
   const title = `Submission # ${items.form_submission_id}`;
-  const isCompleted = !items.is_form_submission_pending;
+  const isCompleted = items.is_completed;
   const statusText = isCompleted ? `Completed` : "Pending";
   const date = isCompleted
     ? `Completed on ${new Date(items.completed_on ?? "").toLocaleString()}`

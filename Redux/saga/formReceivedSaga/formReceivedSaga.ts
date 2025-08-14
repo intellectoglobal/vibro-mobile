@@ -11,7 +11,7 @@ function* fetchFormReceivedSaga(action: any): Generator<any, void, any> {
     const transformedData = rawData.map((item: any) => ({
       formId: item.form.id,
       stageId: item.stage_id,
-      stageAssignmentUUID: item.stage_assignment_uuid,
+      stageAssignmentUUID: item.assignment_uuid,
       formSubmissionId: item.form_submission_id,
     }));
 

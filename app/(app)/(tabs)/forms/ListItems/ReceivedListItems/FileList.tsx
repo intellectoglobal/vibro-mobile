@@ -32,6 +32,7 @@ const FileList = ({ items, formId, onClick }: FileListProps) => {
         <FeatherIcon name="file-text" size={24} color="#6b7280" />
         <View style={{ marginLeft: 8 }}>
           <Text style={styles.title}>{title}</Text>
+          <Text>Stage : {items.stage_name}</Text>
           <Text style={isCompleted ? styles.completed : styles.pending}>
             {statusText}
           </Text>

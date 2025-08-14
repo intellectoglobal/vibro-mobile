@@ -31,11 +31,14 @@ export default function ReceivedForm() {
       setLoading(true);
       const response = await api.get(`${RECEIVED}${user.id}/`);
       const rawData = response.data;
-      dispatch(fetchFormReceived(response.data));
+      dispatch(fetchFormReceived(rawData));
 
       const grouped: { [formId: string]: ReceivedData } = {};
 
       rawData.forEach((item: any) => {
+        // Skip if no form_submission_id
+        if (!item.form_submission_id) return;
+
         const form = item.form;
         const formId = String(form.id);
 
@@ -60,9 +63,11 @@ export default function ReceivedForm() {
           is_form_submission_pending: item.is_form_submission_pending,
           is_stage_submission_pending: item.is_stage_submission_pending,
           stage_assignment_id: item.stage_assignment_id,
-          stage_assignment_uuid: item.stage_assignment_uuid,
+          stage_assignment_uuid: item.assignment_uuid,
           stage_id: item.stage_id,
+          stage_name: item.stage_name,
           stage_order: item.stage_order,
+          form_submission_id: item.form_submission_id,
         });
       });
 
@@ -94,29 +99,34 @@ export default function ReceivedForm() {
     });
   };
 
-  const renderItem = ({ item }: { item: ReceivedData }) => (
-    <Accordion
-      title={item.title}
-      containerStyle={styles.accordionContainer}
-      headerStyle={styles.accordionHeader}
-      iconColor="#6200ee"
-      expanded={false}
-      onPress={(expanded) => console.log("Accordion expanded:", expanded)}
-    >
-      {item.received
-        .filter(
-          (received: Received) => received.is_stage_submission_pending === true
-        )
-        .map((received: Received) => (
-          <FileList
-            key={received.stage_id}
-            items={received}
-            formId={item.id}
-            onClick={routeFormsFileList}
-          />
-        ))}
-    </Accordion>
-  );
+  const renderItem = ({ item }: { item: ReceivedData }) => {
+    if (!item.received || item.received.length === 0) return null;
+    return (
+      <Accordion
+        title={item.title}
+        containerStyle={styles.accordionContainer}
+        headerStyle={styles.accordionHeader}
+        iconColor="#6200ee"
+        expanded={false}
+        onPress={(expanded) => console.log("Accordion expanded:", expanded)}
+      >
+        {item.received
+          .filter(
+            (received: Received) =>
+              received.is_stage_submission_pending === true
+          )
+          .map(
+            (received: Received) =>
+                <FileList
+                  key={received.form_submission_id}
+                  items={received}
+                  formId={item.id}
+                  onClick={routeFormsFileList}
+                />
+          )}
+      </Accordion>
+    );
+  };
 
   return (
     <View style={styles.container}>

@@ -27,12 +27,12 @@ const TextareaField: React.FC<TextareaFieldProps> = ({
       name={name}
       rules={{
         required: question.is_required ? "This field is required" : false,
-        maxLength: characterLimit
-          ? {
-              value: characterLimit,
-              message: `Maximum ${characterLimit} characters allowed`,
-            }
-          : undefined,
+        // maxLength: characterLimit
+        //   ? {
+        //       value: characterLimit,
+        //       message: `Maximum ${characterLimit} characters allowed`,
+        //     }
+        //   : undefined,
       }}
       render={({ field: { onChange, onBlur, value } }) => (
         <View style={styles.container}>
@@ -64,7 +64,7 @@ const TextareaField: React.FC<TextareaFieldProps> = ({
             multiline
             numberOfLines={question.question_type === "long_answer" ? 4 : 3}
             textAlignVertical="top"
-            maxLength={characterLimit}
+            // maxLength={characterLimit}
             editable={!isCompleted}
           />
 
@@ -77,11 +77,11 @@ const TextareaField: React.FC<TextareaFieldProps> = ({
               )
             )}
 
-            {characterLimit && (
+            {/* {characterLimit && (
               <Text style={styles.counterText}>
                 {characterCount}/{characterLimit}
               </Text>
-            )}
+            )} */}
           </View>
         </View>
       )}

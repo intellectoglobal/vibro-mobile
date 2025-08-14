@@ -159,7 +159,6 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
               )
             : getVisibleLogicIndexes([{ id: currentValue }]);
 
-          console.log("visibleLogicIndexes ::", visibleLogicIndexes);
 
           return (
             <>

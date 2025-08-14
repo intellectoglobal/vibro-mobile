@@ -25,6 +25,7 @@ export default function SentForm() {
       setSentData(submissions.data);
       setLoading(false)
     } catch (error: any) {
+      setLoading(false)
       console.log("Error in getSentForms", error);
     } 
   };
