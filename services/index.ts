@@ -5,7 +5,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { SecureStoreKeys, SecureStoreService } from "./secureStore";
 
 // Configure your base API URL
-const BASE_URL = "https://vibro.onrender.com/api";
+const BASE_URL = "https://api.vibroprod.mooo.com/api";
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
